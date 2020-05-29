@@ -1,0 +1,15 @@
+{
+  "name": "morph-matrix-gen",
+  "version": "0.0.1",
+  "description": "Morphological Matrix Generation Interface",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Julian Martinsson",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^9.0.0"
+  }
+}

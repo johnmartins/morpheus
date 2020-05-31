@@ -2,12 +2,13 @@ const { app, BrowserWindow, ipcMain, webContents, Menu } = require('electron')
 
 function createWindow () {
     let win = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1024,
+        height: 768,
         webPreferences: {
             nodeIntegration: true
         }
     })
+    win.setFullScreen(true)
 
     win.loadFile('static/html/index.html')
     //win.setMenu(null)

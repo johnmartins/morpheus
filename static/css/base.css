@@ -1,0 +1,8 @@
+html, body {
+    height: 100%;
+    margin: 0px;
+}
+html {
+    font-size: 0.8rem;
+    overflow: hidden;
+}

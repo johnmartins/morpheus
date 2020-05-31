@@ -27,5 +27,3 @@ menuResizeBorder.onmousedown = () => {
         layoutContainer.style.gridTemplateColumns = `${mouseX}px 4px auto`
     }
 }
-
-

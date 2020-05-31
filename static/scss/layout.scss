@@ -17,12 +17,14 @@
 
 #layout-workspace {
     height: 100%;
+    background-color: $grey-low;
 }
 
 .resize-border-v {
     width: 4px;
     cursor: w-resize;
     height: 100%;
+    background-color: transparent;
 }
 
 .menu {
@@ -42,7 +44,7 @@
     color: $white-medium;
     padding: 6px 10px 6px 10px;
     width: 60px;
-    margin-right: 2px;
+    margin-right: 1px;
     cursor: pointer;
 }
 
@@ -54,8 +56,10 @@
 .tab-content {
     flex: 1 1 auto;
     background-color: $grey-high;
+    padding: 8px;
 }
 
 .workspace {
     margin: 8px;
+    height: 100%;
 }

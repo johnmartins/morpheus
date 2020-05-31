@@ -5,6 +5,7 @@ html, body {
     margin: 0px;
     background-color: $grey-lowest;
     color: $white-high;
+    user-select: none;
 }
 html {
     font-size: 0.8rem;

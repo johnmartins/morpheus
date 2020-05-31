@@ -11,15 +11,25 @@
 }
 
 .matrix .mm-add-cell {
-    color: $white-medium;
+    color: $green-medium;
     cursor: pointer;
 }
 
 .matrix .mm-add-cell:hover {
-    color: $white-high;
+    color: $green-high;
 }
 
 .matrix td {
     padding: 5px;
     border: 1px solid $white-low;
+}
+
+.cellForm {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    color: $white-high;
+    font-size: 1rem;
+    resize: none;
+    font-family: 'Barlow';
 }

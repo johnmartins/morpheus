@@ -5,8 +5,18 @@
     font-size: 0.8rem;
 }
 
-.matrix .mm-root-cell {
-    background-color: $white-low;
+.matrix .mm-label-cell {
+    background-color: $grey-medium;
+    color: $white-medium
+}
+
+.matrix .mm-add-cell {
+    color: $white-medium;
+    cursor: pointer;
+}
+
+.matrix .mm-add-cell:hover {
+    color: $white-high;
 }
 
 .matrix td {

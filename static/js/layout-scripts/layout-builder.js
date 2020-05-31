@@ -1,10 +1,14 @@
 const fs = require('fs')
+const MorphMatrix = require('../js/morph-matrix/matrix')
 
 let layoutContainer = document.getElementById('layout-container')
 
+// Setup matrix layout
 let matrixLayout = fs.readFileSync('static/html/matrix.html', {encoding: 'utf-8'})
 document.getElementById('layout-workspace').innerHTML = matrixLayout
+const morphMartix = new MorphMatrix('matrix-container')
 
+// Setup menu layout
 let menuLayout = fs.readFileSync('static/html/menu.html', {encoding: 'utf-8'})
 document.getElementById('layout-menu').innerHTML = menuLayout
 

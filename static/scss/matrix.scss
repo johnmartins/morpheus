@@ -1,0 +1,14 @@
+@import "variables.scss";
+
+.matrix table {
+    border-collapse: collapse;
+}
+
+.matrix .mm-root-cell {
+    background-color: $white-low;
+}
+
+.matrix td {
+    padding: 5px;
+    border: 1px solid $white-low;
+}

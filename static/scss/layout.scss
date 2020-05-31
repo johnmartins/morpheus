@@ -1,15 +1,38 @@
 @import "variables.scss";
 
 #layout-body {
+    height: 100%;
     background-color: $grey-lowest;
 }
 
 #layout-container {
+    height: 100%;
     display: grid;
-    grid-template-columns: 250px auto;
+    grid-template-columns: 250px 4px auto;      // Menu, resize-border, workspace
+}
+
+#layout-menu {
+    height: 100%;
+}
+
+#layout-workspace {
+    height: 100%;
+}
+
+.resize-border-v {
+    width: 4px;
+    cursor: w-resize;
+    height: 100%;
+}
+
+.menu {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
 }
 
 .tab-container {
+    flex: 0 1 auto;
     display: flex;
     background-color: $grey-low;
 }
@@ -26,4 +49,13 @@
 .tab-element.selected {
     background-color: $grey-high;
     color: $white-high;
+}
+
+.tab-content {
+    flex: 1 1 auto;
+    background-color: $grey-high;
+}
+
+.workspace {
+    margin: 8px;
 }

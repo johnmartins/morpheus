@@ -5,12 +5,17 @@ function createWindow () {
         width: 1024,
         height: 768,
         webPreferences: {
-            nodeIntegration: true
-        }
+            nodeIntegration: true,
+        },
+        show: false // Wait until window is ready
     })
-    win.setFullScreen(true)
-
     win.loadFile('static/html/index.html')
+    win.on('ready-to-show', () => {
+        win.show()
+        win.maximize()
+    })
+
+
     //win.setMenu(null)
 }
 

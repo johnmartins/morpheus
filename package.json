@@ -4,8 +4,9 @@
   "description": "Morphological Matrix Generation Interface",
   "main": "index.js",
   "scripts": {
-    "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start":  "electron .",
+    "test":   "echo \"Error: no test specified\" && exit 1",
+    "watch":  "sass --watch static/scss:static/css"
   },
   "author": "Julian Martinsson",
   "license": "ISC",

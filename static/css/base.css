@@ -1,8 +1,14 @@
+/* Colors */
 html, body {
-    height: 100%;
-    margin: 0px;
+  height: 100%;
+  margin: 0px;
+  background-color: #101010;
+  color: rgba(255, 255, 255, 0.87);
 }
+
 html {
-    font-size: 0.8rem;
-    overflow: hidden;
+  font-size: 0.8rem;
+  overflow: hidden;
 }
+
+/*# sourceMappingURL=base.css.map */

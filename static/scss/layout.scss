@@ -1,5 +1,7 @@
+@import "variables.scss";
+
 #layout-body {
-    background-color: white;
+    background-color: $grey-lowest;
 }
 
 #layout-container {
@@ -9,19 +11,19 @@
 
 .tab-container {
     display: flex;
-    background-color: #222222;
+    background-color: $grey-low;
 }
 
 .tab-element {
-    background-color: #333333;
-    color: white;
+    background-color: $grey-medium;
+    color: $white-medium;
     padding: 6px 10px 6px 10px;
-    width: 50px;
+    width: 60px;
     margin-right: 2px;
     cursor: pointer;
 }
 
 .tab-element.selected {
-    background-color: #121212;
-    color: rgba(255,255,255,0.87);
+    background-color: $grey-high;
+    color: $white-high;
 }

@@ -1,0 +1,12 @@
+@import "variables.scss";
+
+html, body {
+    height: 100%;
+    margin: 0px;
+    background-color: $grey-lowest;
+    color: $white-high;
+}
+html {
+    font-size: 0.8rem;
+    overflow: hidden;
+}

@@ -1,27 +1,30 @@
+/* Colors */
 #layout-body {
-    background-color: white;
+  background-color: #101010;
 }
 
 #layout-container {
-    display: grid;
-    grid-template-columns: 250px auto;
+  display: grid;
+  grid-template-columns: 250px auto;
 }
 
 .tab-container {
-    display: flex;
-    background-color: #222222;
+  display: flex;
+  background-color: #121212;
 }
 
 .tab-element {
-    background-color: #333333;
-    color: white;
-    padding: 6px 10px 6px 10px;
-    width: 50px;
-    margin-right: 2px;
-    cursor: pointer;
+  background-color: #252525;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 6px 10px 6px 10px;
+  width: 60px;
+  margin-right: 2px;
+  cursor: pointer;
 }
 
 .tab-element.selected {
-    background-color: #121212;
-    color: rgba(255,255,255,0.87);
+  background-color: #404040;
+  color: rgba(255, 255, 255, 0.87);
 }
+
+/*# sourceMappingURL=layout.css.map */

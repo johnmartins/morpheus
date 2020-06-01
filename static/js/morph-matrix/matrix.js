@@ -35,6 +35,7 @@ class MorphMatrix {
     solutions = []
 
     rowToRequirementMap = {}
+    cellToDesignSolutionMap = {}
 
     // Parameters
     cellWidth = "150px"
@@ -65,6 +66,25 @@ class MorphMatrix {
         this.containerElement.appendChild(this.tableElement)
 
         this._setupTableControls()
+
+        // Setup global event listeners
+        this._setupGlobalEventListeners()
+    }
+
+    _setupGlobalEventListeners () {
+        GlobalObserver.on('file-dialog-result', (res) => {
+            console.log(res.file)
+            console.log(res.data)
+            let ds = this.cellToDesignSolutionMap[res.data.targetElement]
+            ds.image = res.file
+
+            let cell = document.getElementById(res.data.targetElement)
+            let img = document.createElement('img')
+            img.src = ds.image
+            img.width = 150
+            img.height = 150
+            cell.appendChild(img)
+        })
     }
     
     _setupTitleElement () {
@@ -203,11 +223,15 @@ class MorphMatrix {
         this.rowToRequirementMap[row.id].designSolutions.push(ds)
 
         let newCell = row.insertCell(cellPosition)
+        newCell.id = dsID
         newCell.width = this.cellWidth
         newCell.height = this.cellHeight
 
+        this.cellToDesignSolutionMap[dsID] = ds
+
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, null, (value) => {
             ds.description = value
+            console.log(ds)
         })
         
         if (this.dsLabelCell.colSpan < row.cells.length - 2) {
@@ -225,7 +249,7 @@ class MorphMatrix {
             newCell.appendChild(overlay)
 
             overlay.onclick = () => {
-                GlobalObserver.emit('open-file-dialog')
+                GlobalObserver.emit('open-file-dialog', {targetElement: dsID})
             }
         }
         newCell.onmouseleave = (evt) => {

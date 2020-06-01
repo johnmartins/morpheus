@@ -8,7 +8,7 @@ module.exports = () => {
         evt.reply('pong')
     })
 
-    ipcMain.on('open-file-dialog', async (evt, settings) => {
+    ipcMain.on('open-file-dialog', async (evt, data) => {
         try {
             let res = await dialog.showOpenDialog({
                 properties: ['openFile'],
@@ -16,6 +16,7 @@ module.exports = () => {
                     { name: 'Images', extensions: ['jpg', 'png', 'gif']}
                 ]
             })
+            res.data = data
             evt.reply('file-dialog-result', res)
         } catch (err) {
             console.error('Caught exception: '+err.message)

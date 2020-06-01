@@ -174,6 +174,10 @@ class MorphMatrix {
         cellForm.focus()
     }
 
+    _createFRCellOverlay (frRow) {
+        
+    }
+
     _createDSCellOverlay (dsCell) {
         let overlay = null
         let dsID = dsCell.id
@@ -222,8 +226,7 @@ class MorphMatrix {
             }
 
             deleteOverlay.onclick = () => {
-                console.log("delete cell "+dsID)
-                
+                this.deleteDesignSolution(dsID)
             }
 
             dsCell.appendChild(overlay)
@@ -232,6 +235,33 @@ class MorphMatrix {
             dsCell.removeChild(overlay)
             overlay = null
         }
+    }
+
+    deleteDesignSolution (dsID) {
+        console.log("delete cell "+dsID)
+        let ds = this.cellToDesignSolutionMap[dsID]
+        let frID = ds.frID
+        let fr = this.rowToRequirementMap[frID]
+
+        // Delete reference from functional requirement
+        let deleteIndex = -1
+        for (let i = 0; i < fr.designSolutions.length; i++) {
+            let selectedDS = fr.designSolutions[i]
+            if (ds.id === selectedDS.id) {
+                deleteIndex = i
+            }
+            if (deleteIndex !== -1) {
+                ds.position -= 1
+            }
+        }
+        fr.designSolutions.splice(deleteIndex, 1)
+
+        // Delete DOM element
+        let dsElement = document.getElementById(dsID)
+        let frRow = document.getElementById(frID)
+        frRow.removeChild(dsElement)
+
+        // Fix other DS elements
     }
 
     addFunctionalRequirement () {

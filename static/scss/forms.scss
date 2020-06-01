@@ -1,0 +1,11 @@
+@import "variables.scss";
+
+.text-form {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    color: $white-high;
+    border-bottom: 1px solid $grey-highest;
+    margin-bottom: 8px;
+    width: 100%;
+}

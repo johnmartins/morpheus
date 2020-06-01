@@ -30,7 +30,7 @@ class DesignSolution {
 class MorphMatrix {
 
     // Object representation of matrix information
-    name = "Unnamed Morph Matrix"
+    name = "Untitled Morphological Matrix"
     functionalRequirements = []
     solutions = []
 
@@ -87,6 +87,8 @@ class MorphMatrix {
             let titleInput = document.createElement('input')
             titleInput.type = 'text'
             titleInput.value = this.name
+            titleInput.maxLength = 50
+            titleInput.classList.add('text-form')
             this.titleContainerElement.appendChild(titleInput)
             titleInput.focus()
 

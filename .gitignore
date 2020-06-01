@@ -106,3 +106,6 @@ dist
 # Compiled SASS files (css and map files)
 *.css
 *.map
+
+# User "uploaded" data
+user-data/

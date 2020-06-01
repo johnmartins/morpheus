@@ -23,6 +23,17 @@
 .matrix td {
     padding: 5px;
     border: 1px solid $white-low;
+    position: relative;
+}
+
+.matrix .hover-overlay {
+    position: absolute;
+    height: 13px;
+    width: 13px;
+    top: 4px;
+    right: 4px;
+    font-size: 1rem;
+    cursor: pointer;
 }
 
 .cell-form {

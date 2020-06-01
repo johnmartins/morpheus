@@ -1,4 +1,7 @@
-const { app, BrowserWindow, ipcMain, webContents, Menu } = require('electron')
+const { app, BrowserWindow} = require('electron')
+
+// IPC request handler
+require('./services/ipc-handler')()
 
 function createWindow () {
     let win = new BrowserWindow({
@@ -14,8 +17,6 @@ function createWindow () {
         win.show()
         win.maximize()
     })
-
-
     //win.setMenu(null)
 }
 
@@ -33,10 +34,4 @@ app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
     }
-})
-
-// Talk to back-end
-ipcMain.on('ping', (evt, arg) => {
-    console.log("Pinged from client")
-    evt.reply('pong')
 })

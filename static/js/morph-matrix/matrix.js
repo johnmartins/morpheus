@@ -211,6 +211,25 @@ class MorphMatrix {
         if (this.dsLabelCell.colSpan < row.cells.length - 2) {
             this.dsLabelCell.colSpan = row.cells.length - 2
         }
+
+        let overlay = null
+
+        // Setup hover functionality
+        newCell.onmouseover = (evt) => {
+            if (overlay) return
+            overlay = document.createElement('div')
+            overlay.classList.add('hover-overlay')
+            overlay.innerHTML = '<i class="fas fa-camera"></i>'
+            newCell.appendChild(overlay)
+
+            overlay.onclick = () => {
+                GlobalObserver.emit('open-file-dialog')
+            }
+        }
+        newCell.onmouseleave = (evt) => {
+            newCell.removeChild(overlay)
+            overlay = null
+        }
     }
 
     import(json) {

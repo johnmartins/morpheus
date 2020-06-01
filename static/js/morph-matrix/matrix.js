@@ -18,11 +18,12 @@ class DesignSolution {
     description = null
     position = null
     image = null
-    fr = null
+    frID = null
 
-    constructor(id, position) {
+    constructor(id, position, frID) {
         this.id = id
         this.position = position
+        this.frID = frID
     }
 }
 
@@ -37,10 +38,13 @@ class MorphMatrix {
 
     // Parameters
     cellWidth = "150px"
+    cellHeight = "50px"
 
     // Important layout vars
     containerID = null
     containerElement = null
+    titleContainerElement = null
+    titleElement = null
     tableElement = null
     tbodyElement = null
     dsLabelCell = null
@@ -50,7 +54,10 @@ class MorphMatrix {
         this.containerID = containerID
 
         if (!this.containerElement) throw new Error('Failed to find matrix container')
-    
+        
+        // Create title
+        this._setupTitleElement()
+
         // Create table
         this.tableElement = document.createElement('table')
         this.tbodyElement = document.createElement('tbody')
@@ -58,6 +65,41 @@ class MorphMatrix {
         this.containerElement.appendChild(this.tableElement)
 
         this._setupTableControls()
+    }
+    
+    _setupTitleElement () {
+        this.titleContainerElement = document.createElement('div')
+        this.titleElement = document.createElement('h3')
+        this.titleElement.innerHTML = this.name
+        this.titleContainerElement.appendChild(this.titleElement)
+        this.containerElement.appendChild(this.titleContainerElement)
+
+        this.titleElement.onmouseover = (evt) => {
+            this.titleElement.innerHTML = this.name + ' <i class="far fa-edit"></i>'
+        }
+
+        this.titleElement.onmouseleave = (evt) => {
+            this.titleElement.innerHTML = this.name 
+        }
+
+        this.titleElement.onclick = (evt) => {
+            this.titleContainerElement.innerHTML = ""
+            let titleInput = document.createElement('input')
+            titleInput.type = 'text'
+            titleInput.value = this.name
+            this.titleContainerElement.appendChild(titleInput)
+            titleInput.focus()
+
+            let saveTitleChange = (evt) => {
+                this.name = evt.target.value
+                this.titleContainerElement.innerHTML = ""
+                this.titleContainerElement.appendChild(this.titleElement)
+                this.titleElement.innerHTML = this.name
+            }
+
+            titleInput.onchange = saveTitleChange
+            titleInput.onblur = saveTitleChange
+        }
     }
 
     _setupTableControls () {
@@ -81,6 +123,7 @@ class MorphMatrix {
         addRowCell.style.fontSize = "1rem"
         addRowCell.classList.add('mm-add-cell')
         addRowCell.width = this.cellWidth
+        addRowCell.height = this.cellHeight
         addRowCell.onclick = () => {
             this.addFunctionalRequirement ()
         }
@@ -126,6 +169,7 @@ class MorphMatrix {
 
         let newCell = newRow.insertCell()
         newCell.width = this.cellWidth
+        newCell.height = this.cellHeight
         
         this._createCellForm(newCell, `Functional Requirement ${position}`, 'func-req', (value) => {
             fr.description = value
@@ -137,11 +181,11 @@ class MorphMatrix {
         newAddCell.style.fontSize = "1rem"
         newAddCell.align = "center"
         newAddCell.width = this.cellWidth
+        newAddCell.height = this.cellHeight
         newAddCell.classList.add('mm-add-cell')
         newAddCell.onclick = () => {
             this.addDesignSolution(position)
         }
-
     }
 
     /**
@@ -153,15 +197,15 @@ class MorphMatrix {
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
         let dsID = "ds-"+random.randomString(8)
-        let ds = new DesignSolution(dsID, cellPosition)
-        ds.fr = this.rowToRequirementMap[row.id]
+        let ds = new DesignSolution(dsID, cellPosition, row.id)
+        this.rowToRequirementMap[row.id].designSolutions.push(ds)
 
         let newCell = row.insertCell(cellPosition)
         newCell.width = this.cellWidth
+        newCell.height = this.cellHeight
 
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, null, (value) => {
             ds.description = value
-            console.log(ds)
         })
         
         if (this.dsLabelCell.colSpan < row.cells.length - 2) {
@@ -169,7 +213,16 @@ class MorphMatrix {
         }
     }
 
+    import(json) {
+        JSON.parse(json)
+    }
 
+    /**
+     * Returns serialized object
+     */
+    export() {
+        return JSON.stringify(this)
+    }
 }
 
 

@@ -30,8 +30,8 @@
 
 .matrix .hover-overlay {
     position: absolute;
+    display: inline-block;
     height: 13px;
-    width: 60px;
     top: 4px;
     right: 4px;
     font-size: 1rem;

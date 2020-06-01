@@ -174,8 +174,33 @@ class MorphMatrix {
         cellForm.focus()
     }
 
-    _createFRCellOverlay (frRow) {
+    _createFRCellOverlay (frCell) {
+        let overlay = null
+        let frID = frCell.id
+        let fr = this.rowToRequirementMap['row-'+frID]
         
+        frCell.onmouseover = (evt) => {
+            if (overlay) return
+            overlay = document.createElement('div')
+            overlay.classList.add('hover-overlay')
+
+            // Add delete icon
+            let deleteOverlay = document.createElement('i')
+            deleteOverlay.classList.add('fas', 'fa-trash-alt', 'overlay-icon')
+
+            overlay.appendChild(deleteOverlay)
+
+            deleteOverlay.onclick = (evt) => {
+                this.deleteFunctionalRequirement(frID)
+            }
+
+            frCell.appendChild(overlay)
+        }
+
+        frCell.onmouseleave = (evt) => {
+            frCell.removeChild(overlay)
+            overlay = null
+        }
     }
 
     _createDSCellOverlay (dsCell) {
@@ -237,8 +262,43 @@ class MorphMatrix {
         }
     }
 
+    deleteFunctionalRequirement (frID) {
+        console.log("delete FR "+frID)
+        let frRowID = 'row-'+frID
+        let fr = this.rowToRequirementMap[frRowID]
+
+        // Delete design solutions existing for this FR
+        for (let i = fr.designSolutions.length-1; i >= 0; i--) {
+            this.deleteDesignSolution(fr.designSolutions[i].id)
+        }
+
+        // Delete FR object
+        let deleteIndex = -1
+        for (let i = 0; i < this.functionalRequirements.length; i++) {
+            let selectedFr = this.functionalRequirements[i]
+            console.log(this.functionalRequirements[i].id)
+            if (this.functionalRequirements[i].id === frID) {
+                deleteIndex = i
+            }
+            if (deleteIndex !== -1) {
+                selectedFr.position -= 1
+            }
+        }
+        if (deleteIndex === -1) throw new Error('Failed to delete FR.')
+        this.functionalRequirements.splice(deleteIndex, 1)
+
+        // Delete DOM element
+        let frRow = document.getElementById(frRowID)
+        let frCell = document.getElementById(frID)
+        frRow.removeChild(frCell)
+        this.tbodyElement.removeChild(frRow)
+
+        // Delete map reference
+        delete this.rowToRequirementMap[frRowID]
+    }
+
     deleteDesignSolution (dsID) {
-        console.log("delete cell "+dsID)
+        console.log("delete DS "+dsID)
         let ds = this.cellToDesignSolutionMap[dsID]
         let frID = ds.frID
         let fr = this.rowToRequirementMap[frID]
@@ -254,6 +314,7 @@ class MorphMatrix {
                 ds.position -= 1
             }
         }
+        if (deleteIndex === -1) throw new Error('Failed to delete DS.')
         fr.designSolutions.splice(deleteIndex, 1)
 
         // Delete DOM element
@@ -261,17 +322,21 @@ class MorphMatrix {
         let frRow = document.getElementById(frID)
         frRow.removeChild(dsElement)
 
-        // Fix other DS elements
+        // TODO: Fix other DS elements?
+        // Delete map reference
+        delete this.cellToDesignSolutionMap[dsID]
     }
 
     addFunctionalRequirement () {
         // Parameters
-        let rowID = "fr-"+random.randomString(8)
+        let cellID = "fr-"+random.randomString(8)
+        let rowID = "row-"+cellID
 
         let position = this.tableElement.rows.length - 1
 
         // Create model representation
-        let fr = new FunctionalRequirement(rowID, position)
+        let fr = new FunctionalRequirement(cellID, position)
+        this.functionalRequirements.push(fr)
 
         let newRow = this.tbodyElement.insertRow(position)
         newRow.id = rowID
@@ -280,6 +345,7 @@ class MorphMatrix {
         this.rowToRequirementMap[newRow.id] = fr
 
         let newCell = newRow.insertCell()
+        newCell.id = cellID
         newCell.width = this.cellWidth
         newCell.height = this.cellHeight
         
@@ -288,6 +354,9 @@ class MorphMatrix {
             console.log(fr)
         })
 
+        this._createFRCellOverlay(newCell)
+
+        // Create a new "Add DS"-cell on this row
         let newAddCell = newRow.insertCell()
         newAddCell.innerHTML = '<i style="font-weight: bold;" class="far fa-plus-square"></i> DS'
         newAddCell.style.fontSize = "1rem"
@@ -296,16 +365,17 @@ class MorphMatrix {
         newAddCell.height = this.cellHeight
         newAddCell.classList.add('mm-add-cell')
         newAddCell.onclick = () => {
-            this.addDesignSolution(position)
+            this.addDesignSolution(rowID)
         }
+
     }
 
     /**
      * Add a new DS to the morph matrix
      * @param {Number} rowPosition To which row the design solution should be added
      */
-    addDesignSolution (rowPosition) {
-        let row = this.tableElement.rows[rowPosition]
+    addDesignSolution (rowID) {
+        let row = document.getElementById(rowID)
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
         let dsID = "ds-"+random.randomString(8)

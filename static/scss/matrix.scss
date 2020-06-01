@@ -25,7 +25,7 @@
     border: 1px solid $white-low;
 }
 
-.cellForm {
+.cell-form {
     background-color: transparent;
     outline: none;
     border: none;
@@ -33,4 +33,11 @@
     font-size: 1rem;
     resize: none;
     font-family: 'Barlow';
+    width: 100%;
+    overflow: hidden;
+}
+
+.cell-form.func-req {
+    color: $cyan-high;
+    font-weight: bold;
 }

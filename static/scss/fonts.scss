@@ -1,5 +1,10 @@
 @import "variables.scss";
 
+// Free icon package (font awesome)
+@import "font-awesome/fontawesome.scss";
+@import "font-awesome/regular.scss";
+@import "font-awesome/solid.scss";
+
 .fonts-loaded {
     font-family: 'Barlow';
 }

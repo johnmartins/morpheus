@@ -106,6 +106,7 @@ class MorphMatrix {
             this.titleContainerElement.innerHTML = ""
             let titleInput = document.createElement('input')
             titleInput.type = 'text'
+            titleInput.spellcheck = false
             titleInput.value = this.name
             titleInput.maxLength = 50
             titleInput.classList.add('text-form')
@@ -126,6 +127,12 @@ class MorphMatrix {
 
             titleInput.onchange = saveTitleChange
             titleInput.onblur = saveTitleChange
+            titleInput.onkeypress = (evt) => {
+                // User pressed enter
+                if (evt.keyCode === 13) {
+                    saveTitleChange(evt)
+                }
+            }
         }
     }
 
@@ -158,6 +165,7 @@ class MorphMatrix {
 
     _createCellForm (cellElement, placeholder, styleClass, onChangeCallback) {
         let cellForm = document.createElement('textarea')
+        cellForm.spellcheck = false
         cellForm.placeholder = placeholder
         cellForm.classList.add('cell-form')
         if (styleClass) cellForm.classList.add(styleClass)

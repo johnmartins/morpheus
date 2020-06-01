@@ -14,6 +14,7 @@
     color: $green-medium;
     cursor: pointer;
     font-weight: bold;
+    vertical-align: middle;
 }
 
 .matrix .mm-add-cell:hover {
@@ -24,6 +25,7 @@
     padding: 5px;
     border: 1px solid $white-low;
     position: relative;
+    vertical-align: top;
 }
 
 .matrix .hover-overlay {

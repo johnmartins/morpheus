@@ -77,9 +77,9 @@ class MorphMatrix {
             console.log(res.data)
             let ds = this.cellToDesignSolutionMap[res.data.targetElement]
             ds.image = res.file
-
+            
             let cell = document.getElementById(res.data.targetElement)
-            let img = document.createElement('img')
+            let img = document.getElementById('img-'+res.data.targetElement)
             img.src = ds.image
             img.width = 150
             img.height = 150
@@ -226,13 +226,21 @@ class MorphMatrix {
         newCell.id = dsID
         newCell.width = this.cellWidth
         newCell.height = this.cellHeight
+        newCell.verticalAlign = "top"
 
+        // Map ID for easy object lookup
         this.cellToDesignSolutionMap[dsID] = ds
 
+        // Create form in which a description can be written
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, null, (value) => {
             ds.description = value
             console.log(ds)
         })
+
+        // Create initially empty image field
+        let imgElement = document.createElement('img')
+        imgElement.id = 'img-'+dsID
+        newCell.appendChild(imgElement)
         
         if (this.dsLabelCell.colSpan < row.cells.length - 2) {
             this.dsLabelCell.colSpan = row.cells.length - 2

@@ -109,3 +109,6 @@ dist
 
 # User "uploaded" data
 user-data/
+
+# Build output files
+out/

@@ -174,6 +174,66 @@ class MorphMatrix {
         cellForm.focus()
     }
 
+    _createDSCellOverlay (dsCell) {
+        let overlay = null
+        let dsID = dsCell.id
+        let ds = this.cellToDesignSolutionMap[dsID]
+
+        // Setup hover functionality
+        dsCell.onmouseover = (evt) => {
+            if (overlay) return
+            overlay = document.createElement('div')
+            overlay.classList.add('hover-overlay')
+
+            // Add image icon
+            let imgOverlay = document.createElement('span')
+            imgOverlay.style.fontSize = '0.8rem'
+            imgOverlay.classList.add('fa-stack', 'fa-1x', 'overlay-icon')
+            
+            let imgOverlayLayer1 = document.createElement('i')
+            imgOverlayLayer1.classList.add('fas', 'fa-camera', 'fa-stack-1x')
+            let imgOverlayLayer2 = document.createElement('i')
+            imgOverlayLayer2.classList.add('fas', 'fa-ban', 'fa-stack-2x', 'text-red')
+
+            imgOverlay.appendChild(imgOverlayLayer1)
+            imgOverlay.appendChild(imgOverlayLayer2)
+
+            // If this cell has no image, hide red cross icon
+            if (!ds.image){
+                imgOverlayLayer2.style.color = 'transparent'
+                imgOverlayLayer1.style.fontSize = '1rem'
+            } 
+
+            // Remove cell icon
+            let deleteOverlay = document.createElement('i')
+            deleteOverlay.classList.add('fas', 'fa-trash-alt', 'overlay-icon')
+            
+            overlay.appendChild(imgOverlay)
+            overlay.appendChild(deleteOverlay)
+
+            imgOverlay.onclick = () => {
+                if (!ds.image){
+                    GlobalObserver.emit('open-file-dialog', {targetElement: dsID})
+                } else {
+                    let imgElement = document.getElementById('img-'+dsID)
+                    imgElement.height = 0
+                    ds.image = null
+                }
+            }
+
+            deleteOverlay.onclick = () => {
+                console.log("delete cell "+dsID)
+                
+            }
+
+            dsCell.appendChild(overlay)
+        }
+        dsCell.onmouseleave = (evt) => {
+            dsCell.removeChild(overlay)
+            overlay = null
+        }
+    }
+
     addFunctionalRequirement () {
         // Parameters
         let rowID = "fr-"+random.randomString(8)
@@ -246,24 +306,7 @@ class MorphMatrix {
             this.dsLabelCell.colSpan = row.cells.length - 2
         }
 
-        let overlay = null
-
-        // Setup hover functionality
-        newCell.onmouseover = (evt) => {
-            if (overlay) return
-            overlay = document.createElement('div')
-            overlay.classList.add('hover-overlay')
-            overlay.innerHTML = '<i class="fas fa-camera"></i>'
-            newCell.appendChild(overlay)
-
-            overlay.onclick = () => {
-                GlobalObserver.emit('open-file-dialog', {targetElement: dsID})
-            }
-        }
-        newCell.onmouseleave = (evt) => {
-            newCell.removeChild(overlay)
-            overlay = null
-        }
+        this._createDSCellOverlay(newCell)
     }
 
     import(json) {

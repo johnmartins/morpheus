@@ -31,11 +31,20 @@
 .matrix .hover-overlay {
     position: absolute;
     height: 13px;
-    width: 13px;
+    width: 60px;
     top: 4px;
     right: 4px;
     font-size: 1rem;
+    text-align: right;
+}
+
+.matrix .hover-overlay .overlay-icon {
     cursor: pointer;
+    color: $white-medium;
+}
+
+.matrix .hover-overlay .overlay-icon:hover {
+    color: $white-high;
 }
 
 .cell-form {

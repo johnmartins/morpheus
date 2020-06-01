@@ -113,7 +113,12 @@ class MorphMatrix {
             titleInput.focus()
 
             let saveTitleChange = (evt) => {
-                this.name = evt.target.value
+                // Ensure that the new name is more than whitespace
+                let value = evt.target.value
+                if (/\S/.test(value)) {
+                    this.name = value
+                }
+                
                 this.titleContainerElement.innerHTML = ""
                 this.titleContainerElement.appendChild(this.titleElement)
                 this.titleElement.innerHTML = this.name

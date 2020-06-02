@@ -22,7 +22,7 @@
 }
 
 .matrix td {
-    padding: 5px;
+    padding: 4px;
     border: 1px solid $white-low;
     position: relative;
     vertical-align: top;
@@ -50,13 +50,14 @@
 .cell-form {
     background-color: transparent;
     outline: none;
-    border: none;
+    border: 1px solid transparent;
     color: $white-high;
     font-size: 1rem;
     resize: none;
     font-family: 'Barlow';
     width: 100%;
     overflow: hidden;
+    padding: 0;
 }
 
 .cell-form.func-req {

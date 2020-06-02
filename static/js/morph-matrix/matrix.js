@@ -409,6 +409,11 @@ class MorphMatrix {
             ds.description = value
             console.log(ds)
         })
+        // If the user clicks anywhere within the cell, then set focus to the textarea.
+        newCell.onclick = (evt) => {
+            let cellform = newCell.querySelector('textarea')
+            if (cellform) cellform.focus()
+        }
 
         // Create initially empty image field
         let imgElement = document.createElement('img')

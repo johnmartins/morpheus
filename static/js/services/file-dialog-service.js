@@ -24,4 +24,12 @@ module.exports = (GlobalObserver) => {
             file: targetPath
         })
     })
+
+    GlobalObserver.on('save-file-dialog', (data) => {
+        ipcRenderer.send('save-file-dialog', data)
+    })
+    ipcRenderer.on('save-file-result', (evt, saveFileResult) => {
+        if (saveFileResult.canceled) return
+        GlobalObserver.emit('save-file-result', saveFileResult)
+    })
 }

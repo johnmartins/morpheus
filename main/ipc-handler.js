@@ -25,4 +25,19 @@ module.exports = (win) => {
             console.error(err.stack)
         }
     })
+
+    ipcMain.on('save-file-dialog', async (evt, data) => {
+        try {
+            let res = await dialog.showSaveDialog({
+                filters: [
+                    { name: 'Json', extensions: ['json']}
+                ]
+            })
+            res.data = data
+            evt.reply('save-file-result', res)
+        } catch (err) {
+            console.error('Caught exception: '+err.message)
+            console.error(err.stack)  
+        }
+    })
 }

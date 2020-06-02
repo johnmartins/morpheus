@@ -25,6 +25,9 @@ module.exports = {
         document.getElementById(matrixContainerID).innerHTML = ""
         currentMatrix = new MorphMatrix(matrixContainerID)
         currentMatrix.import(json)
+    },
+    getMatrixJSON: () => {
+        return currentMatrix.export()
     }
 }
 

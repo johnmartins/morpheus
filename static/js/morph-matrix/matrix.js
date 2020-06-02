@@ -428,7 +428,8 @@ class MorphMatrix {
     }
 
     import(json) {
-        JSON.parse(json)
+        let saveObject = JSON.parse(json)
+        console.log(saveObject)
     }
 
     /**

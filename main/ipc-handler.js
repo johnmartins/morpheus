@@ -1,6 +1,8 @@
+'use strict'
+
 const { ipcMain, dialog } = require('electron')
 
-module.exports = () => {
+module.exports = (win) => {
 
     // Test that is run when the renderer starts.
     ipcMain.on('ping', (evt, arg) => {
@@ -13,7 +15,7 @@ module.exports = () => {
             let res = await dialog.showOpenDialog({
                 properties: ['openFile'],
                 filters: [
-                    { name: 'Images', extensions: ['jpg', 'png', 'gif']}
+                    { name: 'Images', extensions: data.extensions}
                 ]
             })
             res.data = data

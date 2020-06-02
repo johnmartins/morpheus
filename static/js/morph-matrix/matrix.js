@@ -69,7 +69,17 @@ class MorphMatrix {
 
     _setupGlobalEventListeners () {
         GlobalObserver.on('file-dialog-result', (res) => {
+            if (res.data.type !== 'attach-img') return
+            if (!res.data.targetElement) throw new Error('No target element')
+
             let ds = this.cellToDesignSolutionMap[res.data.targetElement]
+
+            if (!ds) {
+                console.error('Target element no longer exists')
+                return
+            }
+            console.log(res.file)
+
             ds.image = res.file
             
             let cell = document.getElementById(res.data.targetElement)
@@ -266,7 +276,11 @@ class MorphMatrix {
 
             imgOverlay.onclick = () => {
                 if (!ds.image){
-                    GlobalObserver.emit('open-file-dialog', {targetElement: dsID})
+                    GlobalObserver.emit('open-file-dialog', {
+                        type: 'attach-img', 
+                        targetElement: dsID,
+                        extensions: ['jpg', 'png', 'gif']
+                    })
                 } else {
                     let imgElement = document.getElementById('img-'+dsID)
                     imgElement.height = 0
@@ -445,9 +459,9 @@ class MorphMatrix {
         this._createDSCellOverlay(newCell)
     }
 
-    import(json) {
-        let saveObject = JSON.parse(json)
-        console.log(saveObject)
+    import(object) {
+        console.log('importing..')
+        console.log(object)
     }
 
     /**
@@ -459,4 +473,8 @@ class MorphMatrix {
 }
 
 
-module.exports = MorphMatrix
+module.exports = {
+    MorphMatrix: MorphMatrix, 
+    FunctionalRequirement: FunctionalRequirement, 
+    DesignSolution: DesignSolution
+}

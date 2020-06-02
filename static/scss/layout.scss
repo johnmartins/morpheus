@@ -16,8 +16,10 @@
 }
 
 #layout-workspace {
-    height: 100%;
+    height: calc(100% - 15px);
     background-color: $grey-low;
+    overflow: auto;
+    padding: 8px;
 }
 
 .resize-border-v {
@@ -57,9 +59,4 @@
     flex: 1 1 auto;
     background-color: $grey-high;
     padding: 8px;
-}
-
-.workspace {
-    margin: 8px;
-    height: 100%;
 }

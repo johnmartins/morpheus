@@ -3,11 +3,14 @@
 .matrix table {
     border-collapse: collapse;
     font-size: 0.8rem;
+    table-layout: fixed;
 }
 
 .matrix .mm-label-cell {
     background-color: $grey-medium;
-    color: $white-medium
+    color: $white-medium;
+    height: 15px;
+    min-height: 15px;
 }
 
 .matrix .mm-add-cell {
@@ -26,6 +29,10 @@
     border: 1px solid $white-low;
     position: relative;
     vertical-align: top;
+    width: 140px;
+    height: 50px;
+    min-width: 140px;
+    min-height: 50px;
 }
 
 .matrix .hover-overlay {

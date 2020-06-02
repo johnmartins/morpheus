@@ -37,10 +37,6 @@ class MorphMatrix {
     rowToRequirementMap = {}
     cellToDesignSolutionMap = {}
 
-    // Parameters
-    cellWidth = "150px"
-    cellHeight = "50px"
-
     // Important layout vars
     containerID = null
     containerElement = null
@@ -81,8 +77,8 @@ class MorphMatrix {
             let cell = document.getElementById(res.data.targetElement)
             let img = document.getElementById('img-'+res.data.targetElement)
             img.src = ds.image
-            img.width = 150
-            img.height = 150
+            img.width = 140
+            img.height = 140
             cell.appendChild(img)
         })
     }
@@ -141,14 +137,12 @@ class MorphMatrix {
         let rootCell = firstRow.insertCell()
         rootCell.classList.add('mm-label-cell')
         rootCell.innerHTML = "Functional Requirements"
-        rootCell.width = this.cellWidth
 
         this.dsLabelCell = firstRow.insertCell()
         this.dsLabelCell.innerHTML = "Design solutions"
         this.dsLabelCell.align = "center"
         this.dsLabelCell.classList.add('mm-label-cell')
         this.dsLabelCell.colSpan = 1
-        this.dsLabelCell.width = this.cellWidth
 
         let secondRow = this.tbodyElement.insertRow()
         let addRowCell = secondRow.insertCell()
@@ -156,8 +150,6 @@ class MorphMatrix {
         addRowCell.align = "center"
         addRowCell.style.fontSize = "1rem"
         addRowCell.classList.add('mm-add-cell')
-        addRowCell.width = this.cellWidth
-        addRowCell.height = this.cellHeight
         addRowCell.onclick = () => {
             this.addFunctionalRequirement ()
         }
@@ -359,8 +351,6 @@ class MorphMatrix {
 
         let newCell = newRow.insertCell()
         newCell.id = cellID
-        newCell.width = this.cellWidth
-        newCell.height = this.cellHeight
         
         this._createCellForm(newCell, `Functional Requirement ${position}`, 'func-req', (value) => {
             fr.description = value
@@ -374,8 +364,6 @@ class MorphMatrix {
         newAddCell.innerHTML = '<i style="font-weight: bold;" class="far fa-plus-square"></i> DS'
         newAddCell.style.fontSize = "1rem"
         newAddCell.align = "center"
-        newAddCell.width = this.cellWidth
-        newAddCell.height = this.cellHeight
         newAddCell.classList.add('mm-add-cell')
         newAddCell.onclick = () => {
             this.addDesignSolution(rowID)
@@ -397,8 +385,6 @@ class MorphMatrix {
 
         let newCell = row.insertCell(cellPosition)
         newCell.id = dsID
-        newCell.width = this.cellWidth
-        newCell.height = this.cellHeight
         newCell.verticalAlign = "top"
 
         // Map ID for easy object lookup

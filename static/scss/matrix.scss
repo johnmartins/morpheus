@@ -40,8 +40,8 @@
     position: absolute;
     display: inline-block;
     height: 13px;
-    bottom: 4px;
-    right: 4px;
+    bottom: 6px;
+    right: 6px;
     font-size: 1rem;
     text-align: right;
 }
@@ -53,6 +53,7 @@
 .matrix .hover-overlay .overlay-icon {
     cursor: pointer;
     color: $white-medium;
+    margin-right: 4px;
 }
 
 .matrix .hover-overlay .overlay-icon:hover {

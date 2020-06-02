@@ -29,13 +29,18 @@
 }
 
 .matrix .hover-overlay {
+    background-color: transparentize($color: $grey-low, $amount: 0.4);
     position: absolute;
     display: inline-block;
     height: 13px;
-    top: 4px;
+    bottom: 4px;
     right: 4px;
     font-size: 1rem;
     text-align: right;
+}
+
+.matrix .hover-overlay:hover {
+    background-color: transparentize($color: $grey-low, $amount: 0.1);
 }
 
 .matrix .hover-overlay .overlay-icon {

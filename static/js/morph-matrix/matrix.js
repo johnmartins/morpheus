@@ -62,13 +62,10 @@ class MorphMatrix {
         this.containerElement.appendChild(this.tableElement)
 
         this._setupTableControls()
-
-        // Setup global event listeners
-        this._setupGlobalEventListeners()
     }
 
-    _setupGlobalEventListeners () {
-        GlobalObserver.on('file-dialog-result', (res) => {
+    _waitForFileDialogResult () {
+        GlobalObserver.once('file-dialog-result', (res) => {
             if (res.data.type !== 'attach-img') return
             if (!res.data.targetElement) throw new Error('No target element')
 
@@ -78,7 +75,6 @@ class MorphMatrix {
                 console.error('Target element no longer exists')
                 return
             }
-            console.log(res.file)
 
             ds.image = res.file
             
@@ -276,6 +272,7 @@ class MorphMatrix {
 
             imgOverlay.onclick = () => {
                 if (!ds.image){
+                    this._waitForFileDialogResult()
                     GlobalObserver.emit('open-file-dialog', {
                         type: 'attach-img', 
                         targetElement: dsID,
@@ -415,7 +412,6 @@ class MorphMatrix {
         newAddCell.onclick = () => {
             this.addDesignSolution(rowID)
         }
-
     }
 
     /**
@@ -471,7 +467,6 @@ class MorphMatrix {
         return JSON.stringify(this)
     }
 }
-
 
 module.exports = {
     MorphMatrix: MorphMatrix, 

@@ -1,5 +1,5 @@
 {
-  "name": "morph-matrix-gen",
+  "name": "morpheus",
   "version": "0.0.1",
   "description": "Morphological Matrix Generation Interface",
   "main": "index.js",

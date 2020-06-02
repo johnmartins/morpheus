@@ -69,8 +69,6 @@ class MorphMatrix {
 
     _setupGlobalEventListeners () {
         GlobalObserver.on('file-dialog-result', (res) => {
-            console.log(res.file)
-            console.log(res.data)
             let ds = this.cellToDesignSolutionMap[res.data.targetElement]
             ds.image = res.file
             
@@ -182,18 +180,39 @@ class MorphMatrix {
     _createFRCellOverlay (frCell) {
         let overlay = null
         let frID = frCell.id
-        let fr = this.rowToRequirementMap['row-'+frID]
+        let frRowID = 'row-'+frID
+        let fr = this.rowToRequirementMap[frRowID]
         
         frCell.onmouseover = (evt) => {
             if (overlay) return
             overlay = document.createElement('div')
             overlay.classList.add('hover-overlay')
 
-            // Add delete icon
+            // Overlay icons
+            let moveUpOverlay = document.createElement('i')
+            moveUpOverlay.classList.add('fas', 'fa-chevron-up', 'overlay-icon')
+            moveUpOverlay.style.marginRight = "4px"
+
+            let moveDownOverlay = document.createElement('i')
+            moveDownOverlay.classList.add('fas', 'fa-chevron-down', 'overlay-icon')
+            moveDownOverlay.style.marginRight = "4px"
+
             let deleteOverlay = document.createElement('i')
             deleteOverlay.classList.add('fas', 'fa-trash-alt', 'overlay-icon')
 
+            if (fr.position > 1) overlay.appendChild(moveUpOverlay)
+            if (fr.position < this.functionalRequirements.length) overlay.appendChild(moveDownOverlay)
             overlay.appendChild(deleteOverlay)
+
+            moveUpOverlay.onclick = (evt) => {
+                let otherRowID = 'row-'+this.functionalRequirements[fr.position - 2].id
+                this.switchRowPosition(otherRowID, frRowID)
+            }
+            
+            moveDownOverlay.onclick = (evt) => {
+                let otherRowID = 'row-'+this.functionalRequirements[fr.position].id
+                this.switchRowPosition(frRowID, otherRowID)
+            }
 
             deleteOverlay.onclick = (evt) => {
                 this.deleteFunctionalRequirement(frID)
@@ -267,8 +286,25 @@ class MorphMatrix {
         }
     }
 
+    switchRowPosition(rowID1, rowID2) {
+        let fr1 = this.rowToRequirementMap[rowID1]
+        let fr2 = this.rowToRequirementMap[rowID2]
+
+        // Change fr.position attribute
+        let pos1 = fr1.position
+        let pos2 = fr2.position
+        fr1.position = pos2
+        fr2.position = pos1
+
+        // Switch position in this.functionalRequirements array
+        this.functionalRequirements[pos1 - 1] = fr2
+        this.functionalRequirements[pos2 - 1] = fr1
+
+        // Switch position in DOM
+        this.tbodyElement.insertBefore(document.getElementById(rowID2), document.getElementById(rowID1))
+    }
+
     deleteFunctionalRequirement (frID) {
-        console.log("delete FR "+frID)
         let frRowID = 'row-'+frID
         let fr = this.rowToRequirementMap[frRowID]
 
@@ -281,7 +317,6 @@ class MorphMatrix {
         let deleteIndex = -1
         for (let i = 0; i < this.functionalRequirements.length; i++) {
             let selectedFr = this.functionalRequirements[i]
-            console.log(this.functionalRequirements[i].id)
             if (this.functionalRequirements[i].id === frID) {
                 deleteIndex = i
             }
@@ -303,7 +338,6 @@ class MorphMatrix {
     }
 
     deleteDesignSolution (dsID) {
-        console.log("delete DS "+dsID)
         let ds = this.cellToDesignSolutionMap[dsID]
         let frID = ds.frID
         let fr = this.rowToRequirementMap[frID]
@@ -354,7 +388,6 @@ class MorphMatrix {
         
         this._createCellForm(newCell, `Functional Requirement ${position}`, 'func-req', (value) => {
             fr.description = value
-            console.log(fr)
         })
 
         this._createFRCellOverlay(newCell)
@@ -393,7 +426,6 @@ class MorphMatrix {
         // Create form in which a description can be written
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, null, (value) => {
             ds.description = value
-            console.log(ds)
         })
         // If the user clicks anywhere within the cell, then set focus to the textarea.
         newCell.onclick = (evt) => {

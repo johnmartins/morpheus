@@ -486,6 +486,7 @@ class MorphMatrix {
      * Returns serialized object
      */
     export() {
+        // Grab images and pack them
         return JSON.stringify(this)
     }
 }

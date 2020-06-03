@@ -1,8 +1,9 @@
 const { ipcRenderer } = require('electron')
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
 const random = require('./../utils/random')
-const userDataPath = __dirname+'/../../../user-data/' // this is awful and should probably be OS TMP directory
+const userDataPath = os.tmpdir() + '/morpheus/'
 
 module.exports = (GlobalObserver) => {
 
@@ -12,6 +13,7 @@ module.exports = (GlobalObserver) => {
     })
     ipcRenderer.on('file-dialog-result', (evt, openFileResult) => {
         if (openFileResult.canceled) return
+        createTmpDir()
 
         let originalPath = openFileResult.filePaths[0]
         let fileExtension = path.extname(originalPath)
@@ -32,4 +34,11 @@ module.exports = (GlobalObserver) => {
         if (saveFileResult.canceled) return
         GlobalObserver.emit('save-file-result', saveFileResult)
     })
+}
+
+function createTmpDir() {
+    let exists = fs.existsSync(userDataPath)
+    if (exists) return
+    fs.mkdirSync(userDataPath)
+    return
 }

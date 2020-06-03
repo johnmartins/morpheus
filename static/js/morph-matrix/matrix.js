@@ -160,8 +160,9 @@ class MorphMatrix {
         }
     }
 
-    _createCellForm (cellElement, placeholder, styleClass, onChangeCallback) {
+    _createCellForm (cellElement, placeholder, { defaultValue = null, styleClass = null, onChangeCallback = null } = {}) {
         let cellForm = document.createElement('textarea')
+        cellForm.value = defaultValue
         cellForm.spellcheck = false
         cellForm.placeholder = placeholder
         cellForm.classList.add('cell-form')
@@ -378,9 +379,9 @@ class MorphMatrix {
         delete this.cellToDesignSolutionMap[dsID]
     }
 
-    addFunctionalRequirement () {
+    addFunctionalRequirement ({id = null, description = null} = {}) {
         // Parameters
-        let cellID = "fr-"+random.randomString(8)
+        let cellID = id ? id : "fr-"+random.randomString(8)
         let rowID = "row-"+cellID
 
         let position = this.tableElement.rows.length - 1
@@ -398,9 +399,11 @@ class MorphMatrix {
         let newCell = newRow.insertCell()
         newCell.id = cellID
         
-        this._createCellForm(newCell, `Functional Requirement ${position}`, 'func-req', (value) => {
-            fr.description = value
-        })
+        this._createCellForm(newCell, `Functional Requirement ${position}`, {
+            onChangeCallback: (value) => fr.description = value,
+            defaultValue: description,
+            styleClass: 'func-req'
+        } )
 
         this._createFRCellOverlay(newCell)
 
@@ -419,11 +422,11 @@ class MorphMatrix {
      * Add a new DS to the morph matrix
      * @param {Number} rowPosition To which row the design solution should be added
      */
-    addDesignSolution (rowID) {
+    addDesignSolution (rowID, { id = null, description = null } = {}) {
         let row = document.getElementById(rowID)
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
-        let dsID = "ds-"+random.randomString(8)
+        let dsID = id ? id : "ds-"+random.randomString(8)
         let ds = new DesignSolution(dsID, cellPosition, row.id)
         this.rowToRequirementMap[row.id].designSolutions.push(ds)
 
@@ -435,8 +438,9 @@ class MorphMatrix {
         this.cellToDesignSolutionMap[dsID] = ds
 
         // Create form in which a description can be written
-        this._createCellForm(newCell, `Design Solution ${cellPosition}`, null, (value) => {
-            ds.description = value
+        this._createCellForm(newCell, `Design Solution ${cellPosition}`, {
+            onChangeCallback: (value) => ds.description = value,
+            defaultValue: description,
         })
         // If the user clicks anywhere within the cell, then set focus to the textarea.
         newCell.onclick = (evt) => {
@@ -456,9 +460,26 @@ class MorphMatrix {
         this._createDSCellOverlay(newCell)
     }
 
-    import(object) {
-        console.log('importing..')
-        console.log(object)
+    import(save) {
+        // Rebuild matrix from json dump
+        console.log(`Imported ${save.name}`)
+        this.name = save.name
+        this.titleElement.innerHTML = this.name
+        
+        for (let frN = 0; frN < save.functionalRequirements.length; frN++) {
+            let savedFr = save.functionalRequirements[frN]
+            this.addFunctionalRequirement({
+                id: savedFr.id,
+                description: savedFr.description
+            })
+            for (let dsN = 0; dsN < savedFr.designSolutions.length; dsN++) {
+                let savedDs = savedFr.designSolutions[dsN]
+                this.addDesignSolution('row-'+savedFr.id, {
+                    id: savedDs.id,
+                    description: savedDs.description
+                })
+            }
+        }
     }
 
     /**

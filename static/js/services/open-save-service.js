@@ -17,7 +17,7 @@ module.exports = {
                 console.error('Failed to find file')
                 return
             }
-            
+
             workspace.setWorkingFileLocation(res.originalPath)
             console.log("reading file: "+res.file)
             let content = fs.readFileSync(res.file, {encoding: 'utf8'})
@@ -46,9 +46,9 @@ module.exports = {
             let overwrite = fs.existsSync(res.filePath)
 
             if (overwrite) {
-                overwriteFile(res.filePath, saveJsonContent)
+                overwriteFile(res.filePath, saveJsonContent, () => workspace.saveCurrentHash() )
             } else {
-                writeContentToFile(res.filePath, saveJsonContent)
+                writeContentToFile(res.filePath, saveJsonContent, () => workspace.saveCurrentHash())
             }
         })
 
@@ -56,18 +56,18 @@ module.exports = {
     },  
 }
 
-function overwriteFile (filePath, content) {
+function overwriteFile (filePath, content, callback) {
     fs.access(filePath, fs.constants.W_OK, err => {
         if (err) {
             console.error('Save failed. Could not access file.')
             return
         } 
         console.log("File can be written to.")
-        writeContentToFile(filePath, content)
+        writeContentToFile(filePath, content, callback)
     })
 }
 
-function writeContentToFile (filePath, content) {
+function writeContentToFile (filePath, content, callback) {
     fs.writeFile(filePath, content, {flag: 'w'}, (err) => {
         if (err) {
             console.error(err.message)
@@ -75,5 +75,6 @@ function writeContentToFile (filePath, content) {
             return
         }
         console.log("Saved!")
+        callback()
     })
 }

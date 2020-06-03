@@ -1,9 +1,11 @@
 'use strict'
 
+let crypto = require('crypto')
+
 let matrixContainerID = null
 let currentMatrix = null
 let originalFilePosition = null
-let lastSavedHash = ''
+let lastSavedHash = null
 
 const { MorphMatrix } = require ('./morph-matrix/matrix')
 
@@ -30,6 +32,7 @@ module.exports = {
 
         document.getElementById(matrixContainerID).innerHTML = ""
         currentMatrix = new MorphMatrix(matrixContainerID)
+        module.exports.saveCurrentHash()
     },
     /**
      * Create a matrix from an existing object. Used to "load" or "open" existing matricies.
@@ -42,21 +45,31 @@ module.exports = {
         document.getElementById(matrixContainerID).innerHTML = ""
         currentMatrix = new MorphMatrix(matrixContainerID)
         currentMatrix.import(json)
+        module.exports.saveCurrentHash()
     },
     /**
      * Get the matrix as a JSON string. Used when saving the matrix to a file.
      */
     getMatrixJSON: () => {
         return currentMatrix.export()
+    },
+
+    saveCurrentHash: () => {
+        lastSavedHash = hash (module.exports.getMatrixJSON())
     }
 }
 
 function promptUnsavedChanges () {
-
+    console.log("There are unsaved changes!")
 }
 
 function isMatrixChanged () {
-    let currentHash = ''
+    if (!currentMatrix) return false
+    let currentHash = hash(module.exports.getMatrixJSON())
     if (lastSavedHash === currentHash) return false
     return true
+}
+
+function hash (data) {
+    return crypto.createHash('md5').update(data).digest("hex");
 }

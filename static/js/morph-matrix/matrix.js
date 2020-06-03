@@ -90,6 +90,7 @@ class MorphMatrix {
     _setupTitleElement () {
         this.titleContainerElement = document.createElement('div')
         this.titleElement = document.createElement('h3')
+        this.titleElement.classList.add('matrix-title')
         this.titleElement.innerHTML = this.name
         this.titleContainerElement.appendChild(this.titleElement)
         this.containerElement.appendChild(this.titleContainerElement)
@@ -276,7 +277,7 @@ class MorphMatrix {
                     GlobalObserver.emit('open-file-dialog', {
                         type: 'attach-img', 
                         targetElement: dsID,
-                        extensions: ['jpg', 'png', 'gif']
+                        filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
                     })
                 } else {
                     let imgElement = document.getElementById('img-'+dsID)

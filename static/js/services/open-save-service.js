@@ -23,7 +23,13 @@ module.exports = {
             workspace.createMatrixFromObject(json)
         })
 
-        GlobalObserver.emit('open-file-dialog', {type: 'open-file', extensions: ['json']})
+        GlobalObserver.emit('open-file-dialog', {
+            type: 'open-file', 
+            filters: [
+                { name: 'Morph-matrix', extensions: ['morph'] },
+                { name: 'JSON', extensions: ['json'] }
+            ]
+        })
     },
     save: () => {
         console.log("SAVE")

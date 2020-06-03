@@ -14,9 +14,7 @@ module.exports = (win) => {
         try {
             let res = await dialog.showOpenDialog({
                 properties: ['openFile'],
-                filters: [
-                    { name: 'Images', extensions: data.extensions}
-                ]
+                filters: data.filters
             })
             res.data = data
             evt.reply('file-dialog-result', res)

@@ -1,5 +1,6 @@
 'use strict'
 const random = require('./../utils/random')
+const storageService = require('./../services/storage-service')
 
 class FunctionalRequirement {
     id = null
@@ -388,6 +389,7 @@ class MorphMatrix {
 
         // Create model representation
         let fr = new FunctionalRequirement(cellID, position)
+        fr.description = description
         this.functionalRequirements.push(fr)
 
         let newRow = this.tbodyElement.insertRow(position)
@@ -428,6 +430,8 @@ class MorphMatrix {
 
         let dsID = id ? id : "ds-"+random.randomString(8)
         let ds = new DesignSolution(dsID, cellPosition, row.id)
+        ds.description = description
+
         this.rowToRequirementMap[row.id].designSolutions.push(ds)
 
         let newCell = row.insertCell(cellPosition)

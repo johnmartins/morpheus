@@ -1,9 +1,8 @@
 const { ipcRenderer } = require('electron')
 const fs = require('fs')
 const path = require('path')
-const os = require('os')
 const random = require('./../utils/random')
-const userDataPath = os.tmpdir() + '/morpheus/'
+const storageService = require('./storage-service')
 
 module.exports = (GlobalObserver) => {
 
@@ -13,17 +12,17 @@ module.exports = (GlobalObserver) => {
     })
     ipcRenderer.on('file-dialog-result', (evt, openFileResult) => {
         if (openFileResult.canceled) return
-        createTmpDir()
 
         let originalPath = openFileResult.filePaths[0]
-        let fileExtension = path.extname(originalPath)
-        let targetFileName = `user-img-${random.randomString(10)}${fileExtension}`
-        let targetPath = `${userDataPath}${targetFileName}`
-        fs.copyFileSync(originalPath, targetPath)
-
-        GlobalObserver.emit('file-dialog-result', {
-            data: openFileResult.data,
-            file: targetPath
+        // copy file to a safe location
+        storageService.copyFileToTmp(originalPath).then( (destPath) => {
+            GlobalObserver.emit('file-dialog-result', {
+                data: openFileResult.data,
+                file: destPath,
+                originalPath: originalPath
+            })
+        }).catch((err) => {
+            console.error('Failed to copy file.')
         })
     })
 
@@ -34,11 +33,4 @@ module.exports = (GlobalObserver) => {
         if (saveFileResult.canceled) return
         GlobalObserver.emit('save-file-result', saveFileResult)
     })
-}
-
-function createTmpDir() {
-    let exists = fs.existsSync(userDataPath)
-    if (exists) return
-    fs.mkdirSync(userDataPath)
-    return
 }

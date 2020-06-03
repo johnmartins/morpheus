@@ -4,7 +4,8 @@ let crypto = require('crypto')
 
 let matrixContainerID = null
 let currentMatrix = null
-let originalFilePosition = null
+let originalFileLocation = null
+let tempFilePosition = null
 let lastSavedHash = null
 
 const { MorphMatrix } = require ('./morph-matrix/matrix')
@@ -20,7 +21,16 @@ module.exports = {
      * If an existing file is opened, then a soft reference to that file is saved here.
      */
     setWorkingFileLocation: (path) => {
-        originalFilePosition = path
+        originalFileLocation = path
+    },
+    getWorkingFileLocation: () => {
+        return originalFileLocation
+    },
+    setTempFileLocation: (path) => {
+        tempFilePosition = path
+    },
+    getTempFileLocation: () => {
+        return tempFilePosition
     },
     /**
      * Create a completely empty matrix

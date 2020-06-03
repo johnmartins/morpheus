@@ -35,25 +35,39 @@ module.exports = {
     },
     save: () => {
         console.log("SAVE")
+        let filePath = workspace.getWorkingFileLocation()
+
+        // File has not previously been saved
+        if (!filePath) {
+            return module.exports.saveAs()
+        }
+
+        saveFile(filePath)
+
     },
     saveAs: () => {
         console.log("SAVE AS")
 
         GlobalObserver.once('save-file-result', (res) => {
-            console.log(`Save to file ${res.filePath}`)
-            let saveJsonContent = workspace.getMatrixJSON()
-
-            let overwrite = fs.existsSync(res.filePath)
-
-            if (overwrite) {
-                overwriteFile(res.filePath, saveJsonContent, () => workspace.saveCurrentHash() )
-            } else {
-                writeContentToFile(res.filePath, saveJsonContent, () => workspace.saveCurrentHash())
-            }
+            saveFile(res.filePath)
+            workspace.setWorkingFileLocation(res.filePath)
         })
 
         GlobalObserver.emit('save-file-dialog', {type: 'save-file', extensions: ['json']})
     },  
+}
+
+function saveFile (filePath) {
+    console.log(`Save to file ${filePath}`)
+    let saveJsonContent = workspace.getMatrixJSON()
+
+    let overwrite = fs.existsSync(filePath)
+
+    if (overwrite) {
+        overwriteFile(filePath, saveJsonContent, () => workspace.saveCurrentHash() )
+    } else {
+        writeContentToFile(filePath, saveJsonContent, () => workspace.saveCurrentHash())
+    }
 }
 
 function overwriteFile (filePath, content, callback) {

@@ -54,6 +54,9 @@ module.exports = {
         return currentMatrix.export()
     },
 
+    /**
+     * Saves a hashed value of the matrix which may be used to detect changes to the matrix.
+     */
     saveCurrentHash: () => {
         lastSavedHash = hash (module.exports.getMatrixJSON())
     }

@@ -282,9 +282,15 @@ class MorphMatrix {
                         filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
                     })
                 } else {
-                    let imgElement = document.getElementById('img-'+dsID)
-                    imgElement.height = 0
-                    ds.image = null
+                    storageService.removeFileFromTmp(ds.image, (err) => {
+                        if (err) {
+                            console.log('Image was not properly deleted from tmp storage')
+                            // continue anyway?
+                        }
+                        let imgElement = document.getElementById('img-'+dsID)
+                        imgElement.height = 0
+                        ds.image = null
+                    })
                 }
             }
 

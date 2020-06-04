@@ -12,19 +12,23 @@ module.exports = {
                 submenu: [
                     {
                         label: 'New',
-                        click: () => {win.webContents.send('menu-event', {type: 'new'})} 
+                        click: () => {win.webContents.send('menu-event', {type: 'new'})},
+                        accelerator: isMac ? 'Option+Cmd+N' : 'Ctrl+N'
                     },
                     {
                         label: 'Open',
-                        click: () => {win.webContents.send('menu-event', {type: 'open'})}
+                        click: () => {win.webContents.send('menu-event', {type: 'open'})},
+                        accelerator: isMac ? 'Cmd+O' : 'Ctrl+O'
                     },
                     {
                         label: 'Save',
-                        click: () => {win.webContents.send('menu-event', {type: 'save'})}
+                        click: () => {win.webContents.send('menu-event', {type: 'save'})},
+                        accelerator: isMac ? 'Cmd+S' : 'Ctrl+S'
                     },
                     {
                         label: 'Save As...',
-                        click: () => {win.webContents.send('menu-event', {type: 'save-as'})}
+                        click: () => {win.webContents.send('menu-event', {type: 'save-as'})},
+                        accelerator: isMac ? 'Cmd+Shift+S' : 'Ctrl+Shift+S'
                     },
                     {
                         type: 'separator'
@@ -42,14 +46,9 @@ module.exports = {
                 ]
             }
         ]
-    
-        let menu = null
-        if (!isMac) {
-            menu = Menu.buildFromTemplate(template)
-        } else {
-            // TODO: Mac menu..
-        }
-       
+
+        let menu = Menu.buildFromTemplate(template)
+
         Menu.setApplicationMenu(menu)
     }
 }

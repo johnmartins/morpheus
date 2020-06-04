@@ -18,8 +18,10 @@ module.exports = (GlobalObserver) => {
         storageService.copyFileToTmp(originalPath).then( (destPath) => {
             GlobalObserver.emit('file-dialog-result', {
                 data: openFileResult.data,
-                file: destPath,
-                originalPath: originalPath
+                path: destPath,
+                fileName: path.basename(destPath),
+                originalPath: originalPath,
+                originalFileName: path.basename(originalPath)
             })
         }).catch((err) => {
             console.error('Failed to copy file.')

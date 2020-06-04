@@ -13,14 +13,14 @@ module.exports = {
 
         GlobalObserver.once('file-dialog-result', (res) => {
             if (res.data.type !== 'open-file') return
-            if (!fs.existsSync(res.file)) {
+            if (!fs.existsSync(res.path)) {
                 console.error('Failed to find file')
                 return
             }
 
             workspace.setWorkingFileLocation(res.originalPath)
-            console.log("reading file: "+res.file)
-            let content = fs.readFileSync(res.file, {encoding: 'utf8'})
+            console.log("reading file: "+res.path)
+            let content = fs.readFileSync(res.path, {encoding: 'utf8'})
             let json = JSON.parse(content)
             workspace.createMatrixFromObject(json)
         })

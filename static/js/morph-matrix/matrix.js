@@ -77,11 +77,11 @@ class MorphMatrix {
                 return
             }
 
-            ds.image = res.file
+            ds.image = res.fileName
             
             let cell = document.getElementById(res.data.targetElement)
             let img = document.getElementById('img-'+res.data.targetElement)
-            img.src = ds.image
+            img.src = storageService.getTmpStorageDirectory() + ds.image
             img.width = 140
             img.height = 140
             cell.appendChild(img)

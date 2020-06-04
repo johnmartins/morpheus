@@ -1,9 +1,10 @@
 'use strict'
 
+const zlib = require('zlib')
 const os = require('os')
 const fs = require('fs')
 const random = require('./../utils/random')
-const tmpStorage = os.tmpdir() + '/morpheus/'+ random.randomString(8)
+const tmpStorage = os.tmpdir() + '/morpheus/'+ random.randomString(8) + '/'
 
 module.exports = {
     getTmpStorageDirectory: function () {
@@ -46,6 +47,10 @@ module.exports = {
         console.log("file was successfully copied to "+targetPath)
         
         return targetPath
+    },
+
+    removeFileFromTmp: function (fileName, callback) {
+        fs.unlink(module.exports.getTmpStorageDirectory() + fileName, callback)
     }
 }
 

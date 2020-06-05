@@ -439,6 +439,7 @@ class MorphMatrix {
         let dsID = id ? id : "ds-"+random.randomString(8)
         let ds = new DesignSolution(dsID, cellPosition, row.id)
         ds.description = description
+        ds.image = image
 
         this.rowToRequirementMap[row.id].designSolutions.push(ds)
 

@@ -1,13 +1,14 @@
 const fs = require('fs')
-const MorphMatrix = require('../js/morph-matrix/matrix')
 const path = require('path')
 
+const workspace = require(path.join(__dirname, '../js/workspace.js'))
 let layoutContainer = document.getElementById('layout-container')
 
 // Setup matrix layout
 let matrixLayout = fs.readFileSync(path.join(__dirname,'matrix.html'), {encoding: 'utf-8'})
 document.getElementById('layout-workspace').innerHTML = matrixLayout
-const morphMartix = new MorphMatrix('matrix-container')
+workspace.setMatrixContainer('matrix-container')
+workspace.createEmptyMatrix()
 
 // Setup menu layout
 let menuLayout = fs.readFileSync(path.join(__dirname, 'menu.html'), {encoding: 'utf-8'})

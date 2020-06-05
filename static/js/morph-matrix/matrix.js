@@ -1,5 +1,6 @@
 'use strict'
 const random = require('./../utils/random')
+const storageService = require('./../services/storage-service')
 
 class FunctionalRequirement {
     id = null
@@ -62,28 +63,36 @@ class MorphMatrix {
         this.containerElement.appendChild(this.tableElement)
 
         this._setupTableControls()
-
-        // Setup global event listeners
-        this._setupGlobalEventListeners()
     }
 
-    _setupGlobalEventListeners () {
-        GlobalObserver.on('file-dialog-result', (res) => {
+    _waitForFileDialogResult () {
+        GlobalObserver.once('file-dialog-result', (res) => {
+            if (res.data.type !== 'attach-img') return
+            if (!res.data.targetElement) throw new Error('No target element')
+
             let ds = this.cellToDesignSolutionMap[res.data.targetElement]
-            ds.image = res.file
-            
-            let cell = document.getElementById(res.data.targetElement)
-            let img = document.getElementById('img-'+res.data.targetElement)
-            img.src = ds.image
-            img.width = 140
-            img.height = 140
-            cell.appendChild(img)
+
+            if (!ds) {
+                console.error('Target element no longer exists')
+                return
+            }
+
+            ds.image = res.fileName
+            this._addImage('img-'+res.data.targetElement, ds.image)
         })
+    }
+
+    _addImage (element, fileName) {
+        let img = document.getElementById(element)
+        img.src = storageService.getTmpStorageDirectory() + fileName
+        img.width = 140
+        img.height = 140
     }
     
     _setupTitleElement () {
         this.titleContainerElement = document.createElement('div')
         this.titleElement = document.createElement('h3')
+        this.titleElement.classList.add('matrix-title')
         this.titleElement.innerHTML = this.name
         this.titleContainerElement.appendChild(this.titleElement)
         this.containerElement.appendChild(this.titleContainerElement)
@@ -153,8 +162,9 @@ class MorphMatrix {
         }
     }
 
-    _createCellForm (cellElement, placeholder, styleClass, onChangeCallback) {
+    _createCellForm (cellElement, placeholder, { defaultValue = null, styleClass = null, onChangeCallback = null } = {}) {
         let cellForm = document.createElement('textarea')
+        cellForm.value = defaultValue
         cellForm.spellcheck = false
         cellForm.placeholder = placeholder
         cellForm.classList.add('cell-form')
@@ -266,11 +276,23 @@ class MorphMatrix {
 
             imgOverlay.onclick = () => {
                 if (!ds.image){
-                    GlobalObserver.emit('open-file-dialog', {targetElement: dsID})
+                    this._waitForFileDialogResult()
+                    GlobalObserver.emit('open-file-dialog', {
+                        type: 'attach-img', 
+                        copyToTmp: true,
+                        targetElement: dsID,
+                        filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
+                    })
                 } else {
-                    let imgElement = document.getElementById('img-'+dsID)
-                    imgElement.height = 0
-                    ds.image = null
+                    storageService.removeFileFromTmp(ds.image, (err) => {
+                        if (err) {
+                            console.log('Image was not properly deleted from tmp storage')
+                            // continue anyway?
+                        }
+                        let imgElement = document.getElementById('img-'+dsID)
+                        imgElement.height = 0
+                        ds.image = null
+                    })
                 }
             }
 
@@ -366,15 +388,16 @@ class MorphMatrix {
         delete this.cellToDesignSolutionMap[dsID]
     }
 
-    addFunctionalRequirement () {
+    addFunctionalRequirement ({id = null, description = null} = {}) {
         // Parameters
-        let cellID = "fr-"+random.randomString(8)
+        let cellID = id ? id : "fr-"+random.randomString(8)
         let rowID = "row-"+cellID
 
         let position = this.tableElement.rows.length - 1
 
         // Create model representation
         let fr = new FunctionalRequirement(cellID, position)
+        fr.description = description
         this.functionalRequirements.push(fr)
 
         let newRow = this.tbodyElement.insertRow(position)
@@ -386,9 +409,11 @@ class MorphMatrix {
         let newCell = newRow.insertCell()
         newCell.id = cellID
         
-        this._createCellForm(newCell, `Functional Requirement ${position}`, 'func-req', (value) => {
-            fr.description = value
-        })
+        this._createCellForm(newCell, `Functional Requirement ${position}`, {
+            onChangeCallback: (value) => fr.description = value,
+            defaultValue: description,
+            styleClass: 'func-req'
+        } )
 
         this._createFRCellOverlay(newCell)
 
@@ -401,19 +426,21 @@ class MorphMatrix {
         newAddCell.onclick = () => {
             this.addDesignSolution(rowID)
         }
-
     }
 
     /**
      * Add a new DS to the morph matrix
      * @param {Number} rowPosition To which row the design solution should be added
      */
-    addDesignSolution (rowID) {
+    addDesignSolution (rowID, { id = null, description = null, image = null } = {}) {
         let row = document.getElementById(rowID)
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
-        let dsID = "ds-"+random.randomString(8)
+        let dsID = id ? id : "ds-"+random.randomString(8)
         let ds = new DesignSolution(dsID, cellPosition, row.id)
+        ds.description = description
+        ds.image = image
+
         this.rowToRequirementMap[row.id].designSolutions.push(ds)
 
         let newCell = row.insertCell(cellPosition)
@@ -424,8 +451,9 @@ class MorphMatrix {
         this.cellToDesignSolutionMap[dsID] = ds
 
         // Create form in which a description can be written
-        this._createCellForm(newCell, `Design Solution ${cellPosition}`, null, (value) => {
-            ds.description = value
+        this._createCellForm(newCell, `Design Solution ${cellPosition}`, {
+            onChangeCallback: (value) => ds.description = value,
+            defaultValue: description,
         })
         // If the user clicks anywhere within the cell, then set focus to the textarea.
         newCell.onclick = (evt) => {
@@ -443,20 +471,44 @@ class MorphMatrix {
         }
 
         this._createDSCellOverlay(newCell)
+
+        if (image) this._addImage(imgElement.id, image)
     }
 
-    import(json) {
-        let saveObject = JSON.parse(json)
-        console.log(saveObject)
+    import(save) {
+        // Rebuild matrix from json dump
+        console.log(`Imported ${save.name}`)
+        this.name = save.name
+        this.titleElement.innerHTML = this.name
+        
+        for (let frN = 0; frN < save.functionalRequirements.length; frN++) {
+            let savedFr = save.functionalRequirements[frN]
+            this.addFunctionalRequirement({
+                id: savedFr.id,
+                description: savedFr.description
+            })
+            for (let dsN = 0; dsN < savedFr.designSolutions.length; dsN++) {
+                let savedDs = savedFr.designSolutions[dsN]
+                this.addDesignSolution('row-'+savedFr.id, {
+                    id: savedDs.id,
+                    description: savedDs.description,
+                    image: savedDs.image
+                })
+            }
+        }
     }
 
     /**
      * Returns serialized object
      */
     export() {
+        // Grab images and pack them
         return JSON.stringify(this)
     }
 }
 
-
-module.exports = MorphMatrix
+module.exports = {
+    MorphMatrix: MorphMatrix, 
+    FunctionalRequirement: FunctionalRequirement, 
+    DesignSolution: DesignSolution
+}

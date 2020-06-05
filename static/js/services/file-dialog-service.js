@@ -1,8 +1,6 @@
 const { ipcRenderer } = require('electron')
-const fs = require('fs')
 const path = require('path')
-const random = require('./../utils/random')
-const userDataPath = __dirname+'/../../../user-data/' // this is awful and should probably be OS TMP directory
+const storageService = require('./storage-service')
 
 module.exports = (GlobalObserver) => {
 
@@ -13,15 +11,38 @@ module.exports = (GlobalObserver) => {
     ipcRenderer.on('file-dialog-result', (evt, openFileResult) => {
         if (openFileResult.canceled) return
 
-        let originalPath = openFileResult.filePaths[0]
-        let fileExtension = path.extname(originalPath)
-        let targetFileName = `user-img-${random.randomString(10)}${fileExtension}`
-        let targetPath = `${userDataPath}${targetFileName}`
-        fs.copyFileSync(originalPath, targetPath)
+        if (openFileResult.data.copyToTmp) {
+            console.log("copying")
+            // copy file to a safe location
+            let originalPath = openFileResult.filePaths[0]
+            storageService.copyFileToTmp(originalPath).then( (destPath) => {
+                GlobalObserver.emit('file-dialog-result', {
+                    data: openFileResult.data,
+                    path: destPath,
+                    fileName: path.basename(destPath),
+                    originalPath: originalPath,
+                    originalFileName: path.basename(originalPath)
+                })
+            }).catch((err) => {
+                console.error('Failed to copy file.')
+            })
+        } else {
+            console.log("referencing non-copy")
+            // Send reference to file
+            GlobalObserver.emit('file-dialog-result', {
+                data: openFileResult.data,
+                path: openFileResult.filePaths[0],
+                fileName: path.basename(openFileResult.filePaths[0])
+            })
+        }
 
-        GlobalObserver.emit('file-dialog-result', {
-            data: openFileResult.data,
-            file: targetPath
-        })
+    })
+
+    GlobalObserver.on('save-file-dialog', (data) => {
+        ipcRenderer.send('save-file-dialog', data)
+    })
+    ipcRenderer.on('save-file-result', (evt, saveFileResult) => {
+        if (saveFileResult.canceled) return
+        GlobalObserver.emit('save-file-result', saveFileResult)
     })
 }

@@ -1,7 +1,7 @@
-const { app, BrowserWindow} = require('electron')
+'use strict'
 
-// IPC request handler
-require('./services/ipc-handler')()
+const { app, BrowserWindow} = require('electron')
+const menu = require('./main/menu')
 
 function createWindow () {
     let win = new BrowserWindow({
@@ -16,9 +16,16 @@ function createWindow () {
     win.on('ready-to-show', () => {
         win.show()
         win.maximize()
+        win.webContents.openDevTools()
     })
-    //win.setMenu(null)
+
+    menu.build(win)
+
+    // IPC request handler
+    require('./main/ipc-handler')(win)
+
 }
+
 
 app.whenReady().then(createWindow)
 

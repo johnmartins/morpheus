@@ -58,10 +58,6 @@ function saveFile () {
     console.log(`Save to file ${tmpFilePath}`)
     let saveJsonContent = workspace.getMatrixJSON()
 
-    // write JSON to file in tmp dir
-    // zip
-    // copy zip to final location
-
     let overwrite = fs.existsSync(workspace.getTempFileLocation())
 
     let onJsonSavedCallback = () => {

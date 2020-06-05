@@ -1,7 +1,5 @@
 const { ipcRenderer } = require('electron')
-const fs = require('fs')
 const path = require('path')
-const random = require('./../utils/random')
 const storageService = require('./storage-service')
 
 module.exports = (GlobalObserver) => {
@@ -13,19 +11,31 @@ module.exports = (GlobalObserver) => {
     ipcRenderer.on('file-dialog-result', (evt, openFileResult) => {
         if (openFileResult.canceled) return
 
-        let originalPath = openFileResult.filePaths[0]
-        // copy file to a safe location
-        storageService.copyFileToTmp(originalPath).then( (destPath) => {
+        if (openFileResult.data.copyToTmp) {
+            console.log("copying")
+            // copy file to a safe location
+            let originalPath = openFileResult.filePaths[0]
+            storageService.copyFileToTmp(originalPath).then( (destPath) => {
+                GlobalObserver.emit('file-dialog-result', {
+                    data: openFileResult.data,
+                    path: destPath,
+                    fileName: path.basename(destPath),
+                    originalPath: originalPath,
+                    originalFileName: path.basename(originalPath)
+                })
+            }).catch((err) => {
+                console.error('Failed to copy file.')
+            })
+        } else {
+            console.log("referencing non-copy")
+            // Send reference to file
             GlobalObserver.emit('file-dialog-result', {
                 data: openFileResult.data,
-                path: destPath,
-                fileName: path.basename(destPath),
-                originalPath: originalPath,
-                originalFileName: path.basename(originalPath)
+                path: openFileResult.filePaths[0],
+                fileName: path.basename(openFileResult.filePaths[0])
             })
-        }).catch((err) => {
-            console.error('Failed to copy file.')
-        })
+        }
+
     })
 
     GlobalObserver.on('save-file-dialog', (data) => {

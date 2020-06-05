@@ -1,11 +1,13 @@
 'use strict'
 
-let crypto = require('crypto')
+const crypto = require('crypto')
+const storageService = require('./services/storage-service')
+const random = require('./utils/random')
 
 let matrixContainerID = null
 let currentMatrix = null
-let originalFileLocation = null
-let tempFilePosition = null
+let originalFileLocation = null     // The morph file (or JSON depending on type)
+let tempFilePosition = null         // The JSON file
 let lastSavedHash = null
 
 const { MorphMatrix } = require ('./morph-matrix/matrix')
@@ -43,6 +45,8 @@ module.exports = {
         document.getElementById(matrixContainerID).innerHTML = ""
         currentMatrix = new MorphMatrix(matrixContainerID)
         module.exports.saveCurrentHash()
+        module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
+        module.exports.setWorkingFileLocation(null)
     },
     /**
      * Create a matrix from an existing object. Used to "load" or "open" existing matricies.
@@ -56,6 +60,7 @@ module.exports = {
         currentMatrix = new MorphMatrix(matrixContainerID)
         currentMatrix.import(json)
         module.exports.saveCurrentHash()
+        module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
     },
     /**
      * Get the matrix as a JSON string. Used when saving the matrix to a file.

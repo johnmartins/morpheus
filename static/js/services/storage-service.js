@@ -1,10 +1,13 @@
 'use strict'
 
-const zlib = require('zlib')
+const path = require('path')
+const extractor = require('unzipper')
+const archiver = require('archiver')
 const os = require('os')
 const fs = require('fs')
 const random = require('./../utils/random')
-const tmpStorage = os.tmpdir() + '/morpheus/'+ random.randomString(8) + '/'
+const tmpStorageRoot = os.tmpdir() + '/morpheus/'
+const tmpStorage = tmpStorageRoot + random.randomString(8) + '/'
 
 module.exports = {
     getTmpStorageDirectory: function () {
@@ -51,6 +54,57 @@ module.exports = {
 
     removeFileFromTmp: function (fileName, callback) {
         fs.unlink(module.exports.getTmpStorageDirectory() + fileName, callback)
+    },
+
+    /**
+     * Zip up the entire tmp work directory which contains all files necessary to recreate the current project.
+     * @param {function} callback 
+     */
+    zipTmpStorageDir: function (callback) {
+        let destinationFile = tmpStorageRoot + random.randomString(8)+'.morph'
+
+        // write stream for zip file
+        let zipWriteStream = fs.createWriteStream(destinationFile, {flags: 'w'})
+        var archive = archiver('zip', {
+            zlib: {level: 9}
+        })
+    
+        zipWriteStream.on('close', () => {
+            console.log(archive.pointer() + ' total bytes')
+            console.log('archiver has been finalized and the write stream file descriptor has closed.')
+            callback(destinationFile)
+        })
+    
+        archive.on('warning', function(err) {
+            if (err.code === 'ENOENT') {
+                throw err
+            } else {
+                // throw error
+                throw err
+            }
+        })
+    
+        archive.on('error', function(err) {
+            throw err
+        })
+        
+        // pipe archive data to the file
+        archive.pipe(zipWriteStream);
+    
+        // Zip all contents in the tmp storage directory
+        archive.directory(module.exports.getTmpStorageDirectory(), false)
+    
+        // We are done staging files. Start zipping.
+        archive.finalize()
+    },
+
+    unzipInTmpStorage: async function (sourceFile, callback) {
+        let destination = module.exports.getTmpStorageDirectory()
+        fs.createReadStream(sourceFile).pipe(extractor.Extract({ path: destination }))
+        .promise().then( () => {
+            console.log("Done unzipping")
+            callback()
+        } )
     }
 }
 

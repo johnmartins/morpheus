@@ -78,14 +78,15 @@ class MorphMatrix {
             }
 
             ds.image = res.fileName
-            
-            let cell = document.getElementById(res.data.targetElement)
-            let img = document.getElementById('img-'+res.data.targetElement)
-            img.src = storageService.getTmpStorageDirectory() + ds.image
-            img.width = 140
-            img.height = 140
-            cell.appendChild(img)
+            this._addImage('img-'+res.data.targetElement, ds.image)
         })
+    }
+
+    _addImage (element, fileName) {
+        let img = document.getElementById(element)
+        img.src = storageService.getTmpStorageDirectory() + fileName
+        img.width = 140
+        img.height = 140
     }
     
     _setupTitleElement () {
@@ -278,6 +279,7 @@ class MorphMatrix {
                     this._waitForFileDialogResult()
                     GlobalObserver.emit('open-file-dialog', {
                         type: 'attach-img', 
+                        copyToTmp: true,
                         targetElement: dsID,
                         filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
                     })
@@ -430,7 +432,7 @@ class MorphMatrix {
      * Add a new DS to the morph matrix
      * @param {Number} rowPosition To which row the design solution should be added
      */
-    addDesignSolution (rowID, { id = null, description = null } = {}) {
+    addDesignSolution (rowID, { id = null, description = null, image = null } = {}) {
         let row = document.getElementById(rowID)
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
@@ -468,6 +470,8 @@ class MorphMatrix {
         }
 
         this._createDSCellOverlay(newCell)
+
+        if (image) this._addImage(imgElement.id, image)
     }
 
     import(save) {
@@ -486,7 +490,8 @@ class MorphMatrix {
                 let savedDs = savedFr.designSolutions[dsN]
                 this.addDesignSolution('row-'+savedFr.id, {
                     id: savedDs.id,
-                    description: savedDs.description
+                    description: savedDs.description,
+                    image: savedDs.image
                 })
             }
         }

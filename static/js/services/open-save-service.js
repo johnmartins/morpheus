@@ -2,15 +2,13 @@
 
 const fs = require('fs')
 const workspace = require('./../workspace.js')
+const storageService = require('./storage-service')
 
 module.exports = {
     new: () => {
-        console.log("NEW")
         workspace.createEmptyMatrix()
     },
     open: () => {
-        console.log("OPEN")
-
         GlobalObserver.once('file-dialog-result', (res) => {
             if (res.data.type !== 'open-file') return
             if (!fs.existsSync(res.path)) {
@@ -18,55 +16,73 @@ module.exports = {
                 return
             }
 
-            workspace.setWorkingFileLocation(res.originalPath)
-            console.log("reading file: "+res.path)
-            let content = fs.readFileSync(res.path, {encoding: 'utf8'})
-            let json = JSON.parse(content)
-            workspace.createMatrixFromObject(json)
+            workspace.setWorkingFileLocation(res.path)
+            storageService.unzipInTmpStorage(res.path, () => {
+                let content = fs.readFileSync(storageService.getTmpStorageDirectory() + 'matrix.json', {encoding: 'utf8'})
+                let json = JSON.parse(content)
+                workspace.createMatrixFromObject(json)
+            })
         })
 
         GlobalObserver.emit('open-file-dialog', {
             type: 'open-file', 
             filters: [
-                { name: 'Morph-matrix', extensions: ['morph'] },
-                { name: 'JSON', extensions: ['json'] }
-            ]
+                { name: 'Morph-matrix', extensions: ['morph'] }            ]
         })
     },
     save: () => {
-        console.log("SAVE")
-        let filePath = workspace.getWorkingFileLocation()
-
         // File has not previously been saved
-        if (!filePath) {
+        if (!workspace.getWorkingFileLocation()) {
             return module.exports.saveAs()
         }
-
-        saveFile(filePath)
-
+        saveFile()
     },
     saveAs: () => {
-        console.log("SAVE AS")
-
         GlobalObserver.once('save-file-result', (res) => {
-            saveFile(res.filePath)
             workspace.setWorkingFileLocation(res.filePath)
+            saveFile()
         })
 
-        GlobalObserver.emit('save-file-dialog', {type: 'save-file', extensions: ['json']})
+        GlobalObserver.emit('save-file-dialog', {
+            type: 'save-file', 
+            filters: [ 
+                {name: 'Morph-matrix', extensions: ['morph']}
+            ]
+        })
     },  
 }
 
-function saveFile (filePath) {
-    console.log(`Save to file ${filePath}`)
+function saveFile () {
+    //storageService.getTmpStorageDirectory()
+    let tmpFilePath = workspace.getTempFileLocation()
+    console.log(`Save to file ${tmpFilePath}`)
     let saveJsonContent = workspace.getMatrixJSON()
 
-    let overwrite = fs.existsSync(filePath)
+    // write JSON to file in tmp dir
+    // zip
+    // copy zip to final location
 
+    let overwrite = fs.existsSync(workspace.getTempFileLocation())
+
+    let onJsonSavedCallback = () => {
+        workspace.saveCurrentHash()
+
+        // Wrap all content up into a neat zip-file
+        storageService.zipTmpStorageDir( (output) => {
+            console.log(output)
+            // Copy zip file to final non-tmp destionation
+            fs.copyFile(output, workspace.getWorkingFileLocation(), fs.constants.COPYFILE_FICLONE, (err) => {
+                if (err) throw err
+                console.log("Done copying to true destination")
+            })
+        })    
+    }
+
+    // Write content to tmp json file
     if (overwrite) {
-        overwriteFile(filePath, saveJsonContent, () => workspace.saveCurrentHash() )
+        overwriteFile(tmpFilePath, saveJsonContent, onJsonSavedCallback )
     } else {
-        writeContentToFile(filePath, saveJsonContent, () => workspace.saveCurrentHash())
+        writeContentToFile(tmpFilePath, saveJsonContent, onJsonSavedCallback)
     }
 }
 

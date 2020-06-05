@@ -27,9 +27,7 @@ module.exports = (win) => {
     ipcMain.on('save-file-dialog', async (evt, data) => {
         try {
             let res = await dialog.showSaveDialog({
-                filters: [
-                    { name: 'Json', extensions: ['json']}
-                ]
+                filters: data.filters
             })
             res.data = data
             evt.reply('save-file-result', res)

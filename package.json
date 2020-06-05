@@ -21,7 +21,10 @@
     "electron": "^9.0.0"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "archiver": "^4.0.1",
+    "electron-squirrel-startup": "^1.0.0",
+    "extract-zip": "^2.0.0",
+    "unzipper": "^0.10.11"
   },
   "config": {
     "forge": {

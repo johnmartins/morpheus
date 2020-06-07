@@ -2,17 +2,22 @@
 
 const crypto = require('crypto')
 const storageService = require('./services/storage-service')
-const random = require('./utils/random')
 
+// Target layout
 let matrixContainerID = null
+// The matrix structure that currently is being edited
 let currentMatrix = null
+// The original file (situated where the user wants it to)
 let originalFileLocation = null     // The morph file (or JSON depending on type)
+// The temporary file (situated in OS tmp storage). This copy is used to pack into .morph more easily.
 let tempFilePosition = null         // The JSON file
+// Last saved hash is an md5 hash of the json matrix structure of the last save.
 let lastSavedHash = null
 
 const { MorphMatrix } = require ('./morph-matrix/matrix')
 
 module.exports = {
+
     /**
      * Set DOM element in which the matrix should be displayed
      */

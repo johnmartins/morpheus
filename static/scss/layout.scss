@@ -55,8 +55,12 @@
     color: $white-high;
 }
 
-.tab-content {
+.tab-content-container {
     flex: 1 1 auto;
     background-color: $grey-high;
     padding: 8px;
+}
+
+.tab-content {
+    display: none;
 }

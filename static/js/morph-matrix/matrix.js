@@ -1,4 +1,6 @@
 'use strict'
+
+const state = require('./../state')
 const random = require('./../utils/random')
 const storageService = require('./../services/storage-service')
 
@@ -187,47 +189,58 @@ class MorphMatrix {
         cellForm.focus()
     }
 
+    /**
+     * Get overlay layout for default selection mode
+     * @param {*} overlay 
+     * @param {*} frCellID 
+     * @param {*} frRowID 
+     * @param {*} fr 
+     */
+    _getFRCellDefaultOverlay (overlay, frCellID, frRowID, fr) {
+
+        overlay.classList.add('hover-overlay-icons')
+        // Overlay icons
+        let moveUpOverlay = document.createElement('i')
+        moveUpOverlay.classList.add('fas', 'fa-chevron-up', 'overlay-icon')
+        moveUpOverlay.style.marginRight = "4px"
+
+        let moveDownOverlay = document.createElement('i')
+        moveDownOverlay.classList.add('fas', 'fa-chevron-down', 'overlay-icon')
+        moveDownOverlay.style.marginRight = "4px"
+
+        let deleteOverlay = document.createElement('i')
+        deleteOverlay.classList.add('fas', 'fa-trash-alt', 'overlay-icon')
+
+        if (fr.position > 1) overlay.appendChild(moveUpOverlay)
+        if (fr.position < this.functionalRequirements.length) overlay.appendChild(moveDownOverlay)
+        overlay.appendChild(deleteOverlay)
+
+        moveUpOverlay.onclick = (evt) => {
+            let otherRowID = 'row-'+this.functionalRequirements[fr.position - 2].id
+            this.switchRowPosition(otherRowID, frRowID)
+        }
+        
+        moveDownOverlay.onclick = (evt) => {
+            let otherRowID = 'row-'+this.functionalRequirements[fr.position].id
+            this.switchRowPosition(frRowID, otherRowID)
+        }
+
+        deleteOverlay.onclick = (evt) => {
+            this.deleteFunctionalRequirement(frCellID)
+        }
+        return overlay
+    }
+    
     _createFRCellOverlay (frCell) {
         let overlay = null
-        let frID = frCell.id
-        let frRowID = 'row-'+frID
+        let frCellID = frCell.id
+        let frRowID = 'row-'+frCellID
         let fr = this.rowToRequirementMap[frRowID]
         
         frCell.onmouseover = (evt) => {
             if (overlay) return
             overlay = document.createElement('div')
-            overlay.classList.add('hover-overlay')
-
-            // Overlay icons
-            let moveUpOverlay = document.createElement('i')
-            moveUpOverlay.classList.add('fas', 'fa-chevron-up', 'overlay-icon')
-            moveUpOverlay.style.marginRight = "4px"
-
-            let moveDownOverlay = document.createElement('i')
-            moveDownOverlay.classList.add('fas', 'fa-chevron-down', 'overlay-icon')
-            moveDownOverlay.style.marginRight = "4px"
-
-            let deleteOverlay = document.createElement('i')
-            deleteOverlay.classList.add('fas', 'fa-trash-alt', 'overlay-icon')
-
-            if (fr.position > 1) overlay.appendChild(moveUpOverlay)
-            if (fr.position < this.functionalRequirements.length) overlay.appendChild(moveDownOverlay)
-            overlay.appendChild(deleteOverlay)
-
-            moveUpOverlay.onclick = (evt) => {
-                let otherRowID = 'row-'+this.functionalRequirements[fr.position - 2].id
-                this.switchRowPosition(otherRowID, frRowID)
-            }
-            
-            moveDownOverlay.onclick = (evt) => {
-                let otherRowID = 'row-'+this.functionalRequirements[fr.position].id
-                this.switchRowPosition(frRowID, otherRowID)
-            }
-
-            deleteOverlay.onclick = (evt) => {
-                this.deleteFunctionalRequirement(frID)
-            }
-
+            overlay = this._getFRCellDefaultOverlay(overlay, frCellID, frRowID, fr)
             frCell.appendChild(overlay)
         }
 
@@ -236,6 +249,71 @@ class MorphMatrix {
             overlay = null
         }
     }
+
+    _getDSCellSolutionOverlay (overlay, dsID, ds) {
+        overlay.classList.add('hover-overlay-cover')
+
+        return overlay
+    }
+
+    _getDSCellDefaultOverlay (overlay, dsID, ds) {
+        overlay.classList.add('hover-overlay-icons')
+
+         // Add image icon
+         let imgOverlay = document.createElement('span')
+         imgOverlay.style.fontSize = '0.8rem'
+         imgOverlay.classList.add('fa-stack', 'fa-1x', 'overlay-icon')
+         
+         let imgOverlayLayer1 = document.createElement('i')
+         imgOverlayLayer1.classList.add('fas', 'fa-camera', 'fa-stack-1x')
+         let imgOverlayLayer2 = document.createElement('i')
+         imgOverlayLayer2.classList.add('fas', 'fa-ban', 'fa-stack-2x', 'text-red')
+
+         imgOverlay.appendChild(imgOverlayLayer1)
+         imgOverlay.appendChild(imgOverlayLayer2)
+
+         // If this cell has no image, hide red cross icon
+         if (!ds.image){
+             imgOverlayLayer2.style.color = 'transparent'
+             imgOverlayLayer1.style.fontSize = '1rem'
+         } 
+
+         // Remove cell icon
+         let deleteOverlay = document.createElement('i')
+         deleteOverlay.classList.add('fas', 'fa-trash-alt', 'overlay-icon')
+         
+         overlay.appendChild(imgOverlay)
+         overlay.appendChild(deleteOverlay)
+
+         imgOverlay.onclick = () => {
+             if (!ds.image){
+                 this._waitForFileDialogResult()
+                 GlobalObserver.emit('open-file-dialog', {
+                     type: 'attach-img', 
+                     copyToTmp: true,
+                     targetElement: dsID,
+                     filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
+                 })
+             } else {
+                 storageService.removeFileFromTmp(ds.image, (err) => {
+                     if (err) {
+                         console.log('Image was not properly deleted from tmp storage')
+                         // continue anyway?
+                     }
+                     let imgElement = document.getElementById('img-'+dsID)
+                     imgElement.height = 0
+                     ds.image = null
+                 })
+             }
+         }
+
+         deleteOverlay.onclick = () => {
+             this.deleteDesignSolution(dsID)
+         }
+
+        return overlay
+    }
+
 
     _createDSCellOverlay (dsCell) {
         let overlay = null
@@ -246,58 +324,12 @@ class MorphMatrix {
         dsCell.onmouseover = (evt) => {
             if (overlay) return
             overlay = document.createElement('div')
-            overlay.classList.add('hover-overlay')
 
-            // Add image icon
-            let imgOverlay = document.createElement('span')
-            imgOverlay.style.fontSize = '0.8rem'
-            imgOverlay.classList.add('fa-stack', 'fa-1x', 'overlay-icon')
-            
-            let imgOverlayLayer1 = document.createElement('i')
-            imgOverlayLayer1.classList.add('fas', 'fa-camera', 'fa-stack-1x')
-            let imgOverlayLayer2 = document.createElement('i')
-            imgOverlayLayer2.classList.add('fas', 'fa-ban', 'fa-stack-2x', 'text-red')
-
-            imgOverlay.appendChild(imgOverlayLayer1)
-            imgOverlay.appendChild(imgOverlayLayer2)
-
-            // If this cell has no image, hide red cross icon
-            if (!ds.image){
-                imgOverlayLayer2.style.color = 'transparent'
-                imgOverlayLayer1.style.fontSize = '1rem'
-            } 
-
-            // Remove cell icon
-            let deleteOverlay = document.createElement('i')
-            deleteOverlay.classList.add('fas', 'fa-trash-alt', 'overlay-icon')
-            
-            overlay.appendChild(imgOverlay)
-            overlay.appendChild(deleteOverlay)
-
-            imgOverlay.onclick = () => {
-                if (!ds.image){
-                    this._waitForFileDialogResult()
-                    GlobalObserver.emit('open-file-dialog', {
-                        type: 'attach-img', 
-                        copyToTmp: true,
-                        targetElement: dsID,
-                        filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
-                    })
-                } else {
-                    storageService.removeFileFromTmp(ds.image, (err) => {
-                        if (err) {
-                            console.log('Image was not properly deleted from tmp storage')
-                            // continue anyway?
-                        }
-                        let imgElement = document.getElementById('img-'+dsID)
-                        imgElement.height = 0
-                        ds.image = null
-                    })
-                }
-            }
-
-            deleteOverlay.onclick = () => {
-                this.deleteDesignSolution(dsID)
+            // -------------------------
+            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT) {
+                overlay = this._getDSCellDefaultOverlay(overlay, dsID, ds)
+            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION) {
+                overlay = this._getDSCellSolutionOverlay(overlay, dsID, ds)
             }
 
             dsCell.appendChild(overlay)

@@ -68,6 +68,12 @@ module.exports = {
         module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
     },
     /**
+     * Returns the matrix in the workspace
+     */
+    getMatrix: () => {
+        return currentMatrix
+    },
+    /**
      * Get the matrix as a JSON string. Used when saving the matrix to a file.
      */
     getMatrixJSON: () => {

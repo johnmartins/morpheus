@@ -30,12 +30,25 @@ class DesignSolution {
     }
 }
 
+class Solution {
+    id = null
+    name = "Untitled solution"
+    frToDsMap = {} // Maps a FR ID to a DS ID (string->string)
+    color = null
+
+    constructor () {
+        this.id = 'sol-'+random.randomString(12)
+        let randint = random.randomInt(0,360)
+        this.color = `hsl(${randint},80%,60%)`
+    }
+}
+
 class MorphMatrix {
 
     // Object representation of matrix information
     name = "Untitled Morphological Matrix"
     functionalRequirements = []
-    solutions = []
+    solutions = {}
 
     rowToRequirementMap = {}
     cellToDesignSolutionMap = {}
@@ -252,6 +265,14 @@ class MorphMatrix {
 
     _getDSCellSolutionOverlay (overlay, dsID, ds) {
         overlay.classList.add('hover-overlay-cover')
+        // box-shadow: inset 0 0 12px white;
+        let solution = this.solutions[state.workspaceSelectedSolution]
+        console.log(`inset 0 0 12px ${solution.color}`)
+        overlay.style.boxShadow = `inset 0 0 12px ${solution.color}`
+        console.log(overlay.style)
+        overlay.onclick = () => {
+            this.setSolutionDS(ds)
+        }
 
         return overlay
     }
@@ -338,6 +359,19 @@ class MorphMatrix {
             dsCell.removeChild(overlay)
             overlay = null
         }
+    }
+
+    setSolutionDS(ds) {
+        let currentSolutionID = state.workspaceSelectedSolution
+        let solution = this.solutions[currentSolutionID]
+        if (!solution) throw new Error('No such solution')
+
+        solution.frToDsMap[ds.frID] = ds.id
+        console.log(this.solutions)
+    }
+
+    addSolution(solution) {
+        this.solutions[solution.id] = solution
     }
 
     switchRowPosition(rowID1, rowID2) {
@@ -490,6 +524,7 @@ class MorphMatrix {
         // If the user clicks anywhere within the cell, then set focus to the textarea.
         newCell.onclick = (evt) => {
             let cellform = newCell.querySelector('textarea')
+            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT) return
             if (cellform) cellform.focus()
         }
 
@@ -542,5 +577,6 @@ class MorphMatrix {
 module.exports = {
     MorphMatrix: MorphMatrix, 
     FunctionalRequirement: FunctionalRequirement, 
-    DesignSolution: DesignSolution
+    DesignSolution: DesignSolution,
+    Solution: Solution
 }

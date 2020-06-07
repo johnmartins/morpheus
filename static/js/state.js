@@ -6,7 +6,8 @@ module.exports = {
         WORKSPACE_INTERACTION_MODE_SOLUTION: 'wsim-sol'
     },
 
-    workspaceInteractionMode: null
+    workspaceInteractionMode: null,
+    workspaceSelectedSolution: null
 
 }
 

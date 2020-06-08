@@ -267,9 +267,7 @@ class MorphMatrix {
         overlay.classList.add('hover-overlay-cover')
         // box-shadow: inset 0 0 12px white;
         let solution = this.solutions[state.workspaceSelectedSolution]
-        console.log(`inset 0 0 12px ${solution.color}`)
         overlay.style.boxShadow = `inset 0 0 12px ${solution.color}`
-        console.log(overlay.style)
         overlay.onclick = () => {
             this.setSolutionDS(ds)
         }
@@ -361,13 +359,40 @@ class MorphMatrix {
         }
     }
 
+    clearSolutionRender() {
+        let solutionRenderOverlays = document.querySelectorAll('.solution-render')
+        for (let i = 0; i < solutionRenderOverlays.length; i++) {
+            let overlay = solutionRenderOverlays[i]
+            overlay.parentElement.removeChild(overlay)
+        }
+    }
+
+    renderSolution(solutionID) {
+        let solution = this.solutions[solutionID]
+        let frIDs = Object.keys(solution.frToDsMap)
+        for (let i = 0; i < frIDs.length; i++) {
+            let frID = frIDs[i]
+            let dsID = solution.frToDsMap[frID]
+
+            // Create overlay for selected design solution
+            let overlay = document.createElement('div')
+            overlay.classList.add('hover-overlay-cover', 'solution-render')
+            overlay.style.boxShadow = `inset 0 0 40px ${solution.color}`
+
+            let dsCell = document.getElementById(dsID)
+            dsCell.appendChild(overlay)
+        }
+    }
+
     setSolutionDS(ds) {
         let currentSolutionID = state.workspaceSelectedSolution
         let solution = this.solutions[currentSolutionID]
         if (!solution) throw new Error('No such solution')
 
         solution.frToDsMap[ds.frID] = ds.id
-        console.log(this.solutions)
+        
+        this.clearSolutionRender()
+        this.renderSolution(currentSolutionID)
     }
 
     addSolution(solution) {

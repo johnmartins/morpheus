@@ -7,8 +7,13 @@ module.exports = {
     },
 
     workspaceInteractionMode: null,
-    workspaceSelectedSolution: null
+    workspaceSelectedSolution: null,
+
+    reset: () => {
+        module.exports.workspaceInteractionMode = module.exports.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+        module.exports.workspaceSelectedSolution = null
+    }
 
 }
 
-module.exports.workspaceInteractionMode = module.exports.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+module.exports.reset()

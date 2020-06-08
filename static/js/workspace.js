@@ -2,6 +2,7 @@
 
 const crypto = require('crypto')
 const storageService = require('./services/storage-service')
+const state = require('./state')
 
 // Target layout
 let matrixContainerID = null
@@ -46,7 +47,7 @@ module.exports = {
         if (isMatrixChanged()) {
             promptUnsavedChanges()
         }
-
+        state.reset()
         document.getElementById(matrixContainerID).innerHTML = ""
         currentMatrix = new MorphMatrix(matrixContainerID)
         module.exports.saveCurrentHash()
@@ -60,7 +61,7 @@ module.exports = {
         if (isMatrixChanged()) {
             promptUnsavedChanges()
         }
-
+        state.reset()
         document.getElementById(matrixContainerID).innerHTML = ""
         currentMatrix = new MorphMatrix(matrixContainerID)
         currentMatrix.import(json)

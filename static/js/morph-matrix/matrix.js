@@ -127,7 +127,7 @@ class MorphMatrix {
             titleInput.spellcheck = false
             titleInput.value = this.name
             titleInput.maxLength = 50
-            titleInput.classList.add('text-form')
+            titleInput.classList.add('title-form')
             this.titleContainerElement.appendChild(titleInput)
             titleInput.focus()
 

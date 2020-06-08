@@ -1,11 +1,50 @@
 @import "variables.scss";
 
-.text-form {
+.title-form {
     background-color: transparent;
     outline: none;
     border: none;
     color: $white-high;
     border-bottom: 1px solid $grey-highest;
     margin-bottom: 8px;
+    width: 100%;
+}
+
+.solution-text-form {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    color: $white-high;
+    border-bottom: 1px solid $white-medium;
+    margin-bottom: 8px;
+    margin-top: 8px;
+    padding: 0;
+    padding-bottom: 2px;
+    width: 100%;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.btn {
+    border: 1px solid transparent;
+    border-radius: 2px;
+    outline: none;
+    background-color: $green-medium;
+
+    text-transform: uppercase;
+    color: $grey-lowest;
+    font-weight: bold;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+
+    height: 30px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: $green-high;
+}
+
+.btn-max-width {
     width: 100%;
 }

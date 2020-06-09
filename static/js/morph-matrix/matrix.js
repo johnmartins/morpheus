@@ -399,6 +399,10 @@ class MorphMatrix {
         this.solutions[solution.id] = solution
     }
 
+    getSolution(solutionID) {
+        return this.solutions[solutionID]
+    }
+
     switchRowPosition(rowID1, rowID2) {
         let fr1 = this.rowToRequirementMap[rowID1]
         let fr2 = this.rowToRequirementMap[rowID2]

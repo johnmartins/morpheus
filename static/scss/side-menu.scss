@@ -1,0 +1,28 @@
+.slide-down-menu {
+    overflow: hidden;
+    max-height: 0px;
+    transition: max-height 500ms ease 0ms;
+}
+
+.slide-down-menu.open {
+    max-height: 500px;
+}
+
+.solution-list {
+    list-style-type: none;
+    padding: 0 0 8px 0;
+}
+
+.solution-list-entry {
+    padding: 3px 0 3px 4px;
+    cursor: pointer;
+}
+
+.solution-list-entry:hover {
+    background-color: $grey-highest;
+}
+
+.solution-list-entry.selected {
+    background-color: $cyan-low;
+    font-weight: 700;
+}

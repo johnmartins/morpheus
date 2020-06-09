@@ -78,6 +78,8 @@ class MorphMatrix {
         this.containerElement.appendChild(this.tableElement)
 
         this._setupTableControls()
+
+        GlobalObserver.emit('matrix-created', this)
     }
 
     _waitForFileDialogResult () {
@@ -618,6 +620,10 @@ class MorphMatrix {
                 })
             }
         }
+
+        this.solutions = save.solutions
+
+        GlobalObserver.emit('matrix-imported', save)
     }
 
     /**

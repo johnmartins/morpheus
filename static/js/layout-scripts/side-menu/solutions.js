@@ -9,6 +9,24 @@ module.exports = {
         console.log("setup liseteners!")
         let btnSolutions = document.getElementById('btn-new-solution')
         btnSolutions.onclick = module.exports.startNewSolution
+
+        // New import -> Setup solution list
+        GlobalObserver.on('matrix-imported', () => {
+            let matrix = workspace.getMatrix()
+            let solutionIDs = Object.keys(matrix.solutions)
+            for (let i = 0; i < solutionIDs.length; i++) {
+                let solutionID = solutionIDs[i]
+                module.exports.addToSolutionList(solutionID)
+            }
+        })
+
+        GlobalObserver.on('matrix-created', () => {
+            // Clear solution list
+            module.exports.clearSolutionList()
+
+            // Reset UI
+            // TODO: ...
+        })
     },
 
     startNewSolution: () => {
@@ -102,5 +120,13 @@ module.exports = {
 
     removeFromSolutionList: (solutionID) => {
         let matrix = workspace.getMatrix()
+    },
+
+    clearSolutionList: () => {
+        let solutionEls = document.querySelectorAll('#menu-solution-list .solution-list-entry')
+        for (let i = 0; i < solutionEls.length; i++) {
+            let solutionElement = solutionEls[i]
+            solutionElement.parentElement.removeChild(solutionElement)
+        }
     }
 }

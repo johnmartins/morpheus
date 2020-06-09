@@ -32,7 +32,7 @@ class DesignSolution {
 
 class Solution {
     id = null
-    name = "Untitled solution"
+    name = null
     frToDsMap = {} // Maps a FR ID to a DS ID (string->string)
     color = null
 
@@ -403,6 +403,15 @@ class MorphMatrix {
         return this.solutions[solutionID]
     }
 
+    removeSolution(solutionID) {
+        console.log("DELETING "+solutionID)
+        delete this.solutions[solutionID]
+    }
+
+    getSolutionMap() {
+        return this.solutions;
+    }
+
     switchRowPosition(rowID1, rowID2) {
         let fr1 = this.rowToRequirementMap[rowID1]
         let fr2 = this.rowToRequirementMap[rowID2]
@@ -452,6 +461,13 @@ class MorphMatrix {
 
         // Delete map reference
         delete this.rowToRequirementMap[frRowID]
+
+        // Delete solution references
+        let solutionIDs = Object.keys(this.solutions)
+        for (let i = 0; i < solutionIDs.length; i++) {
+            let solution = this.solutions[solutionIDs[i]]
+            delete solution.frToDsMap[frRowID]
+        }
     }
 
     deleteDesignSolution (dsID) {
@@ -478,9 +494,19 @@ class MorphMatrix {
         let frRow = document.getElementById(frID)
         frRow.removeChild(dsElement)
 
-        // TODO: Fix other DS elements?
         // Delete map reference
         delete this.cellToDesignSolutionMap[dsID]
+
+        // Delete solution references
+        console.log('target: '+dsID)
+        let solutionIDs = Object.keys(this.solutions)
+        for (let i = 0; i < solutionIDs.length; i++) {
+            let solution = this.solutions[solutionIDs[i]]
+            console.log(solution.frToDsMap)
+            if (solution.frToDsMap[frID] === dsID) {
+                delete solution.frToDsMap[frID]
+            }
+        }
     }
 
     addFunctionalRequirement ({id = null, description = null} = {}) {

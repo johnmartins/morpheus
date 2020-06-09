@@ -1,21 +1,71 @@
+@import "variables.scss";
+
+.menu {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+
+.tab-container {
+    flex: 0 1 auto;
+    display: flex;
+    background-color: $grey-low;
+    max-height: 100%;
+}
+
+.tab-element {
+    background-color: $grey-medium;
+    color: $white-medium;
+    padding: 6px 10px 6px 10px;
+    width: 60px;
+    margin-right: 1px;
+    cursor: pointer;
+}
+
+.tab-element.selected {
+    background-color: $grey-high;
+    color: $white-high;
+}
+
+.tab-content-container {
+    flex: 1 1 auto;
+    background-color: $grey-high;
+    padding: 8px;
+}
+
+.tab-content {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tab-subsection {
+    flex: 1;
+    overflow: auto;
+}
+
 .slide-down-menu {
     overflow: hidden;
     max-height: 0px;
-    transition: max-height 500ms ease 0ms;
+    transition: max-height ease 300ms;
 }
 
 .slide-down-menu.open {
-    max-height: 500px;
+    max-height: 200px;
 }
 
 .solution-list {
+    margin: 0 0 0 4px;
     list-style-type: none;
     padding: 0 0 8px 0;
+    font-size: 1rem;
+    border-left: 1px solid $grey-highest;
 }
 
 .solution-list-entry {
-    padding: 3px 0 3px 4px;
+    padding: 3px 0 3px 6px;
     cursor: pointer;
+    font-size: 1rem;
 }
 
 .solution-list-entry:hover {
@@ -25,4 +75,17 @@
 .solution-list-entry.selected {
     background-color: $cyan-low;
     font-weight: 700;
+}
+
+.menu-title {
+    display: block;
+
+    text-transform: uppercase;
+    color: $white-high;
+    font-weight: bolder;
+    border-top: 1px solid $white-low;
+    border-bottom: 1px solid $white-low;
+    padding: 6px 0 6px 0;
+    margin-bottom: 8px;
+
 }

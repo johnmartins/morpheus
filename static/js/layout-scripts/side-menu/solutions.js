@@ -8,42 +8,68 @@ module.exports = {
     setupListeners: () => {
         console.log("setup liseteners!")
         let btnSolutions = document.getElementById('btn-new-solution')
+        btnSolutions.onclick = module.exports.startNewSolution
+    },
 
-        btnSolutions.onclick = () => {
-            let matrix = workspace.getMatrix()
+    startNewSolution: () => {
+        let matrix = workspace.getMatrix()
+        let button = document.getElementById('btn-new-solution')
 
-            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION) {
-                // Finish solution
-                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
-                btnSolutions.innerHTML = 'New solution'
-                matrix.clearSolutionRender()
-                module.exports.addToSolutionList(state.workspaceSelectedSolution)
+        matrix.clearSolutionRender()
+        button.innerHTML = 'Save solution'
+        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION
+        let solution = new Solution()
+        matrix.addSolution(solution)
+        state.workspaceSelectedSolution = solution.id
 
-                // Reset relevant state parameters
-                state.workspaceSelectedSolution = null
-                // Reset menu UI
-                document.getElementById('solutions-new-form').classList.remove('open')
+        // Setup new solution form
+        document.getElementById('solutions-new-form').classList.add('open')
+        let solNameInput = document.getElementById('solutions-name-input')
+        solNameInput.focus()
+        solNameInput.value = ''
+        document.getElementById('solutions-name-input').onkeyup = (evt) => {
+            if (evt.keyCode === 13) {
+                // user pressed enter
+                module.exports.completeSolution()
                 return
             }
-
-            // New solution
-            matrix.clearSolutionRender()
-            btnSolutions.innerHTML = 'Finish solution'
-            state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION
-            let solution = new Solution()
-            matrix.addSolution(solution)
-            state.workspaceSelectedSolution = solution.id
-
-            // Setup new solution form
-            document.getElementById('solutions-new-form').classList.add('open')
-            let solNameInput = document.getElementById('solutions-name-input')
-            solNameInput.focus()
-            solNameInput.value = ''
-            document.getElementById('solutions-name-input').onkeyup = (evt) => {
-                let val = evt.target.value
-                solution.name = val
-            }
+            let val = evt.target.value
+            solution.name = val
         }
+
+        button.onclick = module.exports.completeSolution
+    },
+
+    completeSolution: () => {
+        let matrix = workspace.getMatrix()
+        let button = document.getElementById('btn-new-solution')
+        let solution = matrix.getSolution(state.workspaceSelectedSolution)
+
+        // RESET UI
+        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+        button.innerHTML = 'New solution'
+        matrix.clearSolutionRender()
+        button.onclick = module.exports.startNewSolution
+        document.getElementById('solutions-new-form').classList.remove('open')
+
+        if (Object.keys(solution.frToDsMap).length === 0) {
+            // No DS has been mapped to any FR.
+            matrix.removeSolution(state.workspaceSelectedSolution)
+            state.workspaceSelectedSolution = null
+            return
+        }
+
+        // Verify solution name. If unset (or useless) then automatically set a name.
+        if (solution.name === null || /^\s+$/.test(solution.name) || solution.name.length === 0){
+            let number = Object.keys(matrix.getSolutionMap()).length
+            solution.name = `solution ${number}`
+        } 
+
+        // Finish solution
+        module.exports.addToSolutionList(state.workspaceSelectedSolution)
+
+        // Reset relevant state parameters
+        state.workspaceSelectedSolution = null
     },
 
     addToSolutionList: (solutionID) => {

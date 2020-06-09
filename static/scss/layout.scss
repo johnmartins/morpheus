@@ -30,39 +30,3 @@
     height: 100%;
     background-color: transparent;
 }
-
-.menu {
-    display: flex;
-    flex-flow: column;
-    height: 100%;
-}
-
-.tab-container {
-    flex: 0 1 auto;
-    display: flex;
-    background-color: $grey-low;
-}
-
-.tab-element {
-    background-color: $grey-medium;
-    color: $white-medium;
-    padding: 6px 10px 6px 10px;
-    width: 60px;
-    margin-right: 1px;
-    cursor: pointer;
-}
-
-.tab-element.selected {
-    background-color: $grey-high;
-    color: $white-high;
-}
-
-.tab-content-container {
-    flex: 1 1 auto;
-    background-color: $grey-high;
-    padding: 8px;
-}
-
-.tab-content {
-    display: none;
-}

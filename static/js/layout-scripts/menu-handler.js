@@ -40,7 +40,7 @@ module.exports = () => {
         if (currentTabContent) currentTabContent.style.display = 'none'
         console.log(`showing ${tabID}`)
         console.log(targetTabContent)
-        targetTabContent.style.display = 'block'
+        targetTabContent.style.display = 'flex'
         currentTabContent = targetTabContent
     }
 }

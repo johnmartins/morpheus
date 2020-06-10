@@ -38,8 +38,6 @@ module.exports = () => {
         let targetTabContent = document.getElementById(tabID)
         if (!targetTabContent) console.error('no target tab content')
         if (currentTabContent) currentTabContent.style.display = 'none'
-        console.log(`showing ${tabID}`)
-        console.log(targetTabContent)
         targetTabContent.style.display = 'flex'
         currentTabContent = targetTabContent
     }

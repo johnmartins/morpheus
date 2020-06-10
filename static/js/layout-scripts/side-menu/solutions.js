@@ -4,9 +4,10 @@ const state = require('./../../state')
 const { Solution } = require('./../../morph-matrix/matrix')
 const workspace = require('./../../workspace')
 
+let unfinishedSolution = false
+
 module.exports = {
     setupListeners: () => {
-        console.log("setup liseteners!")
         let btnSolutions = document.getElementById('btn-new-solution')
         btnSolutions.onclick = module.exports.startNewSolution
 
@@ -25,13 +26,16 @@ module.exports = {
             module.exports.clearSolutionList()
 
             // Reset UI
-            // TODO: ...
+            module.exports.resetUI()
         })
     },
 
     startNewSolution: () => {
         let matrix = workspace.getMatrix()
         let button = document.getElementById('btn-new-solution')
+
+        module.exports.resetUI()
+        unfinishedSolution = true
 
         matrix.clearSolutionRender()
         button.innerHTML = 'Save solution'
@@ -60,20 +64,16 @@ module.exports = {
 
     completeSolution: () => {
         let matrix = workspace.getMatrix()
-        let button = document.getElementById('btn-new-solution')
         let solution = matrix.getSolution(state.workspaceSelectedSolution)
 
+        unfinishedSolution = false
+
         // RESET UI
-        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
-        button.innerHTML = 'New solution'
-        matrix.clearSolutionRender()
-        button.onclick = module.exports.startNewSolution
-        document.getElementById('solutions-new-form').classList.remove('open')
+        module.exports.resetUI()
 
         if (Object.keys(solution.frToDsMap).length === 0) {
             // No DS has been mapped to any FR.
-            matrix.removeSolution(state.workspaceSelectedSolution)
-            state.workspaceSelectedSolution = null
+            matrix.removeSolution(solution.id)
             return
         }
 
@@ -84,10 +84,7 @@ module.exports = {
         } 
 
         // Finish solution
-        module.exports.addToSolutionList(state.workspaceSelectedSolution)
-
-        // Reset relevant state parameters
-        state.workspaceSelectedSolution = null
+        module.exports.addToSolutionList(solution.id)
     },
 
     addToSolutionList: (solutionID) => {
@@ -99,12 +96,17 @@ module.exports = {
         solListEntry.innerHTML = solution.name
         solListEntry.classList.add('solution-list-entry')
         solListEntry.onclick = () => {
-            // Clear previous render
-            matrix.clearSolutionRender()
-            if (solListEntry.classList.contains('selected')) {
-                solListEntry.classList.remove('selected')
+
+            console.log('clicked: ' + solution.id)
+
+            if (solListEntry.classList.contains('selected')) { 
+                module.exports.resetUI()
                 return;
             }
+
+            module.exports.resetUI()
+
+            state.workspaceSelectedSolution = solutionID
 
             // Clear previous menu selection
             let previousSelection = document.querySelector('.solution-list-entry.selected')
@@ -112,7 +114,6 @@ module.exports = {
             
             solListEntry.classList.add('selected')
             matrix.renderSolution(solutionID)
-            
         }
 
         solList.appendChild(solListEntry)
@@ -127,6 +128,30 @@ module.exports = {
         for (let i = 0; i < solutionEls.length; i++) {
             let solutionElement = solutionEls[i]
             solutionElement.parentElement.removeChild(solutionElement)
+        }
+    },
+
+    resetUI: () => {
+        let button = document.getElementById('btn-new-solution')
+        let matrix = workspace.getMatrix()
+
+        // If there is an unfinished solution, delete it
+        if (unfinishedSolution) {
+            matrix.removeSolution(state.workspaceSelectedSolution)
+            state.workspaceSelectedSolution = null
+            unfinishedSolution = false
+        }
+
+        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+        button.innerHTML = 'New solution'
+        matrix.clearSolutionRender()
+        button.onclick = module.exports.startNewSolution
+        document.getElementById('solutions-new-form').classList.remove('open')
+
+        // Clear solution menu selection
+        let previousSelection = document.querySelector('.solution-list-entry.selected')
+        if (previousSelection) {
+            previousSelection.classList.remove('selected')
         }
     }
 }

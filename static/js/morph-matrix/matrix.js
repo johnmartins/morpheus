@@ -500,11 +500,9 @@ class MorphMatrix {
         delete this.cellToDesignSolutionMap[dsID]
 
         // Delete solution references
-        console.log('target: '+dsID)
         let solutionIDs = Object.keys(this.solutions)
         for (let i = 0; i < solutionIDs.length; i++) {
             let solution = this.solutions[solutionIDs[i]]
-            console.log(solution.frToDsMap)
             if (solution.frToDsMap[frID] === dsID) {
                 delete solution.frToDsMap[frID]
             }

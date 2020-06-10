@@ -3,7 +3,6 @@
 const crypto = require('crypto')
 const storageService = require('./services/storage-service')
 const state = require('./state')
-const popup = require('./layout-scripts/popup')
 
 // Target layout
 let matrixContainerID = null
@@ -45,39 +44,29 @@ module.exports = {
      * Create a completely empty matrix
      */
     createEmptyMatrix: () => {
-        let create = () => {
-            state.reset()
-            document.getElementById(matrixContainerID).innerHTML = ""
-            currentMatrix = new MorphMatrix(matrixContainerID)
-            module.exports.saveCurrentHash()
-            module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
-            module.exports.setWorkingFileLocation(null)
-        }
-
         if (isMatrixChanged()) {
-            promptUnsavedChanges(() => { return }, create)
-        } else {
-            create()
+            promptUnsavedChanges()
         }
+        state.reset()
+        document.getElementById(matrixContainerID).innerHTML = ""
+        currentMatrix = new MorphMatrix(matrixContainerID)
+        module.exports.saveCurrentHash()
+        module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
+        module.exports.setWorkingFileLocation(null)
     },
     /**
      * Create a matrix from an existing object. Used to "load" or "open" existing matricies.
      */
     createMatrixFromObject: (json) => {
-        let create = () => {
-            state.reset()
-            document.getElementById(matrixContainerID).innerHTML = ""
-            currentMatrix = new MorphMatrix(matrixContainerID)
-            currentMatrix.import(json)
-            module.exports.saveCurrentHash()
-            module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
-        }
-
         if (isMatrixChanged()) {
-            promptUnsavedChanges(() => { return }, create)
-        } else {
-            create()
+            promptUnsavedChanges()
         }
+        state.reset()
+        document.getElementById(matrixContainerID).innerHTML = ""
+        currentMatrix = new MorphMatrix(matrixContainerID)
+        currentMatrix.import(json)
+        module.exports.saveCurrentHash()
+        module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
     },
     /**
      * Returns the matrix in the workspace
@@ -100,13 +89,8 @@ module.exports = {
     }
 }
 
-function promptUnsavedChanges (callbackCancel, callbackContinue) {
-    console.log("Uhr muh ghurrr")
-    popup.warning('There are unsaved changes. If you continue, those changes will be lost.', {
-        callbackCancel: callbackCancel,
-        callbackContinue: callbackContinue,
-        titleTxt: "Unsaved changes"
-    })
+function promptUnsavedChanges () {
+    console.log("There are unsaved changes!")
 }
 
 function isMatrixChanged () {

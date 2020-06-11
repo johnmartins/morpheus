@@ -7,6 +7,8 @@ const popup = require('./../popup')
 
 let unfinishedSolution = false
 
+const ID_PREFIX_SOLUTION_ENTRY = 'sol-li-'
+
 module.exports = {
     setupListeners: () => {
         let btnSolutions = document.getElementById('btn-new-solution')
@@ -46,19 +48,11 @@ module.exports = {
         state.workspaceSelectedSolution = solution.id
 
         // Setup new solution form
-        document.getElementById('solutions-new-form').classList.add('open')
+        document.getElementById('solutions-edit-form').classList.add('open')
         let solNameInput = document.getElementById('solutions-name-input')
         solNameInput.focus()
         solNameInput.value = ''
-        document.getElementById('solutions-name-input').onkeyup = (evt) => {
-            if (evt.keyCode === 13) {
-                // user pressed enter
-                module.exports.completeSolution()
-                return
-            }
-            let val = evt.target.value
-            solution.name = val
-        }
+        document.getElementById('solutions-name-input').onkeyup = getSolutionNameFormCallback(solution)
 
         button.onclick = module.exports.completeSolution
     },
@@ -88,16 +82,26 @@ module.exports = {
         module.exports.addToSolutionList(solution.id)
     },
 
+    saveEditedSolution: () => {
+        let solutionID = state.workspaceSelectedSolution
+        let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
+        listEntry.parentElement.removeChild(listEntry)
+
+        module.exports.completeSolution()
+    },
+
     addToSolutionList: (solutionID) => {
         let solList = document.getElementById('menu-solution-list')
         let matrix = workspace.getMatrix()
         let solution = matrix.getSolution(solutionID)
 
         let solListEntry = document.createElement('li')
-        solListEntry.id = 'sol-li-'+solutionID
+        solListEntry.id = ID_PREFIX_SOLUTION_ENTRY+solutionID
         solListEntry.innerHTML = solution.name
         solListEntry.classList.add('solution-list-entry')
-        solListEntry.onclick = () => {
+        solListEntry.onclick = (evt) => {
+            if (evt.target.id !== solListEntry.id) return
+
             console.log('clicked: ' + solution.id)
 
             if (solListEntry.classList.contains('selected')) { 
@@ -148,11 +152,36 @@ module.exports = {
             },
             callbackContinue: () => {
                 matrix.removeSolution(solutionID)
-                let listEntry = document.getElementById('sol-li-'+solutionID)
+                let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
                 listEntry.parentElement.removeChild(listEntry)
                 matrix.clearSolutionRender()
             }
         })
+    },
+
+    editSolution: (solutionID) => {
+        console.log("EDIT SOLUTION")
+        let matrix = workspace.getMatrix()
+        let solution = matrix.getSolution(solutionID)
+        let button = document.getElementById('btn-new-solution')
+
+        state.workspaceSelectedSolution = solutionID
+
+        let nameForm = document.getElementById('solutions-name-input')
+        nameForm.value = solution.name
+        nameForm.onkeyup = getSolutionNameFormCallback(solution)
+
+        // Setup button
+        button.innerHTML = 'Save solution'
+        button.onclick = module.exports.saveEditedSolution
+
+        document.getElementById('solutions-edit-form').classList.add('open')
+        
+        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION
+        matrix.renderSolution(solutionID)
+
+        nameForm.focus()
+        
     },
 
     clearSolutionList: () => {
@@ -178,7 +207,7 @@ module.exports = {
         button.innerHTML = 'New solution'
         matrix.clearSolutionRender()
         button.onclick = module.exports.startNewSolution
-        document.getElementById('solutions-new-form').classList.remove('open')
+        document.getElementById('solutions-edit-form').classList.remove('open')
 
         // Clear solution menu selection
         let previousSelection = document.querySelector('.solution-list-entry.selected')
@@ -199,7 +228,22 @@ function createSolutionEntryOverlay (overlay, solution) {
 
     let editIcon = document.createElement('i')
     editIcon.classList.add('far', 'fa-edit', 'icon')
+    editIcon.onclick = () => {
+        module.exports.editSolution(solution.id)
+    }
 
     overlay.appendChild(editIcon)
     overlay.appendChild(deleteIcon)
+}
+
+function getSolutionNameFormCallback (solution) {
+    return function (evt) {
+        if (evt.keyCode === 13) {
+            // user pressed enter
+            module.exports.completeSolution()
+            return
+        }
+        let val = evt.target.value
+        solution.name = val
+    }
 }

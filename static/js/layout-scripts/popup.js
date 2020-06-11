@@ -1,13 +1,25 @@
 'use strict'
 
+const random = require('./../utils/random')
+
+const ID_PREFIX_MASK = 'popup-mask-'
+const ID_PREFIX_POSITIONER = 'popup-positioner-'
+
 module.exports = {
+    /**
+     * Create a popup that implies that an error occured. Contains an OK button only.
+     */
     error: (msg) => {
-        let { mask, window, title, messageElement } = createPopupWindow()
+        let { id, mask, window, title, messageElement } = createPopupWindow()
         title.innerHTML = "Error!"
     },
 
+    /**
+     * Create a popup to warn of notify the user about something. 
+     * Contains a "Cancel" and "Continue button".
+     */
     warning: (msg, {callbackCancel, callbackContinue, titleTxt = "Warning"} = {}) => {
-        let { mask, window, title, messageElement } = createPopupWindow()
+        let { id, mask, window, title, messageElement } = createPopupWindow()
         title.innerHTML = titleTxt
         messageElement.innerHTML = msg
 
@@ -17,7 +29,7 @@ module.exports = {
         btnCancel.innerHTML = 'Cancel'
         btnCancel.onclick = () => {
             if (callbackCancel) callbackCancel()
-            removePopup()
+            removePopup(id)
         } 
 
         let btnContinue = document.createElement('button')
@@ -26,25 +38,42 @@ module.exports = {
         btnContinue.innerHTML = 'Continue'
         btnContinue.onclick = () => {
             if (callbackContinue) callbackContinue()
-            removePopup()
+            removePopup(id)
         } 
 
         window.appendChild(btnCancel)
         window.appendChild(btnContinue)
     },
 
+    /**
+     * Create an empty popup. Only contains a title.
+     */
+    empty: ({titleTxt = "Prompt"} = {}) => {
+        let { id, mask, window, title, messageElement } = createPopupWindow()
+
+        title.innerHTML = titleTxt
+        messageElement.parentElement.removeChild(messageElement)
+
+        return {
+            removePopup: () => {removePopup(id)},
+            window: window
+        }
+    }
+
 }
 
 function createPopupWindow () {
+    let id = random.randomString(5)
+
     // The mask blocks the user from clicking on things outside the popup
     let mask = document.createElement('div')
-    mask.id = 'popup-mask'
+    mask.id = ID_PREFIX_MASK+id
     mask.classList.add('popup-mask')
     document.body.append(mask)
 
     // The positioner helps placing the popup window in the center of the page
     let positioner = document.createElement('div')
-    positioner.id = 'popup-positioner'
+    positioner.id = ID_PREFIX_POSITIONER+id
     positioner.classList.add('popup-positioner')
     document.body.appendChild(positioner)
 
@@ -59,13 +88,14 @@ function createPopupWindow () {
     messageElement.classList.add('popup-message')
     window.appendChild(messageElement)
 
-    return { mask, window, title, messageElement }
+    return { id, mask, window, title, messageElement }
 }
 
-function removePopup () {
-    let mask = document.getElementById('popup-mask')
+function removePopup (id) {
+    console.log(`remove popup ${id}`)
+    let mask = document.getElementById(ID_PREFIX_MASK+id)
     mask.parentElement.removeChild(mask)
 
-    let positioner = document.getElementById('popup-positioner')
+    let positioner = document.getElementById(ID_PREFIX_POSITIONER+id)
     positioner.parentElement.removeChild(positioner)
 }

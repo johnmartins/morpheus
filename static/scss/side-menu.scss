@@ -69,6 +69,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    position: relative;
 }
 
 .solution-list-entry:hover {
@@ -78,6 +79,28 @@
 .solution-list-entry.selected {
     background-color: $cyan-low;
     font-weight: 700;
+}
+
+.solution-list-entry .overlay {
+    position: absolute;
+    display: inline-block;
+    height: 100%;
+    width: 50px;
+    right: 0;
+    top: 0;
+    text-align: right;
+}
+
+.solution-list-entry .overlay .icon {
+    cursor: pointer;
+    color: $white-medium;
+    margin-right: 4px;
+    margin-top: 4px;
+}
+
+.solution-list-entry .overlay .icon:hover {
+    cursor: pointer;
+    color: $white-high;
 }
 
 .menu-title {

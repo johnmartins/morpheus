@@ -3,6 +3,7 @@ const state = require('./../../state')
 
 const { Solution } = require('./../../morph-matrix/matrix')
 const workspace = require('./../../workspace')
+const popup = require('./../popup')
 
 let unfinishedSolution = false
 
@@ -93,10 +94,10 @@ module.exports = {
         let solution = matrix.getSolution(solutionID)
 
         let solListEntry = document.createElement('li')
+        solListEntry.id = 'sol-li-'+solutionID
         solListEntry.innerHTML = solution.name
         solListEntry.classList.add('solution-list-entry')
         solListEntry.onclick = () => {
-
             console.log('clicked: ' + solution.id)
 
             if (solListEntry.classList.contains('selected')) { 
@@ -116,11 +117,42 @@ module.exports = {
             matrix.renderSolution(solutionID)
         }
 
+        let overlay = null
+
+        solListEntry.onmouseover = () => {
+            if (overlay) return
+            overlay = document.createElement('div')
+
+            createSolutionEntryOverlay(overlay, solution)
+            
+            solListEntry.appendChild(overlay)
+        }
+
+        solListEntry.onmouseleave = () => {
+            solListEntry.removeChild(overlay)
+            overlay = null
+        }
+
         solList.appendChild(solListEntry)
     },
 
     removeFromSolutionList: (solutionID) => {
         let matrix = workspace.getMatrix()
+        let solution = matrix.getSolution(solutionID)
+        let solutionName = solution.name
+
+        popup.warning(`Are you sure you want to delete solution "${solutionName}" permanently?`, {
+            titleTxt: 'Delete solution',
+            callbackCancel: () => {
+                return
+            },
+            callbackContinue: () => {
+                matrix.removeSolution(solutionID)
+                let listEntry = document.getElementById('sol-li-'+solutionID)
+                listEntry.parentElement.removeChild(listEntry)
+                matrix.clearSolutionRender()
+            }
+        })
     },
 
     clearSolutionList: () => {
@@ -154,4 +186,20 @@ module.exports = {
             previousSelection.classList.remove('selected')
         }
     }
+}
+
+function createSolutionEntryOverlay (overlay, solution) {
+    overlay.classList.add('overlay')
+
+    let deleteIcon = document.createElement('i')
+    deleteIcon.classList.add('fas', 'fa-trash-alt', 'icon')
+    deleteIcon.onclick = () => {
+        module.exports.removeFromSolutionList(solution.id)
+    }
+
+    let editIcon = document.createElement('i')
+    editIcon.classList.add('far', 'fa-edit', 'icon')
+
+    overlay.appendChild(editIcon)
+    overlay.appendChild(deleteIcon)
 }

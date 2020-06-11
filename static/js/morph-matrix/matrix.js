@@ -346,7 +346,6 @@ class MorphMatrix {
             if (overlay) return
             overlay = document.createElement('div')
 
-            // -------------------------
             if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT) {
                 overlay = this._getDSCellDefaultOverlay(overlay, dsID, ds)
             } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION) {

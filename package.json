@@ -24,7 +24,8 @@
   "dependencies": {
     "archiver": "^4.0.1",
     "electron-squirrel-startup": "^1.0.0",
-    "unzipper": "^0.10.11"
+    "unzipper": "^0.10.11",
+    "sass": "^1.26.8"
   },
   "config": {
     "forge": {
@@ -35,14 +36,22 @@
         },
         {
           "name": "@electron-forge/maker-zip",
-          "platforms": ["darwin"]
+          "platforms": [
+            "darwin"
+          ]
         },
         {
           "name": "@electron-forge/maker-deb",
-          "platforms": ["linux"]},
+          "platforms": [
+            "linux"
+          ]
+        },
         {
           "name": "@electron-forge/maker-rpm",
-          "platforms": ["linux"]}
+          "platforms": [
+            "linux"
+          ]
+        }
       ]
     }
   }

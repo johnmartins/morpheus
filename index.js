@@ -16,7 +16,7 @@ function createWindow () {
     win.on('ready-to-show', () => {
         win.show()
         win.maximize()
-        win.webContents.openDevTools()
+        //win.webContents.openDevTools()
     })
 
     menu.build(win)

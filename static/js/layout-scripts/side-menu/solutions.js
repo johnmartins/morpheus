@@ -52,7 +52,9 @@ module.exports = {
         let solNameInput = document.getElementById('solutions-name-input')
         solNameInput.focus()
         solNameInput.value = ''
-        document.getElementById('solutions-name-input').onkeyup = getSolutionNameFormCallback(solution)
+        document.getElementById('solutions-name-input').onkeyup = getSolutionNameFormCallback(solution, () => {
+            module.exports.completeSolution()
+        })
 
         button.onclick = module.exports.completeSolution
     },
@@ -169,7 +171,9 @@ module.exports = {
 
         let nameForm = document.getElementById('solutions-name-input')
         nameForm.value = solution.name
-        nameForm.onkeyup = getSolutionNameFormCallback(solution)
+        nameForm.onkeyup = getSolutionNameFormCallback(solution, () => {
+            module.exports.saveEditedSolution()
+        })
 
         // Setup button
         button.innerHTML = 'Save solution'
@@ -236,11 +240,11 @@ function createSolutionEntryOverlay (overlay, solution) {
     overlay.appendChild(deleteIcon)
 }
 
-function getSolutionNameFormCallback (solution) {
+function getSolutionNameFormCallback (solution, enterCallback) {
     return function (evt) {
         if (evt.keyCode === 13) {
             // user pressed enter
-            module.exports.completeSolution()
+            enterCallback()
             return
         }
         let val = evt.target.value

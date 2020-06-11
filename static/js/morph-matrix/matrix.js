@@ -1,5 +1,12 @@
 'use strict'
 
+/**
+ * This file contains the four most important data structures to this software. Namely,
+ * the 4 things that make up a morph matrix: The matrix itself, the requirements (FRs), 
+ * the design solutions (DSs), and of course the solutions (or "concepts").
+ * @author Julian Martinsson
+ */
+
 const state = require('./../state')
 const random = require('./../utils/random')
 const storageService = require('./../services/storage-service')
@@ -43,6 +50,12 @@ class Solution {
     }
 }
 
+/**
+ * A morphological matrix structure. Contains Functional Requirements, 
+ * Design Solutions and Solutions. After instanciation it is possible to import
+ * a previously stored JSON structure using MorphMatrix.import(json). 
+ * You can also export the JSON structure using MorphMatrix.export().
+ */
 class MorphMatrix {
 
     // Object representation of matrix information

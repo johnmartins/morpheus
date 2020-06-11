@@ -1,11 +1,27 @@
 @import "variables.scss";
 
-.text-form {
+.title-form {
     background-color: transparent;
     outline: none;
     border: none;
     color: $white-high;
     border-bottom: 1px solid $grey-highest;
-    margin-bottom: 8px;
+    margin: 16px 0 12px 0;
     width: 100%;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.solution-text-form {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    color: $white-high;
+    border-bottom: 1px solid $white-medium;
+    margin-top: 8px;
+    padding: 0;
+    padding-bottom: 2px;
+    width: 100%;
+    font-family: monospace;
+    font-weight: bold;
 }

@@ -11,9 +11,7 @@ const tmpStorage = tmpStorageRoot + random.randomString(8) + '/'
 
 module.exports = {
     getTmpStorageDirectory: function () {
-        console.log(`Checking if temp storage directory ${tmpStorage} exists`)
         let exists = fs.existsSync(tmpStorage)
-        console.log(`tmpStorage exists: ${exists}`)
         
         if (exists) return tmpStorage
         
@@ -27,8 +25,6 @@ module.exports = {
             console.error(err.stack)
             return null
         }
-
-        console.log(`tmpStorage exists: ${tmpStorage}`)
 
         return tmpStorage + '/'
     },

@@ -1,9 +1,34 @@
-<div id="side-menu" class="menu">
+<div id="side-menu" class="menu" style="overflow: hidden;">
     <div id="side-menu-tabs" class="tab-container">
-        <div id="menu-functions" class="tab-element selected">FR</div>
-        <div id="menu-part-solutions" class="tab-element">DS</div>
-        <div id="menu-solutions" class="tab-element">Solutions</div>
+        <div id="menu-solutions" class="tab-element selected" target="tab-solutions">Solutions</div>
     </div>
-    <div class="tab-content">
+    <div class="tab-content-container" style="overflow: hidden;">
+        <div id="tab-solutions" class="tab-content" style="overflow: hidden;">
+
+            <!-- Solutions -->
+            <span class="menu-title">Solutions</span>
+            <div class="tab-subsection" style="overflow: auto;">
+                <ul id="menu-solution-list" class="solution-list">
+                
+                </ul>
+            </div>
+            <div class="slide-down-menu" id="solutions-edit-form">
+                <input id="solutions-name-input" placeholder="Solution name" spellcheck="false" class="solution-text-form" type="text", maxlength="60">
+            </div>
+            <button id="btn-new-solution" class="btn btn-max-width">New solution</button>
+
+            <!-- Export -->
+            <span class="menu-title">Export</span>
+            <div class="tab-subsection" style="overflow: auto;">
+                Export to what?
+            </div>
+
+            <!-- Export -->
+            <span class="menu-title">Generate</span>
+            <div class="tab-subsection" style="overflow: auto;">
+                Generate solutions
+            </div>
+
+        </div>
     </div>
 </div>

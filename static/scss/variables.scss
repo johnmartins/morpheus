@@ -1,7 +1,7 @@
 /* Colors */
-$white-high:    rgba(255,255,255,0.87);
-$white-medium:  rgba(255,255,255,0.60);
-$white-low:     rgba(255,255,255,0.38);
+$white-high:    hsl(0, 0%, 87%);
+$white-medium:  hsl(0, 0%, 60%);
+$white-low:     hsl(0, 0%, 38%);
 
 $grey-highest:  #454545;
 $grey-high:     #333333;
@@ -9,12 +9,14 @@ $grey-medium:   #252525;
 $grey-low:      #121212;
 $grey-lowest:   #101010;
 
-$green-high:    hsl(120,50,50);
-$green-medium:  hsl(120, 50, 40);
+$green-high:    #44dc11;
+$green-medium:  #11dc44;
 $green-low:     hsl(120, 50, 30);
 
-$cyan-high:     hsl(180, 50, 50);
-$cyan-medium:   hsl(180, 50, 40);
-$cyan-low:      hsl(180, 50, 30);
+$cyan-high:     hsl(165, 86%, 46%);
+$cyan-medium:   hsl(165, 86%, 40%);
+$cyan-low:      hsl(165, 86%, 30%);
 
 $red-high:      rgb(255,0,0);
+
+$purple-high:   #8a00ac;

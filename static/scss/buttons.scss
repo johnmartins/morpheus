@@ -1,0 +1,26 @@
+@import "variables.scss";
+
+.btn {
+    border: 1px solid transparent;
+    border-radius: 2px;
+    outline: none;
+    background-color: $green-medium;
+
+    text-transform: uppercase;
+    color: $grey-lowest;
+    font-weight: bold;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+
+    margin: 8px 8px 8px 0;
+    height: 30px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: $green-high;
+}
+
+.btn-max-width {
+    width: 100%;
+}

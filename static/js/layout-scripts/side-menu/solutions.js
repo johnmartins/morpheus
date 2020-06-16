@@ -166,7 +166,11 @@ module.exports = {
         let matrix = workspace.getMatrix()
         let solution = matrix.getSolution(solutionID)
         let button = document.getElementById('btn-new-solution')
+        let solEl = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
 
+        module.exports.resetUI()
+        solEl.classList.add('selected')
+        
         state.workspaceSelectedSolution = solutionID
 
         let nameForm = document.getElementById('solutions-name-input')

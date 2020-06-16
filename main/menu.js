@@ -28,12 +28,12 @@ module.exports = {
             submenu: [
                 {
                     label: 'New',
-                    click: () => {win.webContents.send('menu-event', {type: 'new'})},
+                    click: () => {win.webContents.send('menu-event', {type: 'new'})},   // First ask renderer for permission
                     accelerator: isMac ? 'Option+Cmd+N' : 'Ctrl+N'
                 },
                 {
                     label: 'Open',
-                    click: () => {win.webContents.send('menu-event', {type: 'open'})},
+                    click: () => {win.webContents.send('menu-event', {type: 'open'})},  // First ask renderer for permission
                     accelerator: isMac ? 'Cmd+O' : 'Ctrl+O'
                 },
                 {
@@ -50,7 +50,8 @@ module.exports = {
                     type: 'separator'
                 },
                 {
-                    role:  isMac ? 'close' : 'quit'
+                    label: 'Exit',
+                    click: () => {win.webContents.send('menu-event', {type: 'exit'})}                                     // First ask renderer for permission
                 }]
         })
         

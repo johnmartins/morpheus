@@ -1,6 +1,6 @@
 'use strict'
 
-const { ipcMain, dialog } = require('electron')
+const { ipcMain, dialog, app } = require('electron')
 
 module.exports = (win) => {
 
@@ -35,5 +35,10 @@ module.exports = (win) => {
             console.error('Caught exception: '+err.message)
             console.error(err.stack)  
         }
+    })
+
+    ipcMain.on('exit-confirmed', () => {
+        console.log('Graceful shutdown confirmed')
+        app.exit(0)
     })
 }

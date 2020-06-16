@@ -86,6 +86,10 @@ module.exports = {
      */
     saveCurrentHash: () => {
         lastSavedHash = hash (module.exports.getMatrixJSON())
+    },
+
+    checkUnsavedChanges: () => {
+        return isMatrixChanged()
     }
 }
 

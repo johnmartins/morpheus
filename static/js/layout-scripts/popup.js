@@ -9,9 +9,20 @@ module.exports = {
     /**
      * Create a popup that implies that an error occured. Contains an OK button only.
      */
-    error: (msg) => {
+    error: (msg, {callbackContinue, titleTxt} = {}) => {
         let { id, window, title, messageElement, buttonContainer } = createPopupWindow()
-        title.innerHTML = "Error!"
+        title.innerHTML = titleTxt ? titleTxt : "Error"
+        messageElement.innerHTML = msg ? msg : 'An unexpected exception occured. Please, restart the application.'
+
+        let btnContinue = document.createElement('button')
+        btnContinue.classList.add('btn')
+        btnContinue.innerHTML = 'Continue'
+        btnContinue.onclick = () => {
+            if (callbackContinue) callbackContinue()
+            removePopup(id)
+        }
+
+        buttonContainer.appendChild(btnContinue)
     },
 
     /**
@@ -25,7 +36,6 @@ module.exports = {
 
         let btnCancel = document.createElement('button')
         btnCancel.classList.add('btn')
-        btnCancel.style.marginBottom = 0
         btnCancel.innerHTML = 'Cancel'
         btnCancel.onclick = () => {
             if (callbackCancel) callbackCancel()
@@ -34,7 +44,6 @@ module.exports = {
 
         let btnContinue = document.createElement('button')
         btnContinue.classList.add('btn')
-        btnContinue.style.marginBottom = 0
         btnContinue.innerHTML = 'Continue'
         btnContinue.onclick = () => {
             if (callbackContinue) callbackContinue()
@@ -60,11 +69,6 @@ module.exports = {
         }
     }
 }
-
-window.onload = () => {
-    module.exports.warning('hello')
-}
-
 
 function createPopupWindow () {
     let id = random.randomString(5)

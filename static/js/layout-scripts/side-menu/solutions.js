@@ -5,7 +5,8 @@ const { Solution } = require('./../../morph-matrix/matrix')
 const workspace = require('./../../workspace')
 const popup = require('./../popup')
 
-let unfinishedSolution = false
+let unfinishedSolution = false      // The user has started a new solution that is unsaved
+let editingSolution = false         // The user is editing a solution
 
 const ID_PREFIX_SOLUTION_ENTRY = 'sol-li-'
 
@@ -88,6 +89,7 @@ module.exports = {
         let solutionID = state.workspaceSelectedSolution
         let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
         listEntry.parentElement.removeChild(listEntry)
+        editingSolution = false
 
         module.exports.completeSolution()
     },
@@ -103,6 +105,7 @@ module.exports = {
         solListEntry.classList.add('solution-list-entry')
         solListEntry.onclick = (evt) => {
             if (evt.target.id !== solListEntry.id) return
+            if (editingSolution) return
 
             console.log('clicked: ' + solution.id)
 
@@ -127,10 +130,10 @@ module.exports = {
 
         solListEntry.onmouseover = () => {
             if (overlay) return
-            overlay = document.createElement('div')
+            if (editingSolution) return
 
+            overlay = document.createElement('div')
             createSolutionEntryOverlay(overlay, solution)
-            
             solListEntry.appendChild(overlay)
         }
 
@@ -169,6 +172,7 @@ module.exports = {
         let solEl = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
 
         module.exports.resetUI()
+        editingSolution = true
         solEl.classList.add('selected')
         
         state.workspaceSelectedSolution = solutionID

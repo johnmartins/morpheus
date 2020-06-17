@@ -10,7 +10,7 @@ module.exports = {
      * Create a popup that implies that an error occured. Contains an OK button only.
      */
     error: (msg) => {
-        let { id, mask, window, title, messageElement } = createPopupWindow()
+        let { id, window, title, messageElement, buttonContainer } = createPopupWindow()
         title.innerHTML = "Error!"
     },
 
@@ -19,7 +19,7 @@ module.exports = {
      * Contains a "Cancel" and "Continue button".
      */
     warning: (msg, {callbackCancel, callbackContinue, titleTxt = "Warning"} = {}) => {
-        let { id, mask, window, title, messageElement } = createPopupWindow()
+        let { id, dialogWindow, title, messageElement, buttonContainer } = createPopupWindow()
         title.innerHTML = titleTxt
         messageElement.innerHTML = msg
 
@@ -41,15 +41,15 @@ module.exports = {
             removePopup(id)
         } 
 
-        window.appendChild(btnCancel)
-        window.appendChild(btnContinue)
+        buttonContainer.appendChild(btnCancel)
+        buttonContainer.appendChild(btnContinue)
     },
 
     /**
      * Create an empty popup. Only contains a title.
      */
     empty: ({titleTxt = "Prompt"} = {}) => {
-        let { id, mask, window, title, messageElement } = createPopupWindow()
+        let { id, mask, dialogWindow, title, messageElement } = createPopupWindow()
 
         title.innerHTML = titleTxt
         messageElement.parentElement.removeChild(messageElement)
@@ -59,8 +59,12 @@ module.exports = {
             window: window
         }
     }
-
 }
+
+window.onload = () => {
+    module.exports.warning('hello')
+}
+
 
 function createPopupWindow () {
     let id = random.randomString(5)
@@ -77,18 +81,22 @@ function createPopupWindow () {
     positioner.classList.add('popup-positioner')
     document.body.appendChild(positioner)
 
-    // The window contains all the stuff
-    let window = document.createElement('div')
-    window.classList.add('popup')
-    positioner.appendChild(window)
+    // The dialogWindow contains all the stuff
+    let dialogWindow = document.createElement('div')
+    dialogWindow.classList.add('popup')
+    positioner.appendChild(dialogWindow)
 
     let title = document.createElement('h4')
-    window.appendChild(title)
+    dialogWindow.appendChild(title)
     let messageElement = document.createElement('span')
     messageElement.classList.add('popup-message')
-    window.appendChild(messageElement)
+    dialogWindow.appendChild(messageElement)
 
-    return { id, mask, window, title, messageElement }
+    let buttonContainer = document.createElement('div')
+    buttonContainer.classList.add('popup-btn-container')
+    dialogWindow.appendChild(buttonContainer)
+
+    return { id, mask, dialogWindow, title, messageElement, buttonContainer }
 }
 
 function removePopup (id) {

@@ -29,7 +29,7 @@ function handleMenuEvent(menuEvent) {
 
 function askUserIfUnsaved (continueCallback) {
     if (workspace.checkUnsavedChanges()) {
-        popup.warning('You have unsaved changes. Are you sure you want to exit the application?', {
+        popup.warning('You have unsaved changes. If you continue your changes will be lost.', {
             callbackCancel: () => {return},
             callbackContinue: () => {
                 continueCallback()

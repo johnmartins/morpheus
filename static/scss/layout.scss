@@ -1,6 +1,7 @@
 @import "variables.scss";
 @import "buttons.scss";
 @import "side-menu.scss";
+@import "popup.scss";
 
 #layout-body {
     height: 100%;
@@ -29,40 +30,4 @@
     cursor: w-resize;
     height: 100%;
     background-color: transparent;
-}
-
-.popup-mask {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    cursor: not-allowed;
-    background-color: rgba(0,0,0,0.30);
-}
-
-.popup-positioner {
-    position: absolute;
-    left: 50%;
-    top: 30%;
-}
-
-.popup-positioner .popup {
-    position: relative;
-    left: -50%;
-    
-    background-color: $grey-high;
-    padding: 8px;
-    border-radius: 2px;
-    width: 400px;
-}
-
-.popup-positioner .popup h4 {
-    margin-top: 8px;
-    text-transform: uppercase;
-}
-
-.popup-positioner .popup .popup-message {
-    display: block;
-    margin-bottom: 8px;
 }

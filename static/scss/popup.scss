@@ -1,0 +1,53 @@
+@import "variables.scss";
+
+.popup-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: not-allowed;
+    background-color: rgba(0,0,0,0.30);
+}
+
+.popup-positioner {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+}
+
+.popup-positioner .popup {
+    position: relative;
+    left: -50%;
+    width: 300px;
+    padding: 8px;
+
+    background-color: $grey-high;
+    border-radius: 2px;
+    box-shadow: 0px 0px 3px -0px $grey-lowest;    
+}
+
+.popup-positioner .popup h4 {
+    margin-top: 8px;
+    text-transform: uppercase;
+}
+
+.popup-positioner .popup .popup-message {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.popup .popup-btn-container {
+    text-align: right;
+}
+
+.popup .popup-btn-container .btn {
+    background-color: transparent;
+    color: $green-medium;
+    font-weight: bold;
+    font-size: 0.93rem;
+}
+
+.popup .popup-btn-container .btn:hover {
+    color: $green-high;
+}

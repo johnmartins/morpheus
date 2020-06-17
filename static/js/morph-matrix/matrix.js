@@ -559,6 +559,10 @@ class MorphMatrix {
         newAddCell.onclick = () => {
             this.addDesignSolution(rowID)
         }
+
+        // Automatically scroll to the bottom of the page
+        let workspaceElement = document.querySelector("#layout-workspace")
+        workspaceElement.scrollTo(0, workspaceElement.scrollHeight)
     }
 
     /**
@@ -607,6 +611,13 @@ class MorphMatrix {
         this._createDSCellOverlay(newCell)
 
         if (image) this._addImage(imgElement.id, image)
+
+        // Scroll right
+        let workspaceElement = document.querySelector("#layout-workspace")
+        let val = workspaceElement.offsetWidth + workspaceElement.scrollLeft
+        if (newCell.offsetLeft > val) {
+            workspaceElement.scrollLeft += newCell.offsetWidth
+        }
     }
 
     import(save) {

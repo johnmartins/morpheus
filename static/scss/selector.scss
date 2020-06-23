@@ -41,6 +41,7 @@
     visibility: hidden;
     pointer-events: none;
     z-index: 2;
+    transition: all 0.2s;
 }
 
 .selector.open .selector-options {
@@ -54,7 +55,7 @@
     display: block;
     padding: 0 22px 0 22px;
     cursor: pointer;
-    transition: all 0.5s;
+    
 }
 
 .selector-option:hover {

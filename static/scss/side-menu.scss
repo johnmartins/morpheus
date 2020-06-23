@@ -14,22 +14,22 @@
 }
 
 .tab-element {
-    background-color: $grey-medium;
+    background-color: $grey-low;
     color: $white-medium;
     padding: 6px 10px 6px 10px;
     width: 60px;
-    margin-right: 1px;
     cursor: pointer;
+    border-right: 1px solid $grey-medium
 }
 
 .tab-element.selected {
-    background-color: $grey-high;
+    background-color: $grey-medium;
     color: $white-high;
 }
 
 .tab-content-container {
     flex: 1 1 auto;
-    background-color: $grey-high;
+    background-color: $grey-medium;
     padding: 8px;
 }
 
@@ -74,11 +74,11 @@
 }
 
 .solution-list-entry:hover {
-    background-color: $grey-highest;
+    background-color: $blue-high;
 }
 
 .solution-list-entry.selected {
-    background-color: $cyan-low;
+    background-color: $blue-low;
     font-weight: 700;
 }
 

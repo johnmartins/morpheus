@@ -42,7 +42,7 @@
 
 .tab-subsection {
     flex: 1;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .slide-down-menu {
@@ -56,7 +56,7 @@
 }
 
 .solution-list {
-    margin: 0 0 0 4px;
+    margin: 8px 0 0 4px;
     list-style-type: none;
     padding: 0 0 8px 0;
     font-size: 1rem;
@@ -113,6 +113,12 @@
     border-top: 1px solid $white-low;
     border-bottom: 1px solid $white-low;
     padding: 6px 0 6px 0;
-    margin-bottom: 8px;
+    margin-bottom: 0px;
 
+}
+
+.menu-subtitle {
+    display: block;
+    margin: 8px 0 4px 0;
+    font-weight: bold;
 }

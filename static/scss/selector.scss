@@ -1,0 +1,74 @@
+@import "variables.scss";
+
+.selector-wrapper {
+    position: relative;
+    user-select: none;
+    width: 100%;
+}
+
+.selector {
+    margin-top: 4px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.selector-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    font-size: 1rem;
+    color: $white-high;
+    height: 1.2rem;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-color: $blue-high;
+}
+
+.selector-options {
+    position: absolute;
+    display: block;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid $blue-high;
+    opacity: 0;
+    border-top: 0;
+    background: $grey-highest;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.selector.open .selector-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+}
+
+.selector-option {
+    position: relative;
+    display: block;
+    padding: 0 22px 0 22px;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+
+.selector-option:hover {
+    cursor: pointer;
+    background-color: $blue-low;
+}
+
+.selector-option.selected {
+    color: $white-high;
+    background-color: $grey-highest;
+}
+
+.selector-arrow {
+    position: relative;
+    height: 1rem;
+    width: 1rem;
+}

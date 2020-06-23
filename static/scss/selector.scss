@@ -18,14 +18,19 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 22px;
+    padding: 1px 22px;
     font-size: 1rem;
     color: $white-high;
     height: 1.2rem;
     cursor: pointer;
     border-width: 1px;
     border-style: solid;
-    border-color: $blue-high;
+    border-color: $white-low;
+}
+
+.selector.open .selector-trigger {
+    border: 1px solid $blue-high;
+    border-bottom-color: transparent;
 }
 
 .selector-options {
@@ -42,25 +47,29 @@
     pointer-events: none;
     z-index: 2;
     transition: all 0.2s;
+    max-height: 100px;
+    height: 0px;
+    overflow: auto;
 }
 
 .selector.open .selector-options {
     opacity: 1;
     visibility: visible;
     pointer-events: all;
+    height: 100px;
 }
 
 .selector-option {
     position: relative;
     display: block;
-    padding: 0 22px 0 22px;
+    padding: 1px 22px;
     cursor: pointer;
     
 }
 
 .selector-option:hover {
     cursor: pointer;
-    background-color: $blue-low;
+    background-color: $blue-low !important;
 }
 
 .selector-option.selected {

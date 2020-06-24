@@ -107,8 +107,6 @@ module.exports = {
             if (evt.target.id !== solListEntry.id) return
             if (editingSolution) return
 
-            console.log('clicked: ' + solution.id)
-
             if (solListEntry.classList.contains('selected')) { 
                 module.exports.resetUI()
                 return;
@@ -143,6 +141,7 @@ module.exports = {
         }
 
         solList.appendChild(solListEntry)
+        GlobalObserver.emit('solution-added', solutionID)
     },
 
     removeFromSolutionList: (solutionID) => {
@@ -156,6 +155,7 @@ module.exports = {
                 return
             },
             callbackContinue: () => {
+                GlobalObserver.emit('solution-removed', solutionID)
                 matrix.removeSolution(solutionID)
                 let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
                 listEntry.parentElement.removeChild(listEntry)

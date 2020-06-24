@@ -1,5 +1,8 @@
 'use strict'
 
+const Selector = require('./../selector')
+const workspace = require('./../../workspace')
+
 const NAME_SOLUTION_EXPORT_TARGET = 'export-solutions-radio'
 
 module.exports = {
@@ -8,7 +11,10 @@ module.exports = {
         let tabExport = document.getElementById('tab-export')
         let btnExportMatrix = document.getElementById('btn-export-matrix')
         let btnExportSolutions = document.getElementById('btn-export-solutions')
-        let solutionSelector = document.getElementById('export-solution-selector')
+
+        let selector = new Selector()
+        document.getElementById('exp-sol-sel-cont').appendChild(selector.getElement())
+        selector.hide()
 
         // Listen for radio input changes
         tabExport.onclick = (evt) => {
@@ -18,11 +24,9 @@ module.exports = {
                 let val = tabExport.querySelector(`[name="${NAME_SOLUTION_EXPORT_TARGET}"]:checked`).value
 
                 if (val === 'specific') {
-                    // Show selector
-                    console.log("show")
+                    selector.show()
                 } else {
-                    // Hide selector
-                    console.log("hide")
+                    selector.hide()
                 }
             }
         }
@@ -35,15 +39,15 @@ module.exports = {
 
         }
 
-        // Solution selector
-        solutionSelector.onclick = () => {
-            let open = solutionSelector.classList.contains('open')
-            if (open) {
-                solutionSelector.classList.remove('open')
-            } else {
-                solutionSelector.classList.add('open')
-            }
-        }
+        GlobalObserver.on('solution-added', (solID) => {
+            let solName = workspace.getMatrix().getSolution(solID).name
+            selector.addOption(solName, solID)
+            selector.setValue(solID)
+        })
+
+        GlobalObserver.on('solution-removed', (solID) => {
+            selector.removeOption(solID)
+        })
     }
 }
 

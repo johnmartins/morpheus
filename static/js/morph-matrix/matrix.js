@@ -620,6 +620,10 @@ class MorphMatrix {
         }
     }
 
+    getContainerElement() {
+        return this.containerElement
+    }
+
     import(save) {
         // Rebuild matrix from json dump
         console.log(`Imported ${save.name}`)

@@ -4,6 +4,7 @@ const html2canvas = require('html2canvas')
 const fs = require('fs')
 
 const workspace = require('./../workspace')
+const fileDiagService = require('./file-dialog-service')
 
 module.exports = {
 
@@ -13,28 +14,34 @@ module.exports = {
     exportMatrixToCSV: () => {
         console.log('Exporting matrix to CSV..')
 
-        // Export FR and DS arrays to CSV
-        let csv = ''
-        let matrix = workspace.getMatrix()
-        
-        const frArray = matrix.functionalRequirements
-        for (let i = 0; i < frArray.length; i++) {
-            const fr = frArray[i]
-            csv += fr.description
+        fileDiagService.newSaveFileDialog({
+            filters: [ 
+                {name: 'CSV', extensions: ['csv']}
+            ]
+        }).then((res) => {
 
-            const dsArray = fr.designSolutions
-            for (let j = 0; j < dsArray.length; j++) {
-                const ds = dsArray[j]
-                csv += ';\t' + ds.description
+            // Export FR and DS arrays to CSV
+            let csv = ''
+            let matrix = workspace.getMatrix()
+            
+            const frArray = matrix.functionalRequirements
+            for (let i = 0; i < frArray.length; i++) {
+                const fr = frArray[i]
+                csv += fr.description
+
+                const dsArray = fr.designSolutions
+                for (let j = 0; j < dsArray.length; j++) {
+                    const ds = dsArray[j]
+                    csv += ';\t' + ds.description
+                }
+
+                csv += '\n'
             }
 
-            csv += '\n'
-        }
-
-        // Write to file (should be done using a stream in the final version)
-        fs.writeFileSync('test.csv', csv)
-        console.log(csv)
-
+            // Write to file (should be done using a stream in the final version)
+            console.log(csv)
+            fs.writeFileSync(res.filePath, csv)
+        })
     },
 
     /** 

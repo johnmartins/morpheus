@@ -1,48 +1,73 @@
+'use strict'
+
 const { ipcRenderer } = require('electron')
 const path = require('path')
 const storageService = require('./storage-service')
 
-module.exports = (GlobalObserver) => {
+module.exports = {
 
-    // Handle file dialog request from other modules
-    GlobalObserver.on('open-file-dialog', (data) => {
-        ipcRenderer.send('open-file-dialog', data)
-    })
-    ipcRenderer.on('file-dialog-result', (evt, openFileResult) => {
-        if (openFileResult.canceled) return
+    // replaces open-file-dialog
+    newOpenFileDialog: (data) => {
+        return new Promise((resolve, reject) => {
+            try {
+                ipcRenderer.send('open-file-dialog', data)
+                ipcRenderer.once('file-dialog-result', (evt, openFileResult) => {
+                    if (openFileResult.canceled) {
+                        resolve()
+                        return
+                    }
 
-        if (openFileResult.data.copyToTmp) {
-            console.log("copying")
-            // copy file to a safe location
-            let originalPath = openFileResult.filePaths[0]
-            storageService.copyFileToTmp(originalPath).then( (destPath) => {
-                GlobalObserver.emit('file-dialog-result', {
-                    data: openFileResult.data,
-                    path: destPath,
-                    fileName: path.basename(destPath),
-                    originalPath: originalPath,
-                    originalFileName: path.basename(originalPath)
+                    // If the new file should be copied
+                    if (openFileResult.data.copyToTmp) {
+                        console.log('copying..')
+
+                        // Copy file to a safe location
+                        let originalPath = openFileResult.filePaths[0]
+                        storageService.copyFileToTmp(originalPath).then( (destPath) => {
+                            resolve({
+                                data: openFileResult.data,
+                                path: destPath,
+                                fileName: path.basename(destPath),
+                                originalPath: originalPath,
+                                originalFileName: path.basename(originalPath)
+                            })
+                        })
+                        return
+                    }
+
+                    // If we want to reference the selected location
+                    console.log("referencing non-copy")
+
+                    // Send reference to file
+                    resolve({
+                        data: openFileResult.data,
+                        path: openFileResult.filePaths[0],
+                        fileName: path.basename(openFileResult.filePaths[0])
+                    })
+                    return
                 })
-            }).catch((err) => {
-                console.error('Failed to copy file.')
-            })
-        } else {
-            console.log("referencing non-copy")
-            // Send reference to file
-            GlobalObserver.emit('file-dialog-result', {
-                data: openFileResult.data,
-                path: openFileResult.filePaths[0],
-                fileName: path.basename(openFileResult.filePaths[0])
-            })
-        }
 
-    })
+            } catch (err) {
+                reject(err)
+                return
+            }
+        })
+    },
 
-    GlobalObserver.on('save-file-dialog', (data) => {
-        ipcRenderer.send('save-file-dialog', data)
-    })
-    ipcRenderer.on('save-file-result', (evt, saveFileResult) => {
-        if (saveFileResult.canceled) return
-        GlobalObserver.emit('save-file-result', saveFileResult)
-    })
+    // Replaces save-file-dialog
+    newSaveFileDialog: (data) => {
+        return new Promise((resolve, reject) => {
+            try {
+                ipcRenderer.send('save-file-dialog', data)
+                ipcRenderer.once('save-file-result', (evt, saveFileResult) => {
+                    if (saveFileResult.canceled) return
+                    resolve(saveFileResult)
+                    return
+                })
+            } catch (err) {
+                reject(err)
+                return
+            }
+        })
+    }
 }

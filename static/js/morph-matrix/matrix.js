@@ -10,6 +10,7 @@
 const state = require('./../state')
 const random = require('./../utils/random')
 const storageService = require('./../services/storage-service')
+const fileDiagService = require('./../services/file-dialog-service')
 
 class FunctionalRequirement {
     id = null
@@ -95,21 +96,19 @@ class MorphMatrix {
         GlobalObserver.emit('matrix-created', this)
     }
 
-    _waitForFileDialogResult () {
-        GlobalObserver.once('file-dialog-result', (res) => {
-            if (res.data.type !== 'attach-img') return
-            if (!res.data.targetElement) throw new Error('No target element')
+    _handleFileDialogResult (res) {
+        if (res.data.type !== 'attach-img') return
+        if (!res.data.targetElement) throw new Error('No target element')
 
-            let ds = this.cellToDesignSolutionMap[res.data.targetElement]
+        let ds = this.cellToDesignSolutionMap[res.data.targetElement]
 
-            if (!ds) {
-                console.error('Target element no longer exists')
-                return
-            }
+        if (!ds) {
+            console.error('Target element no longer exists')
+            return
+        }
 
-            ds.image = res.fileName
-            this._addImage('img-'+res.data.targetElement, ds.image)
-        })
+        ds.image = res.fileName
+        this._addImage('img-'+res.data.targetElement, ds.image)
     }
 
     _addImage (element, fileName) {
@@ -321,13 +320,16 @@ class MorphMatrix {
 
          imgOverlay.onclick = () => {
              if (!ds.image){
-                 this._waitForFileDialogResult()
-                 GlobalObserver.emit('open-file-dialog', {
-                     type: 'attach-img', 
-                     copyToTmp: true,
-                     targetElement: dsID,
-                     filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
-                 })
+                 
+                 fileDiagService.newOpenFileDialog({
+                    type: 'attach-img', 
+                    copyToTmp: true,
+                    targetElement: dsID,
+                    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif']}]
+                }).then((res) => {
+                    this._handleFileDialogResult(res)
+                })
+
              } else {
                  storageService.removeFileFromTmp(ds.image, (err) => {
                      if (err) {

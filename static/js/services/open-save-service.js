@@ -3,13 +3,18 @@
 const fs = require('fs')
 const workspace = require('./../workspace.js')
 const storageService = require('./storage-service')
+const fileDiagService = require('./file-dialog-service')
 
 module.exports = {
     new: () => {
         workspace.createEmptyMatrix()
     },
     open: () => {
-        GlobalObserver.once('file-dialog-result', (res) => {
+        fileDiagService.newOpenFileDialog({
+            type: 'open-file', 
+            filters: [
+                { name: 'Morph-matrix', extensions: ['morph'] }            ]
+        }).then((res) => {
             if (res.data.type !== 'open-file') return
             if (!fs.existsSync(res.path)) {
                 console.error('Failed to find file')
@@ -23,12 +28,6 @@ module.exports = {
                 workspace.createMatrixFromObject(json)
             })
         })
-
-        GlobalObserver.emit('open-file-dialog', {
-            type: 'open-file', 
-            filters: [
-                { name: 'Morph-matrix', extensions: ['morph'] }            ]
-        })
     },
     save: () => {
         // File has not previously been saved
@@ -38,16 +37,14 @@ module.exports = {
         saveFile()
     },
     saveAs: () => {
-        GlobalObserver.once('save-file-result', (res) => {
-            workspace.setWorkingFileLocation(res.filePath)
-            saveFile()
-        })
-
-        GlobalObserver.emit('save-file-dialog', {
+        fileDiagService.newSaveFileDialog({
             type: 'save-file', 
             filters: [ 
                 {name: 'Morph-matrix', extensions: ['morph']}
             ]
+        }).then((res) => {
+            workspace.setWorkingFileLocation(res.filePath)
+            saveFile()
         })
     },  
 }

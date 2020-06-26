@@ -37,7 +37,6 @@ module.exports = {
     },
     saveAs: () => {
         fileDiagService.newSaveFileDialog({
-            type: 'save-file', 
             filters: [ 
                 {name: 'Morph-matrix', extensions: ['morph']}
             ]

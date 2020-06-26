@@ -7,7 +7,7 @@ const os = require('os')
 const fs = require('fs')
 const random = require('./../utils/random')
 const tmpStorageRoot = os.tmpdir() + '/morpheus/'
-const tmpStorage = tmpStorageRoot + random.randomString(8) + '/'
+let tmpStorage = tmpStorageRoot + random.randomString(8) + '/'
 
 module.exports = {
     getTmpStorageDirectory: function () {
@@ -27,6 +27,15 @@ module.exports = {
         }
 
         return tmpStorage + '/'
+    },
+
+    /**
+     * Change TMP storage location to a new one. 
+     * Should be done when a new project is created or opened
+     */
+    resetTmpStorageDirectory: function () {
+        tmpStorage = tmpStorageRoot + random.randomString(8) + '/'
+        console.log('tmp storage dir reset to: '+tmpStorage)
     },
 
     copyFileToTmp: async function (originalPath, {filePrefix = ''} = {}) {

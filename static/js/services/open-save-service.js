@@ -7,6 +7,7 @@ const fileDiagService = require('./file-dialog-service')
 
 module.exports = {
     new: () => {
+        storageService.resetTmpStorageDirectory()
         workspace.createEmptyMatrix()
     },
     open: () => {
@@ -21,6 +22,7 @@ module.exports = {
             }
 
             workspace.setWorkingFileLocation(res.path)
+            storageService.resetTmpStorageDirectory()
             storageService.unzipInTmpStorage(res.path, () => {
                 let content = fs.readFileSync(storageService.getTmpStorageDirectory() + 'matrix.json', {encoding: 'utf8'})
                 let json = JSON.parse(content)

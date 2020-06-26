@@ -1,7 +1,7 @@
 'use strict'
 
-const html2canvas = require('html2canvas')
 const fs = require('fs')
+const html2canvas = require('html2canvas')
 
 const workspace = require('./../workspace')
 const fileDiagService = require('./file-dialog-service')
@@ -59,18 +59,48 @@ module.exports = {
      */
     exportMatrixToPNG: () => {
         console.log('Exporting matrix to PNG..')
-        let matrix = workspace.getMatrix()
 
-        html2canvas(matrix.getContainerElement(), {
-            backgroundColor: 'black',
-            ignoreElements: (element) => {
-                if (element.classList.contains('mm-add-cell')) return true
-                return false
-            }
-        }).then(canvas => {
-            let img = canvas.toDataURL('image/png')
-            document.write(`<img src="${img}">`)
-        })
+        try {
+
+            fileDiagService.newSaveFileDialog({
+                filters: [ 
+                    {name: 'Image', extensions: ['png']}
+                ]
+            }).then((res) => {
+
+                let matrix = workspace.getMatrix()
+                let matrixContainer = matrix.getContainerElement()
+                
+                let x = matrixContainer.scrollWidth
+                let y = matrixContainer.scrollHeight
+                console.log(`${x}, ${y}`)
+        
+                // Set workspace to "visible" to avoid cropping in the image
+                workspace.getLayout().style.overflow = 'visible'
+        
+                html2canvas(matrix.getContainerElement(), {
+                    backgroundColor: 'black',
+                    ignoreElements: (element) => {
+                        if (element.classList.contains('mm-add-cell')) return true
+                        return false
+                    }
+                }).then(canvas => {
+                    let img = canvas.toDataURL('image/png')
+                    const base64Data = img.replace(/^data:image\/png;base64,/, "")
+                    fs.writeFileSync(res.filePath, base64Data, {encoding: 'base64'})
+        
+                    workspace.getLayout().style.overflow = 'auto'
+                })
+
+            }).catch((err) => {
+                throw new ('Error! Failed to save workspace PNG')
+            })
+
+        } catch (err) {
+            popup.error('Failed to export matrix to PNG. Reason: ' + err.message)
+        }
+        
+
     },
 
     exportSolutionToCSV: (solutionID) => {
@@ -198,6 +228,4 @@ module.exports = {
     exportSolutionsToPNG: () => {
         console.log('Exporting solutions to PNG..')
     }
-
-
 }

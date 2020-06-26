@@ -4,7 +4,9 @@ const crypto = require('crypto')
 const storageService = require('./services/storage-service')
 const state = require('./state')
 
-// Target layout
+// Workspace layout
+let workspaceLayout = null
+// Matrix layout
 let matrixContainerID = null
 // The matrix structure that currently is being edited
 let currentMatrix = null
@@ -96,6 +98,14 @@ module.exports = {
 
     checkUnsavedChanges: () => {
         return isMatrixChanged()
+    },
+
+    getLayout: () => {
+        return workspaceLayout
+    },
+
+    setLayoutElementID: (elementID) => {
+        workspaceLayout = document.getElementById(elementID)
     }
 }
 

@@ -11,11 +11,10 @@ module.exports = {
     },
     open: () => {
         fileDiagService.newOpenFileDialog({
-            type: 'open-file', 
             filters: [
                 { name: 'Morph-matrix', extensions: ['morph'] }            ]
         }).then((res) => {
-            if (res.data.type !== 'open-file') return
+            if (!res) return // user canceled operation
             if (!fs.existsSync(res.path)) {
                 console.error('Failed to find file')
                 return
@@ -43,7 +42,7 @@ module.exports = {
                 {name: 'Morph-matrix', extensions: ['morph']}
             ]
         }).then((res) => {
-            if (res.canceled) return
+            if (!res) return // user cancelled operation
             workspace.setWorkingFileLocation(res.filePath)
             saveFile()
         })

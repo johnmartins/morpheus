@@ -13,7 +13,7 @@ module.exports = {
                 ipcRenderer.send('open-file-dialog', data)
                 ipcRenderer.once('file-dialog-result', (evt, openFileResult) => {
                     if (openFileResult.canceled) {
-                        resolve()
+                        resolve(null)
                         return
                     }
 
@@ -60,6 +60,10 @@ module.exports = {
             try {
                 ipcRenderer.send('save-file-dialog', data)
                 ipcRenderer.once('save-file-result', (evt, saveFileResult) => {
+                    if (saveFileResult.canceled) {
+                        resolve(null)
+                        return
+                    }
                     resolve(saveFileResult)
                     return
                 })

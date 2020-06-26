@@ -54,6 +54,23 @@ module.exports = {
         buttonContainer.appendChild(btnContinue)
     },
 
+    notify: (msg, {callbackContinue, titleTxt = "Prompt"} = {}) => {
+        let { id, dialogWindow, title, messageElement, buttonContainer } = createPopupWindow()
+
+        title.innerHTML = titleTxt ? titleTxt : 'Notification'
+        messageElement.innerHTML = msg
+
+        let btnContinue = document.createElement('button')
+        btnContinue.classList.add('btn')
+        btnContinue.innerHTML = 'OK'
+        btnContinue.onclick = () => {
+            if (callbackContinue) callbackContinue()
+            removePopup(id)
+        } 
+
+        buttonContainer.appendChild(btnContinue)
+    },
+
     /**
      * Create an empty popup. Only contains a title.
      */
@@ -93,7 +110,7 @@ function createPopupWindow () {
     let title = document.createElement('h4')
     dialogWindow.appendChild(title)
     let messageElement = document.createElement('span')
-    messageElement.classList.add('popup-message')
+    messageElement.classList.add('popup-message', 'text-selectable')
     dialogWindow.appendChild(messageElement)
 
     let buttonContainer = document.createElement('div')

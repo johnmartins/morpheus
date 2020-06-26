@@ -5,6 +5,7 @@ const fs = require('fs')
 
 const workspace = require('./../workspace')
 const fileDiagService = require('./file-dialog-service')
+const popup = require('./../layout-scripts/popup')
 
 module.exports = {
 
@@ -19,6 +20,9 @@ module.exports = {
                 {name: 'CSV', extensions: ['csv']}
             ]
         }).then((res) => {
+            console.log(res)
+
+            if (res.canceled) return
 
             // Export FR and DS arrays to CSV
             let csv = ''
@@ -41,6 +45,12 @@ module.exports = {
             // Write to file (should be done using a stream in the final version)
             console.log(csv)
             fs.writeFileSync(res.filePath, csv)
+
+            popup.notify(`Export to CSV successful. <br>${res.filePath}`, {
+                titleTxt: 'Export done'
+            })
+        }).catch((err) => {
+            popup.error('Failed to export solutions to CSV. Reason: ' + err.message)
         })
     },
 
@@ -61,9 +71,6 @@ module.exports = {
             let img = canvas.toDataURL('image/png')
             document.write(`<img src="${img}">`)
         })
-
-        
-
     },
 
     exportSolutionToCSV: (solutionID) => {
@@ -73,12 +80,62 @@ module.exports = {
     },
 
     /**
-     * Export ALL solutions to CSV
+     * Export ALL solutions to CSV. 
      */
     exportSolutionsToCSV: () => {
         console.log('Exporting solutions to CSV..')
 
-        let matrix = workspace.getMatrix()
+        fileDiagService.newSaveFileDialog({
+            filters: [ 
+                {name: 'CSV', extensions: ['csv']}
+            ]
+        }).then((res) => {
+            if (res.canceled) return
+            const matrix = workspace.getMatrix()
+            const frArray = matrix.functionalRequirements
+
+            let csv = 'Functional Requirement;\t'
+
+            // Create header
+            for (const solutionID in matrix.solutions) {
+                csv += matrix.solutions[solutionID].name + ';\t'
+            }
+
+            csv += '\n'
+
+            for (let i = 0; i < frArray.length; i++) {
+                const fr = frArray[i]
+
+                let j = 0
+                for (const solutionID in matrix.solutions) {
+                    const solution = matrix.solutions[solutionID]
+                    if (j === 0) {
+                        // Write row header
+                        csv += fr.description + ';\t'
+                    }
+
+                    let mappedDsID = solution.frToDsMap['row-'+fr.id]
+                    
+                    // If this solution has mapped this FR to a DS
+                    if (mappedDsID) {
+                        let ds = matrix.cellToDesignSolutionMap[mappedDsID]
+                        csv += ds.description + ';\t'
+                    } else {
+                        csv += ';\t'
+                    }
+                    j++
+                }
+
+                csv += '\n'
+            }
+            fs.writeFileSync(res.filePath, csv)
+
+            popup.notify(`Export to CSV successful. <br>${res.filePath}`, {
+                titleTxt: 'Export done'
+            })
+        }).catch((err) => {
+            popup.error('Failed to export solutions to CSV. Reason: ' + err.message)
+        })
     },
 
     /**

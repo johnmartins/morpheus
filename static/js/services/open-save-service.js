@@ -43,6 +43,7 @@ module.exports = {
                 {name: 'Morph-matrix', extensions: ['morph']}
             ]
         }).then((res) => {
+            if (res.canceled) return
             workspace.setWorkingFileLocation(res.filePath)
             saveFile()
         })

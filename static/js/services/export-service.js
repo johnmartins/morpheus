@@ -76,7 +76,55 @@ module.exports = {
     exportSolutionToCSV: (solutionID) => {
         console.log('Exporting solution to CSV..')
 
-        if (!solutionID) throw new Error('exportSolutionToPNG requires a solution ID.')
+        try {
+            if (!solutionID) throw new Error('No solution ID specified')
+
+            fileDiagService.newSaveFileDialog({
+                filters: [ 
+                    {name: 'CSV', extensions: ['csv']}
+                ]
+            }).then((res) => {
+
+                const matrix = workspace.getMatrix()
+                const solution =  matrix.solutions[solutionID]
+                const frArray = matrix.functionalRequirements
+                const dsMap = matrix.cellToDesignSolutionMap
+
+                if (!solution) throw new Error('Solution does not exist')
+
+                let csv = 'Functional requirement;\tDesign solution\n'
+
+                for (let i = 0; i < frArray.length; i++) {
+                    const fr = frArray[i]
+                    const frID = 'row-'+fr.id
+
+                    csv += fr.description + ';\t'
+
+                    console.log(frID)
+                    console.log(solution.frToDsMap)
+                
+                    const dsID = solution.frToDsMap[frID]
+                    if (dsID) {
+                        const ds = dsMap[dsID]
+                        csv += ds.description ? ds.description : ''
+                    } else {
+                        csv += ''
+                    }
+
+                    csv += '\n'
+                }
+
+                fs.writeFileSync(res.filePath, csv)
+                popup.notify(`Export to CSV successful. <br>${res.filePath}`, {
+                    titleTxt: 'Export done'
+                })
+
+            }).catch((err) => {
+                throw err
+            })
+        } catch (err) {
+            popup.error(err.message)
+        }
     },
 
     /**

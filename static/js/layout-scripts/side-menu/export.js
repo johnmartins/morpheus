@@ -63,7 +63,7 @@ module.exports = {
                 if (target === 'all'){ 
                     exportService.exportSolutionsToCSV()
                 } else if (target ==='specific') {
-                    exportService.exportSolutionToCSV()
+                    exportService.exportSolutionToCSV(selector.getValue())
                 }
 
             } else {

@@ -90,11 +90,17 @@ module.exports = {
                     fs.writeFileSync(res.filePath, base64Data, {encoding: 'base64'})
         
                     workspace.getLayout().style.overflow = 'auto'
+
+                    popup.notify(`Export to PNG successful. <br>${res.filePath}`, {
+                        titleTxt: 'Export done'
+                    })
                 })
 
             }).catch((err) => {
                 throw new ('Error! Failed to save workspace PNG')
             })
+
+
 
         } catch (err) {
             popup.error('Failed to export matrix to PNG. Reason: ' + err.message)
@@ -229,3 +235,5 @@ module.exports = {
         console.log('Exporting solutions to PNG..')
     }
 }
+
+

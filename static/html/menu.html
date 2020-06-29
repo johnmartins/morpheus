@@ -1,11 +1,12 @@
 <div id="side-menu" class="menu" style="overflow: hidden;">
     <div id="side-menu-tabs" class="tab-container">
         <div id="menu-solutions" class="tab-element selected" target="tab-solutions">Solutions</div>
+        <div id="menu-exports" class="tab-element" target="tab-export">Export</div>
     </div>
     <div class="tab-content-container" style="overflow: hidden;">
-        <div id="tab-solutions" class="tab-content" style="overflow: hidden;">
 
-            <!-- Solutions -->
+        <!-- Solutions tab -->
+        <div id="tab-solutions" class="tab-content">
             <span class="menu-title">Solutions</span>
             <div class="tab-subsection" style="overflow: auto;">
                 <ul id="menu-solution-list" class="solution-list">
@@ -17,18 +18,58 @@
             </div>
             <button id="btn-new-solution" class="btn btn-max-width">New solution</button>
 
-            <!-- Export -->
-            <span class="menu-title">Export</span>
-            <div class="tab-subsection" style="overflow: auto;">
-                Export to what?
-            </div>
-
-            <!-- Export -->
+            <!-- Generate -->
             <span class="menu-title">Generate</span>
             <div class="tab-subsection" style="overflow: auto;">
                 Generate solutions
             </div>
+        </div>
 
+        <!-- Export tab -->
+        <div id="tab-export" class="tab-content">
+            <span class="menu-title">Export matrix</span>
+            <div class="tab-subsection">
+
+                <span class="menu-subtitle">Export type:</span>
+                <div>
+                    <input type="radio" name="export-matrix-format-radio" id="export-matrix-png" value="png" checked>
+                    <label for="export-matrix-png">PNG</label>
+                </div>
+                <div>
+                    <input type="radio" name="export-matrix-format-radio" id="export-matrix-csv" value="csv">
+                    <label for="export-matrix-csv">CSV</label>
+                </div>
+
+            </div>
+
+            <button class="btn btn-max-width" id="btn-export-matrix">Export matrix</button>
+
+            <span class="menu-title">Export solutions</span>
+            <div class="tab-subsection">
+
+                <span class="menu-subtitle">Export target:</span>
+                <div>
+                    <input type="radio" name="export-solutions-radio" id="export-solutions-all" value="all" checked>
+                    <label for="export-solutions-all">All solutions</label>
+                </div>
+                <div>
+                    <input type="radio" name="export-solutions-radio" id="export-solutions-specific" value="specific">
+                    <label for="export-solutions-specific">Specific solution</label>
+                </div>
+
+                <div id="exp-sol-sel-cont"></div>
+
+                <span class="menu-subtitle">Export type:</span>
+                <div>
+                    <input type="radio" name="export-solutions-format-radio" id="export-solutions-png" value="png" checked>
+                    <label for="export-solutions-png">PNG</label>
+                </div>
+                <div>
+                    <input type="radio" name="export-solutions-format-radio" id="export-solutions-csv" value="csv">
+                    <label for="export-solutions-csv">CSV</label>
+                </div>
+            </div>
+            <button class="btn btn-max-width" id="btn-export-solutions">Export solution(s)</button>
         </div>
     </div>
 </div>

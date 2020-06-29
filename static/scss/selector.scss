@@ -1,0 +1,94 @@
+@import "variables.scss";
+
+.selector-wrapper {
+    position: relative;
+    user-select: none;
+    width: 100%;
+    font-size: 1rem;
+}
+
+.selector {
+    margin-top: 4px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.selector .selector-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selector-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px 2px 22px;
+    color: $white-high;
+    height: 1.2rem;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-color: $white-low;
+}
+
+.selector.open .selector-trigger {
+    border: 1px solid $blue-high;
+    border-bottom-color: transparent;
+}
+
+.selector-options {
+    position: absolute;
+    display: block;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid $blue-high;
+    opacity: 0;
+    border-top: 0;
+    background: $grey-highest;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 2;
+    transition: all 0.2s;
+    max-height: 0px;
+    overflow: auto;
+}
+
+.selector.open .selector-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+    max-height: 100px;
+}
+
+.selector-option {
+    position: relative;
+    display: block;
+    padding: 1px 22px;
+    cursor: pointer;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    
+}
+
+.selector-option:hover {
+    cursor: pointer;
+    background-color: $blue-low !important;
+}
+
+.selector-option.selected {
+    color: $white-high;
+    background-color: $blue-low;
+}
+
+.selector-arrow {
+    display: block;
+    position: relative;
+    height: 1rem;
+    width: 1rem;
+}

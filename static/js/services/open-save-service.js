@@ -3,31 +3,31 @@
 const fs = require('fs')
 const workspace = require('./../workspace.js')
 const storageService = require('./storage-service')
+const fileDiagService = require('./file-dialog-service')
 
 module.exports = {
     new: () => {
+        storageService.resetTmpStorageDirectory()
         workspace.createEmptyMatrix()
     },
     open: () => {
-        GlobalObserver.once('file-dialog-result', (res) => {
-            if (res.data.type !== 'open-file') return
+        fileDiagService.newOpenFileDialog({
+            filters: [
+                { name: 'Morph-matrix', extensions: ['morph'] }            ]
+        }).then((res) => {
+            if (!res) return // user canceled operation
             if (!fs.existsSync(res.path)) {
                 console.error('Failed to find file')
                 return
             }
 
             workspace.setWorkingFileLocation(res.path)
+            storageService.resetTmpStorageDirectory()
             storageService.unzipInTmpStorage(res.path, () => {
                 let content = fs.readFileSync(storageService.getTmpStorageDirectory() + 'matrix.json', {encoding: 'utf8'})
                 let json = JSON.parse(content)
                 workspace.createMatrixFromObject(json)
             })
-        })
-
-        GlobalObserver.emit('open-file-dialog', {
-            type: 'open-file', 
-            filters: [
-                { name: 'Morph-matrix', extensions: ['morph'] }            ]
         })
     },
     save: () => {
@@ -38,16 +38,14 @@ module.exports = {
         saveFile()
     },
     saveAs: () => {
-        GlobalObserver.once('save-file-result', (res) => {
-            workspace.setWorkingFileLocation(res.filePath)
-            saveFile()
-        })
-
-        GlobalObserver.emit('save-file-dialog', {
-            type: 'save-file', 
+        fileDiagService.newSaveFileDialog({
             filters: [ 
                 {name: 'Morph-matrix', extensions: ['morph']}
             ]
+        }).then((res) => {
+            if (!res) return // user cancelled operation
+            workspace.setWorkingFileLocation(res.filePath)
+            saveFile()
         })
     },  
 }

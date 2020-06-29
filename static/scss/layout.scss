@@ -2,10 +2,10 @@
 @import "buttons.scss";
 @import "side-menu.scss";
 @import "popup.scss";
+@import "scrollbar.scss";
 
 #layout-body {
     height: 100%;
-    background-color: $grey-lowest;
 }
 
 #layout-container {
@@ -19,7 +19,7 @@
 }
 
 #layout-workspace {
-    height: calc(100% - 15px);
+    height: calc(100% - 16px);
     background-color: $grey-low;
     overflow: auto;
     padding: 8px;
@@ -29,5 +29,5 @@
     width: 4px;
     cursor: w-resize;
     height: 100%;
-    background-color: transparent;
+    background-color: $grey-low;
 }

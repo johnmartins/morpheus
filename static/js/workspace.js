@@ -4,7 +4,9 @@ const crypto = require('crypto')
 const storageService = require('./services/storage-service')
 const state = require('./state')
 
-// Target layout
+// Workspace layout
+let workspaceLayout = null
+// Matrix layout
 let matrixContainerID = null
 // The matrix structure that currently is being edited
 let currentMatrix = null
@@ -47,8 +49,11 @@ module.exports = {
         if (isMatrixChanged()) {
             promptUnsavedChanges()
         }
+        // Reset workspace 
         state.reset()
         document.getElementById(matrixContainerID).innerHTML = ""
+
+        // Create new matrix
         currentMatrix = new MorphMatrix(matrixContainerID)
         module.exports.saveCurrentHash()
         module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
@@ -61,8 +66,11 @@ module.exports = {
         if (isMatrixChanged()) {
             promptUnsavedChanges()
         }
+        // Reset workspace
         state.reset()
         document.getElementById(matrixContainerID).innerHTML = ""
+
+        // Create new matrix and import json
         currentMatrix = new MorphMatrix(matrixContainerID)
         currentMatrix.import(json)
         module.exports.saveCurrentHash()
@@ -90,6 +98,14 @@ module.exports = {
 
     checkUnsavedChanges: () => {
         return isMatrixChanged()
+    },
+
+    getLayout: () => {
+        return workspaceLayout
+    },
+
+    setLayoutElementID: (elementID) => {
+        workspaceLayout = document.getElementById(elementID)
     }
 }
 

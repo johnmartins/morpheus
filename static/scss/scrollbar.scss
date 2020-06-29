@@ -1,0 +1,28 @@
+@import "variables.scss";
+
+/* width */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: $grey-low; 
+    border: 1px solid $white-low;
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: transparentize($color: $white-high, $amount: 0.5); 
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: $white-high;
+
+  }
+
+  ::-webkit-scrollbar-corner { 
+      background: transparent;
+}

@@ -14,22 +14,25 @@
 }
 
 .tab-element {
-    background-color: $grey-medium;
+    background-color: $grey-low;
     color: $white-medium;
     padding: 6px 10px 6px 10px;
     width: 60px;
-    margin-right: 1px;
     cursor: pointer;
+    border-right: 1px solid $grey-medium;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .tab-element.selected {
-    background-color: $grey-high;
+    background-color: $grey-medium;
     color: $white-high;
 }
 
 .tab-content-container {
     flex: 1 1 auto;
-    background-color: $grey-high;
+    background-color: $grey-medium;
     padding: 8px;
 }
 
@@ -37,11 +40,12 @@
     display: none;
     flex-direction: column;
     height: 100%;
+    overflow: hidden;
 }
 
 .tab-subsection {
     flex: 1;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .slide-down-menu {
@@ -55,7 +59,7 @@
 }
 
 .solution-list {
-    margin: 0 0 0 4px;
+    margin: 8px 0 0 4px;
     list-style-type: none;
     padding: 0 0 8px 0;
     font-size: 1rem;
@@ -73,11 +77,11 @@
 }
 
 .solution-list-entry:hover {
-    background-color: $grey-highest;
+    background-color: $blue-low;
 }
 
 .solution-list-entry.selected {
-    background-color: $cyan-low;
+    background-color: $blue-low;
     font-weight: 700;
 }
 
@@ -112,6 +116,12 @@
     border-top: 1px solid $white-low;
     border-bottom: 1px solid $white-low;
     padding: 6px 0 6px 0;
-    margin-bottom: 8px;
+    margin-bottom: 0px;
 
+}
+
+.menu-subtitle {
+    display: block;
+    margin: 8px 0 4px 0;
+    font-weight: bold;
 }

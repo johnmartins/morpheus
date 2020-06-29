@@ -80,6 +80,11 @@ module.exports = {
         GlobalObserver.on('solution-removed', (solID) => {
             selector.removeOption(solID)
         })
+
+        GlobalObserver.on('matrix-created', () => {
+            // Clean up interface 
+            selector.clear()
+        })
     }
 }
 

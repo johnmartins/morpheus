@@ -74,6 +74,7 @@ class Selector {
 
         let el = this.valueToElementMap[value]
         el.parentElement.removeChild(el)
+        delete this.valueToElementMap[value]
     }
 
     setValue (value) {
@@ -106,6 +107,15 @@ class Selector {
 
     show() {
         this.wrapper.style.display = 'block'
+    }
+
+    clear() {
+        const values = Object.keys(this.valueToElementMap)
+
+        for (let i = 0; i < values.length; i++) {
+            const val = values[i]
+            this.removeOption(val)
+        }
     }
 }
 

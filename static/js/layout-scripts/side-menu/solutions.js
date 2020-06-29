@@ -136,6 +136,7 @@ module.exports = {
         }
 
         solListEntry.onmouseleave = () => {
+            if (!overlay) return
             solListEntry.removeChild(overlay)
             overlay = null
         }

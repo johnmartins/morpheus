@@ -78,6 +78,8 @@ module.exports = {
         
                 // Set workspace to "visible" to avoid cropping in the image
                 workspace.getLayout().style.overflow = 'visible'
+
+                prepareMatrixForCapture(matrixContainer)
         
                 html2canvas(matrix.getContainerElement(), {
                     backgroundColor: 'black',
@@ -92,6 +94,7 @@ module.exports = {
         
                     workspace.getLayout().style.overflow = 'auto'
 
+                    resetMatrixLayout(matrixContainer)
                     popup.notify(`Export to PNG successful. <br>${res.filePath}`, {
                         titleTxt: 'Export done'
                     })
@@ -324,3 +327,60 @@ module.exports = {
 }
 
 
+function prepareMatrixForCapture (container) {
+    console.log('This is where the magic happens')
+
+    // Replace all text areas with divs containing the same content
+    let textareas = container.querySelectorAll('textarea')
+
+    for (let i = 0; i < textareas.length; i++) {
+
+        let textarea = textareas[i]
+        textarea.style.display = 'none'
+
+        let replacement = document.createElement('div')
+        replacement.innerHTML = textarea.value
+        replacement.style.height = '2rem'
+        replacement.style.fontSize = '0.8rem'
+        replacement.classList.add('houdini')
+
+        // The good ol' switcharoo
+        textarea.parentElement.insertBefore(replacement, textarea)
+    }
+
+    // Change the font family
+    container.style.fontFamily = 'monospace'
+
+    // Hide all overlays
+    let overlays = container.querySelectorAll('.hover-overlay-icons')
+
+    for (let i = 0; i < overlays.length; i++) {
+        console.log('it happens')
+        let overlay = overlays[i]
+        overlay.style.display = 'none'
+    }
+}
+
+function resetMatrixLayout (container) {
+    let replacements = container.querySelectorAll('.houdini')
+    let textareas = container.querySelectorAll('textarea')
+
+    for (let i = 0; i < replacements.length; i++) {
+        let replacement = replacements[i]
+        let textarea = textareas[i]
+
+        textarea.style.display = 'block'
+        replacement.parentElement.removeChild(replacement)
+    }
+
+    // Change the font family back
+    container.style.fontFamily = 'inherit'
+
+    // Enable all overlays
+    let overlays = container.querySelectorAll('.hover-overlay-icons')
+
+    for (let i = 0; i < overlays.length; i++) {
+        let overlay = overlays[i]
+        overlay.style.display = 'block'
+    }
+}

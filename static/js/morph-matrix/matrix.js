@@ -49,6 +49,10 @@ class Solution {
         let randint = random.randomInt(0,360)
         this.color = `hsl(${randint},80%,60%)`
     }
+
+    bindFrToDs (frID, dsID) {
+        this.frToDsMap[frID] = dsID
+    }
 }
 
 /**

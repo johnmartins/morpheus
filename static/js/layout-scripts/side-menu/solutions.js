@@ -4,6 +4,7 @@ const state = require('./../../state')
 const { Solution } = require('./../../morph-matrix/matrix')
 const workspace = require('./../../workspace')
 const popup = require('./../popup')
+const { randomInt } = require('../../utils/random')
 
 let unfinishedSolution = false      // The user has started a new solution that is unsaved
 let editingSolution = false         // The user is editing a solution
@@ -14,6 +15,9 @@ module.exports = {
     setupListeners: () => {
         let btnSolutions = document.getElementById('btn-new-solution')
         btnSolutions.onclick = module.exports.startNewSolution
+
+        let btnRandomize = document.getElementById('btn-generate-random')
+        btnRandomize.onclick = module.exports.createRandomSolution
 
         // New import -> Setup solution list
         GlobalObserver.on('matrix-imported', () => {
@@ -227,6 +231,41 @@ module.exports = {
         if (previousSelection) {
             previousSelection.classList.remove('selected')
         }
+    },
+
+    createRandomSolution: () => {
+        if (editingSolution) {
+            popup.error('A solution is currently being edited. Save it first.')
+            return
+        }
+        
+        if (unfinishedSolution) {
+            popup.error('A solution is currently being created. Save it first.')
+            return
+        }
+
+        const matrix = workspace.getMatrix()
+        const frArray = matrix.functionalRequirements
+
+        if (Object.keys(matrix.cellToDesignSolutionMap).length < 2) {
+            popup.error('You need to create more design solutions before randomizing')
+            return
+        }
+
+        let randomSolution = new Solution()
+        state.workspaceSelectedSolution = randomSolution.id
+        
+        for (let i = 0; i < frArray.length; i++) {
+            const fr = frArray[i]
+            let dsIndex = randomInt(0, fr.designSolutions.length - 1)
+            let randomDs = fr.designSolutions[dsIndex]
+
+            randomSolution.bindFrToDs('row-'+fr.id, randomDs.id)
+        }
+
+        matrix.addSolution(randomSolution)
+        module.exports.completeSolution()
+        
     }
 }
 

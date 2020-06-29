@@ -24,3 +24,15 @@
 .btn-max-width {
     width: 100%;
 }
+
+.btn-secondary {
+    background-color: transparent;
+    color: $white-medium;
+    border: 1px solid $white-medium;
+}
+
+.btn-secondary:hover {
+    background-color: transparent;
+    color: $white-high;
+    border-color: $white-high;
+}

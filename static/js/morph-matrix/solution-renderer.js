@@ -26,6 +26,8 @@ class SolutionRenderer {
 
     _createTable () {
         let table = document.createElement('table')
+        table.style.fontFamily = 'monospace'
+        table.style.fontSize = '0.9rem'
         let tbody = document.createElement('tbody')
         table.appendChild(tbody)
 

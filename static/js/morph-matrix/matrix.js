@@ -283,7 +283,7 @@ class MorphMatrix {
         let solution = this.solutions[state.workspaceSelectedSolution]
         overlay.style.boxShadow = `inset 0 0 12px ${solution.color}`
         overlay.onclick = () => {
-            this.setSolutionDS(ds)
+            this.toggleSolutionDS(ds)
         }
 
         return overlay
@@ -400,12 +400,19 @@ class MorphMatrix {
         }
     }
 
-    setSolutionDS(ds) {
+    toggleSolutionDS(ds) {
         let currentSolutionID = state.workspaceSelectedSolution
         let solution = this.solutions[currentSolutionID]
         if (!solution) throw new Error('No such solution')
 
-        solution.frToDsMap[ds.frID] = ds.id
+        let currentDsID = solution.frToDsMap[ds.frID]
+        if (currentDsID === ds.id) {
+            // toggle off
+            delete solution.frToDsMap[ds.frID]
+        } else {
+            // toggle on
+            solution.frToDsMap[ds.frID] = ds.id
+        }
         
         this.clearSolutionRender()
         this.renderSolution(currentSolutionID)

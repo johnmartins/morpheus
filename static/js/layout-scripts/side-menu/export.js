@@ -56,7 +56,7 @@ module.exports = {
                 if (target === 'all'){ 
                     exportService.exportSolutionsToPNG()
                 } else if (target ==='specific') {
-                    exportService.exportSolutionToPNG()
+                    exportService.exportSolutionToPNG(selector.getValue())
                 }
                 
             } else if (type === 'csv') {

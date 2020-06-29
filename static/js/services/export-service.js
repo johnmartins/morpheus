@@ -6,6 +6,7 @@ const html2canvas = require('html2canvas')
 const workspace = require('./../workspace')
 const fileDiagService = require('./file-dialog-service')
 const popup = require('./../layout-scripts/popup')
+const SolutionRenderer = require('./../morph-matrix/solution-renderer')
 
 module.exports = {
 
@@ -227,12 +228,98 @@ module.exports = {
      */
     exportSolutionToPNG: (solutionID) => {
         console.log('Exporting solution to PNG..')
+        
+        try {
+            if (!solutionID) throw new Error('exportSolutionToPNG requires a solution ID.')
 
-        if (!solutionID) throw new Error('exportSolutionToPNG requires a solution ID.')
+            fileDiagService.newSaveFileDialog({
+                filters: [ 
+                    {name: 'Image', extensions: ['png']}
+                ]
+            }).then((res) => {
+
+                const matrix = workspace.getMatrix()
+                matrix.getContainerElement().style.display = 'none'       // Hide the matrix
+        
+                const solution = matrix.solutions[solutionID]
+                if (!solution) throw new Error(`No solution with ID ${solutionID} found`)
+        
+                let solutionArray = [solution]
+                let frArray = matrix.functionalRequirements
+        
+                let renderer = new SolutionRenderer(workspace.getLayout(), solutionArray, frArray, matrix.cellToDesignSolutionMap)
+                let renderedElement = renderer.render()
+
+                // Set workspace to "visible" to avoid cropping in the image
+                workspace.getLayout().style.overflow = 'visible'
+
+                html2canvas(renderedElement, {
+                    backgroundColor: 'black'
+                }).then(canvas => {
+                    let img = canvas.toDataURL('image/png')
+                    const base64Data = img.replace(/^data:image\/png;base64,/, "")
+                    fs.writeFileSync(res.filePath, base64Data, {encoding: 'base64'})
+        
+                    workspace.getLayout().removeChild(renderedElement)      // Remove render from DOM
+                    workspace.getLayout().style.overflow = 'auto'
+                    matrix.getContainerElement().style.display = 'block'      // Show the matrix
+
+                    popup.notify(`Export to PNG successful. <br>${res.filePath}`, {
+                        titleTxt: 'Export done'
+                    })
+                })
+            })
+
+        } catch (err) {
+            popup.error('Failed to export solutions to PNG. Reason: ' + err.message)  
+        }
     },
 
     exportSolutionsToPNG: () => {
         console.log('Exporting solutions to PNG..')
+
+        try {
+            fileDiagService.newSaveFileDialog({
+                filters: [ 
+                    {name: 'Image', extensions: ['png']}
+                ]
+            }).then((res) => {
+                const matrix = workspace.getMatrix()
+                matrix.getContainerElement().style.display = 'none'       // Hide the matrix
+        
+                let solutionArray = []
+                let frArray = matrix.functionalRequirements
+        
+                for (let solutionID in matrix.solutions) {
+                    solutionArray.push(matrix.solutions[solutionID])
+                }
+        
+                let renderer = new SolutionRenderer(workspace.getLayout(), solutionArray, frArray, matrix.cellToDesignSolutionMap)
+                let renderedElement = renderer.render()
+
+                // Set workspace to "visible" to avoid cropping in the image
+                workspace.getLayout().style.overflow = 'visible'
+
+                html2canvas(renderedElement, {
+                    backgroundColor: 'black'
+                }).then(canvas => {
+                    let img = canvas.toDataURL('image/png')
+                    const base64Data = img.replace(/^data:image\/png;base64,/, "")
+                    fs.writeFileSync(res.filePath, base64Data, {encoding: 'base64'})
+        
+                    workspace.getLayout().removeChild(renderedElement)      // Remove render from DOM
+                    workspace.getLayout().style.overflow = 'auto'
+                    matrix.getContainerElement().style.display = 'block'      // Show the matrix
+
+                    popup.notify(`Export to PNG successful. <br>${res.filePath}`, {
+                        titleTxt: 'Export done'
+                    })
+                })
+            })
+
+        } catch (err) {
+            popup.error('Failed to export solutions to PNG. Reason: ' + err.message)  
+        }
     }
 }
 

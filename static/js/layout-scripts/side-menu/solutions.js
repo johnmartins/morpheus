@@ -82,6 +82,8 @@ module.exports = {
         // Verify solution name. If unset (or useless) then automatically set a name.
         if (solution.name === null || /^\s+$/.test(solution.name) || solution.name.length === 0){
             let number = Object.keys(matrix.getSolutionMap()).length
+            if (String(number).length === 1) number = `00${number}`
+            if (String(number).length === 2) number = `0${number}`
             solution.name = `solution ${number}`
         } 
 
@@ -145,7 +147,13 @@ module.exports = {
             overlay = null
         }
 
-        solList.appendChild(solListEntry)
+        // Place the entry in the correct place alphabetically
+        let previousEntry = findListPosition(solution.name, solutionID)
+        if (previousEntry) {
+            solList.insertBefore(solListEntry, previousEntry)
+        } else {
+            solList.appendChild(solListEntry) 
+        }
         GlobalObserver.emit('solution-added', solutionID)
     },
 
@@ -298,4 +306,29 @@ function getSolutionNameFormCallback (solution, enterCallback) {
         let val = evt.target.value
         solution.name = val
     }
+}
+
+/**
+ * Lazy O(n) search method for finding the appropriate place alphabetically in the solution list to insert a solution.
+ * Returns the "next element", allowing the use of "insert before" to correctly place the solution. 
+ * If this function returns null, then the correct placement is last.
+ */
+function findListPosition (solutionName, solutionID) {
+    const entriesArray = document.getElementById('menu-solution-list').querySelectorAll('.solution-list-entry')
+
+    if (entriesArray.length === 0) return null
+
+    for (let i = 0; i < entriesArray.length; i++) {
+        const entry = entriesArray[i]
+
+        if (entry.id === ID_PREFIX_SOLUTION_ENTRY+solutionID) continue
+
+        const compRes = entry.innerHTML.localeCompare(solutionName)
+
+        if (compRes === -1) continue
+
+        return entry
+    }
+
+    return null
 }

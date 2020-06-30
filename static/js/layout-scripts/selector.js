@@ -52,8 +52,15 @@ class Selector {
         let el = document.createElement('span')
         el.classList.add('selector-option')
         el.innerHTML = optionText
-        this.optionsContainer.appendChild(el)
 
+        // Insert element in alphabetical order
+        let nextOption = this._getNextElement(optionText)
+        if (nextOption) {
+            this.optionsContainer.insertBefore(el, nextOption)
+        } else {
+            this.optionsContainer.appendChild(el)
+        }
+        
         this.valueToElementMap[value] = el
 
         el.onclick = () => {
@@ -63,8 +70,6 @@ class Selector {
 
     removeOption (value) {
         // If removed option is selected, select another value or default
-        console.log('this value: '+this.value)
-        console.log('value: '+value)
 
         if (this.value === value) {
             console.log('removed selected value')
@@ -73,8 +78,10 @@ class Selector {
         }
 
         let el = this.valueToElementMap[value]
-        el.parentElement.removeChild(el)
-        delete this.valueToElementMap[value]
+        if (el) {
+            el.parentElement.removeChild(el)
+            delete this.valueToElementMap[value]
+        }
     }
 
     setValue (value) {
@@ -116,6 +123,26 @@ class Selector {
             const val = values[i]
             this.removeOption(val)
         }
+    }
+
+    _getNextElement(name) {
+        // TODO.. Also fix the bug where if you edit a solution, the before AND after is visible in the selector. Thanks.
+        let options = this.optionsContainer.querySelectorAll('.selector-option')
+
+        if (options.length === 0) return null
+
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i]
+
+            const compRes = option.innerHTML.localeCompare(name)
+
+            if (compRes === -1) continue
+            
+            return option
+        }
+
+        return null
+
     }
 }
 

@@ -2,7 +2,11 @@
 
 const random = require('./../utils/random')
 
+
 class Selector {
+    /**
+     * Selector element. A drop down list which enables the user to select one out of several options.
+    */
     constructor({placeholder = null} = {}) {
         this.value = null
         this.valueToElementMap = {}
@@ -48,6 +52,11 @@ class Selector {
         return this.wrapper
     }
 
+    /**
+     * Add an option to the selector. 
+     * @param {String} optionText Visible text in the selector. Should be humanly readable.
+     * @param {String} value Hidden value. Does not need to be readable.
+     */
     addOption (optionText, value) {
         let el = document.createElement('span')
         el.classList.add('selector-option')
@@ -68,6 +77,10 @@ class Selector {
         }
     }
 
+    /**
+     * Remove an option from the selector
+     * @param {String} value 
+     */
     removeOption (value) {
         // If removed option is selected, select another value or default
 
@@ -84,6 +97,11 @@ class Selector {
         }
     }
 
+    /**
+     * Set the value of the selector. This also updates the visible text. 
+     * This is a noop if the value is not listed in the selector.
+     * @param {String} value 
+     */
     setValue (value) {
         let valEl = this.valueToElementMap[value]
         if (!valEl) {
@@ -104,18 +122,30 @@ class Selector {
         console.log('current value: '+this.value)
     }
 
+    /**
+     * Get the current value of this selector. Returns null if no value is set. Otherwise returns a string.
+     */
     getValue () {
         return this.value
     }
 
+    /**
+     * Hide this component. Alters the display property.
+     */
     hide() {
         this.wrapper.style.display = 'none'
     }
 
+    /**
+     * Show this component. Alters the display property.
+     */
     show() {
         this.wrapper.style.display = 'block'
     }
 
+    /**
+     * Removes all available options
+     */
     clear() {
         const values = Object.keys(this.valueToElementMap)
 
@@ -125,8 +155,13 @@ class Selector {
         }
     }
 
+    /**
+     * Retrieves the next element from the options list alphabetically.
+     * This enables the use of "insertBefore" to instert new elements alphabetically correct
+     * without having to sort the entire list.
+     * @param {String} name option text
+     */
     _getNextElement(name) {
-        // TODO.. Also fix the bug where if you edit a solution, the before AND after is visible in the selector. Thanks.
         let options = this.optionsContainer.querySelectorAll('.selector-option')
 
         if (options.length === 0) return null

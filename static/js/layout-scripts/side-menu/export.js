@@ -8,6 +8,9 @@ const NAME_SOLUTION_EXPORT_TARGET = 'export-solutions-radio'
 
 module.exports = {
 
+    /**
+     * Sets up all required listeners and additional elements needed to enable the export side-menu.
+     */
     setupListeners: () => {
         let tabExport = document.getElementById('tab-export')
         let btnExportMatrix = document.getElementById('btn-export-matrix')
@@ -70,6 +73,8 @@ module.exports = {
                 console.error('Unknown type selected')
             }
         }
+
+        // Listen for certain global events
 
         GlobalObserver.on('solution-added', (solID) => {
             let solName = workspace.getMatrix().getSolution(solID).name

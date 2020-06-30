@@ -73,6 +73,9 @@ module.exports = {
 
         GlobalObserver.on('solution-added', (solID) => {
             let solName = workspace.getMatrix().getSolution(solID).name
+
+            // If an entry for this solID already exists (happens when editing a solution), then remove it
+            selector.removeOption(solID)    // is a noop if target does not exist
             selector.addOption(solName, solID)
             selector.setValue(solID)
         })

@@ -68,5 +68,11 @@ module.exports = {
         let menu = Menu.buildFromTemplate(template)
 
         Menu.setApplicationMenu(menu)
+
+        // Handle window "x-button"
+        win.on('close', (evt) => {
+            evt.preventDefault()
+            win.webContents.send('menu-event', {type: 'exit'})
+        })
     }
 }

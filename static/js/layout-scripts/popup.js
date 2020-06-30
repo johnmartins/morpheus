@@ -22,6 +22,12 @@ module.exports = {
             removePopup(id)
         }
 
+        document.onkeypress = (evt) => {
+            if (evt.keyCode !== 13) return      // If NOT enter
+            if (callbackContinue) callbackContinue()
+            removePopup(id)
+        }   
+
         buttonContainer.appendChild(btnContinue)
     },
 
@@ -50,6 +56,12 @@ module.exports = {
             removePopup(id)
         } 
 
+        document.onkeypress = (evt) => {
+            if (evt.keyCode !== 13) return      // If NOT enter
+            if (callbackContinue) callbackContinue()
+            removePopup(id)
+        }   
+
         buttonContainer.appendChild(btnCancel)
         buttonContainer.appendChild(btnContinue)
     },
@@ -67,6 +79,12 @@ module.exports = {
             if (callbackContinue) callbackContinue()
             removePopup(id)
         } 
+
+        document.onkeypress = (evt) => {
+            if (evt.keyCode !== 13) return      // If NOT enter
+            if (callbackContinue) callbackContinue()
+            removePopup(id)
+        }        
 
         buttonContainer.appendChild(btnContinue)
     },

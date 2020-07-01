@@ -25,7 +25,9 @@
 }
 
 .matrix .mm-add-cell:hover {
-    color: $green-high;
+    color: $white-high;
+    background-color: transparentize($color: $green-low, $amount: 0.8);
+    box-shadow: inset 0 0 12px $green-high;
 }
 
 .matrix td {

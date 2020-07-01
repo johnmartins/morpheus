@@ -265,9 +265,11 @@ module.exports = {
         
         for (let i = 0; i < frArray.length; i++) {
             const fr = frArray[i]
+
+            if (fr.designSolutions.length === 0) continue
+
             let dsIndex = randomInt(0, fr.designSolutions.length - 1)
             let randomDs = fr.designSolutions[dsIndex]
-
             randomSolution.bindFrToDs('row-'+fr.id, randomDs.id)
         }
 

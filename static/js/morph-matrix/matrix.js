@@ -397,7 +397,7 @@ class MorphMatrix {
             // Create overlay for selected design solution
             let overlay = document.createElement('div')
             overlay.classList.add('hover-overlay-cover', 'solution-render')
-            overlay.style.boxShadow = `inset 0 0 40px ${solution.color}`
+            overlay.style.boxShadow = `inset 0 0 14px ${solution.color}`
 
             let dsCell = document.getElementById(dsID)
             dsCell.appendChild(overlay)

@@ -47,7 +47,7 @@ class Solution {
     constructor () {
         this.id = 'sol-'+random.randomString(12)
         let randint = random.randomInt(0,360)
-        this.color = `hsl(${randint},80%,60%)`
+        this.color = `hsl(${randint},80%,65%)`
     }
 
     bindFrToDs (frID, dsID) {
@@ -101,6 +101,7 @@ class MorphMatrix {
     }
 
     _handleFileDialogResult (res) {
+        if (!res) return
         if (res.data.type !== 'attach-img') return
         if (!res.data.targetElement) throw new Error('No target element')
 
@@ -285,7 +286,8 @@ class MorphMatrix {
         overlay.classList.add('hover-overlay-cover')
         // box-shadow: inset 0 0 12px white;
         let solution = this.solutions[state.workspaceSelectedSolution]
-        overlay.style.boxShadow = `inset 0 0 12px ${solution.color}`
+        overlay.style.boxShadow = `inset 0 0 14px ${solution.color}`
+        overlay.style.border = `1px solid ${solution.color}`
         overlay.onclick = () => {
             this.toggleSolutionDS(ds)
         }
@@ -397,7 +399,8 @@ class MorphMatrix {
             // Create overlay for selected design solution
             let overlay = document.createElement('div')
             overlay.classList.add('hover-overlay-cover', 'solution-render')
-            overlay.style.boxShadow = `inset 0 0 14px ${solution.color}`
+            overlay.style.boxShadow = `inset 0 0 15px ${solution.color}`
+            overlay.style.border = `1px solid ${solution.color}`
 
             let dsCell = document.getElementById(dsID)
             dsCell.appendChild(overlay)

@@ -21,8 +21,7 @@ module.exports = {
                 {name: 'CSV', extensions: ['csv']}
             ]
         }).then((res) => {
-            console.log(res)
-
+            if (!res) return
             if (res.canceled) return
 
             // Export FR and DS arrays to CSV
@@ -68,6 +67,8 @@ module.exports = {
                     {name: 'Image', extensions: ['png']}
                 ]
             }).then((res) => {
+                if (!res) return
+                if (res.canceled) return
 
                 let matrix = workspace.getMatrix()
                 let matrixContainer = matrix.getContainerElement()
@@ -124,6 +125,8 @@ module.exports = {
                     {name: 'CSV', extensions: ['csv']}
                 ]
             }).then((res) => {
+                if (!res) return
+                if (res.canceled) return
 
                 const matrix = workspace.getMatrix()
                 const solution =  matrix.solutions[solutionID]
@@ -178,6 +181,7 @@ module.exports = {
                 {name: 'CSV', extensions: ['csv']}
             ]
         }).then((res) => {
+            if (!res) return
             if (res.canceled) return
             const matrix = workspace.getMatrix()
             const frArray = matrix.functionalRequirements
@@ -240,6 +244,8 @@ module.exports = {
                     {name: 'Image', extensions: ['png']}
                 ]
             }).then((res) => {
+                if (!res) return
+                if (res.canceled) return
 
                 const matrix = workspace.getMatrix()
                 matrix.getContainerElement().style.display = 'none'       // Hide the matrix
@@ -287,6 +293,9 @@ module.exports = {
                     {name: 'Image', extensions: ['png']}
                 ]
             }).then((res) => {
+                if (!res) return
+                if (res.canceled) return
+
                 const matrix = workspace.getMatrix()
                 matrix.getContainerElement().style.display = 'none'       // Hide the matrix
         

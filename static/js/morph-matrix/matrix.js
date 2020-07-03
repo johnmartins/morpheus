@@ -35,17 +35,19 @@ class DesignSolution {
 
     // Delimitation parameters
     disabled = false
-    incompatibleWith = null
+    incompatibleWith = new Set()
 
-    constructor(id, position, frID, {disabled = false} = {}) {
+    constructor(id, position, frID, {disabled = false, image = null, description = null} = {}) {
         this.id = id
         this.position = position
         this.frID = frID
-
+        this.image = image,
+        this.description = description
         this.disabled = disabled
-        this.incompatibleWith = new Set()
-        this.incompatibleWith.add('hello')
-        this.incompatibleWith.add('bananas')
+    }
+
+    setIncompatibleWith(dsID) {
+        this.incompatibleWith.add(dsID)
     }
 }
 
@@ -689,10 +691,14 @@ class MorphMatrix {
                 let savedDs = savedFr.designSolutions[dsN]
 
                 let ds = new DesignSolution(savedDs.id, savedDs.position, savedDs.frID, {
-                    disabled: savedDs.disabled
+                    disabled: savedDs.disabled,
+                    image: savedDs.image,
+                    description: savedDs.description,
                 })
-                ds.description = savedDs.description
-                ds.image = savedDs.image
+
+                for (let i = 0; i < savedDs.incompatibleWith.length; i++) {
+                    ds.setIncompatibleWith(savedDs.incompatibleWith[i])
+                }
 
                 this.addDesignSolution(savedFr, ds)
             }
@@ -721,7 +727,13 @@ class MorphMatrix {
      * Returns serialized object
      */
     export() {
-        return JSON.stringify(this)
+        return JSON.stringify(this, (key, value) => {
+            // JSON can't handle "Set" datastructures. Thus, they must be converted into arrays.
+            if (typeof value === 'object' && value instanceof Set) {
+                return [...value];
+            }
+            return value;
+        })
     }
 }
 

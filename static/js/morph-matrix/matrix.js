@@ -33,10 +33,19 @@ class DesignSolution {
     image = null
     frID = null
 
-    constructor(id, position, frID) {
+    // Delimitation parameters
+    disabled = false
+    incompatibleWith = null
+
+    constructor(id, position, frID, {disabled = false} = {}) {
         this.id = id
         this.position = position
         this.frID = frID
+
+        this.disabled = disabled
+        this.incompatibleWith = new Set()
+        this.incompatibleWith.add('hello')
+        this.incompatibleWith.add('bananas')
     }
 }
 
@@ -604,28 +613,32 @@ class MorphMatrix {
      * Add a new DS to the morph matrix
      * @param {Number} rowPosition To which row the design solution should be added
      */
-    addDesignSolution (fr, { id = null, description = null, image = null } = {}) {
+    addDesignSolution (fr, newDs) {
         let row = document.getElementById(fr.rowID)
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
-        let dsID = id ? id : "ds-"+random.randomString(8)
-        let ds = new DesignSolution(dsID, cellPosition, fr.id)
-        ds.description = description
-        ds.image = image
+        let ds = null
+
+        if (newDs) {
+            ds = newDs
+        } else {
+            let dsID = "ds-"+random.randomString(8)
+            ds = new DesignSolution(dsID, cellPosition, fr.id)
+        }
 
         this.frMap[fr.id].designSolutions.push(ds)
 
         let newCell = row.insertCell(cellPosition)
-        newCell.id = dsID
+        newCell.id = ds.id
         newCell.verticalAlign = "top"
 
         // Map ID for easy object lookup
-        this.dsMap[dsID] = ds
+        this.dsMap[ds.id] = ds
 
         // Create form in which a description can be written
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, {
             onChangeCallback: (value) => ds.description = value,
-            defaultValue: description,
+            defaultValue: ds.description,
         })
         // If the user clicks anywhere within the cell, then set focus to the textarea.
         newCell.onclick = (evt) => {
@@ -636,7 +649,7 @@ class MorphMatrix {
 
         // Create initially empty image field
         let imgElement = document.createElement('img')
-        imgElement.id = 'img-'+dsID
+        imgElement.id = 'img-'+ds.id
         newCell.appendChild(imgElement)
         
         if (this.dsLabelCell.colSpan < row.cells.length - 2) {
@@ -645,7 +658,7 @@ class MorphMatrix {
 
         this._createDSCellOverlay(newCell)
 
-        if (image) this._addImage(imgElement.id, image)
+        if (ds.image) this._addImage(imgElement.id, ds.image)
 
         // Scroll right
         let workspaceElement = document.querySelector("#layout-workspace")
@@ -674,11 +687,14 @@ class MorphMatrix {
             })
             for (let dsN = 0; dsN < savedFr.designSolutions.length; dsN++) {
                 let savedDs = savedFr.designSolutions[dsN]
-                this.addDesignSolution(savedFr, {
-                    id: savedDs.id,
-                    description: savedDs.description,
-                    image: savedDs.image
+
+                let ds = new DesignSolution(savedDs.id, savedDs.position, savedDs.frID, {
+                    disabled: savedDs.disabled
                 })
+                ds.description = savedDs.description
+                ds.image = savedDs.image
+
+                this.addDesignSolution(savedFr, ds)
             }
         }
 
@@ -705,7 +721,6 @@ class MorphMatrix {
      * Returns serialized object
      */
     export() {
-        // Grab images and pack them
         return JSON.stringify(this)
     }
 }

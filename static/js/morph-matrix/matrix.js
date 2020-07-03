@@ -14,13 +14,15 @@ const fileDiagService = require('./../services/file-dialog-service')
 
 class FunctionalRequirement {
     id = null
+    rowID = null
     description = null
     position = null
     designSolutions = []
 
-    constructor (id, position) {
+    constructor (id, rowID, position) {
         this.id = id
         this.position = position
+        this.rowID = rowID
     }
 }
 
@@ -83,8 +85,8 @@ class MorphMatrix {
     functionalRequirements = []
     solutions = {}
 
-    rowToRequirementMap = {}
-    cellToDesignSolutionMap = {}
+    frMap = {}
+    dsMap = {}
 
     // Important layout vars
     containerID = null
@@ -120,7 +122,7 @@ class MorphMatrix {
         if (res.data.type !== 'attach-img') return
         if (!res.data.targetElement) throw new Error('No target element')
 
-        let ds = this.cellToDesignSolutionMap[res.data.targetElement]
+        let ds = this.dsMap[res.data.targetElement]
 
         if (!ds) {
             console.error('Target element no longer exists')
@@ -243,7 +245,7 @@ class MorphMatrix {
      * @param {*} frRowID 
      * @param {*} fr 
      */
-    _getFRCellDefaultOverlay (overlay, frCellID, frRowID, fr) {
+    _getFRCellDefaultOverlay (overlay, fr) {
 
         overlay.classList.add('hover-overlay-icons')
         // Overlay icons
@@ -263,31 +265,30 @@ class MorphMatrix {
         overlay.appendChild(deleteOverlay)
 
         moveUpOverlay.onclick = (evt) => {
-            let otherRowID = 'row-'+this.functionalRequirements[fr.position - 2].id
-            this.switchRowPosition(otherRowID, frRowID)
+            let otherID = this.functionalRequirements[fr.position - 2].id
+            this.switchRowPosition(otherID, fr.id)
         }
         
         moveDownOverlay.onclick = (evt) => {
-            let otherRowID = 'row-'+this.functionalRequirements[fr.position].id
-            this.switchRowPosition(frRowID, otherRowID)
+            let otherID = this.functionalRequirements[fr.position].id
+            this.switchRowPosition(fr.id, otherID)
         }
 
         deleteOverlay.onclick = (evt) => {
-            this.deleteFunctionalRequirement(frCellID)
+            this.deleteFunctionalRequirement(fr.id)
         }
         return overlay
     }
     
-    _createFRCellOverlay (frCell) {
+    _createFRCellOverlay (fr, frCell) {
         let overlay = null
         let frCellID = frCell.id
-        let frRowID = 'row-'+frCellID
-        let fr = this.rowToRequirementMap[frRowID]
+        let frRowID = fr.rowID
         
         frCell.onmouseover = (evt) => {
             if (overlay) return
             overlay = document.createElement('div')
-            overlay = this._getFRCellDefaultOverlay(overlay, frCellID, frRowID, fr)
+            overlay = this._getFRCellDefaultOverlay(overlay, fr)
             frCell.appendChild(overlay)
         }
 
@@ -375,7 +376,7 @@ class MorphMatrix {
     _createDSCellOverlay (dsCell) {
         let overlay = null
         let dsID = dsCell.id
-        let ds = this.cellToDesignSolutionMap[dsID]
+        let ds = this.dsMap[dsID]
 
         // Setup hover functionality
         dsCell.onmouseover = (evt) => {
@@ -458,9 +459,9 @@ class MorphMatrix {
         return this.solutions;
     }
 
-    switchRowPosition(rowID1, rowID2) {
-        let fr1 = this.rowToRequirementMap[rowID1]
-        let fr2 = this.rowToRequirementMap[rowID2]
+    switchRowPosition(frID1, frID2) {
+        let fr1 = this.frMap[frID1]
+        let fr2 = this.frMap[frID2]
 
         // Change fr.position attribute
         let pos1 = fr1.position
@@ -473,12 +474,12 @@ class MorphMatrix {
         this.functionalRequirements[pos2 - 1] = fr1
 
         // Switch position in DOM
-        this.tbodyElement.insertBefore(document.getElementById(rowID2), document.getElementById(rowID1))
+        this.tbodyElement.insertBefore(document.getElementById(fr2.rowID), document.getElementById(fr1.rowID))
     }
 
     deleteFunctionalRequirement (frID) {
-        let frRowID = 'row-'+frID
-        let fr = this.rowToRequirementMap[frRowID]
+        let fr = this.frMap[frID]
+        let frRowID = fr.rowID
 
         // Delete design solutions existing for this FR
         for (let i = fr.designSolutions.length-1; i >= 0; i--) {
@@ -506,7 +507,7 @@ class MorphMatrix {
         this.tbodyElement.removeChild(frRow)
 
         // Delete map reference
-        delete this.rowToRequirementMap[frRowID]
+        delete this.frMap[frRowID]
 
         // Delete solution references
         let solutionIDs = Object.keys(this.solutions)
@@ -517,9 +518,10 @@ class MorphMatrix {
     }
 
     deleteDesignSolution (dsID) {
-        let ds = this.cellToDesignSolutionMap[dsID]
+        let ds = this.dsMap[dsID]
+        console.log(ds)
         let frID = ds.frID
-        let fr = this.rowToRequirementMap[frID]
+        let fr = this.frMap[frID]
 
         // Delete reference from functional requirement
         let deleteIndex = -1
@@ -537,11 +539,11 @@ class MorphMatrix {
 
         // Delete DOM element
         let dsElement = document.getElementById(dsID)
-        let frRow = document.getElementById(frID)
+        let frRow = document.getElementById(fr.rowID)
         frRow.removeChild(dsElement)
 
         // Delete map reference
-        delete this.cellToDesignSolutionMap[dsID]
+        delete this.dsMap[dsID]
 
         // Delete solution references
         let solutionIDs = Object.keys(this.solutions)
@@ -561,15 +563,16 @@ class MorphMatrix {
         let position = this.tableElement.rows.length - 1
 
         // Create model representation
-        let fr = new FunctionalRequirement(cellID, position)
+        let fr = new FunctionalRequirement(cellID, rowID, position)
         fr.description = description
+        fr.id = cellID
         this.functionalRequirements.push(fr)
 
         let newRow = this.tbodyElement.insertRow(position)
         newRow.id = rowID
 
         // Store row -> requirement connection
-        this.rowToRequirementMap[newRow.id] = fr
+        this.frMap[fr.id] = fr
 
         let newCell = newRow.insertCell()
         newCell.id = cellID
@@ -580,7 +583,7 @@ class MorphMatrix {
             styleClass: 'func-req'
         } )
 
-        this._createFRCellOverlay(newCell)
+        this._createFRCellOverlay(fr, newCell)
 
         // Create a new "Add DS"-cell on this row
         let newAddCell = newRow.insertCell()
@@ -589,7 +592,7 @@ class MorphMatrix {
         newAddCell.align = "center"
         newAddCell.classList.add('mm-add-cell')
         newAddCell.onclick = () => {
-            this.addDesignSolution(rowID)
+            this.addDesignSolution(fr)
         }
 
         // Automatically scroll to the bottom of the page
@@ -601,23 +604,23 @@ class MorphMatrix {
      * Add a new DS to the morph matrix
      * @param {Number} rowPosition To which row the design solution should be added
      */
-    addDesignSolution (rowID, { id = null, description = null, image = null } = {}) {
-        let row = document.getElementById(rowID)
+    addDesignSolution (fr, { id = null, description = null, image = null } = {}) {
+        let row = document.getElementById(fr.rowID)
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
         let dsID = id ? id : "ds-"+random.randomString(8)
-        let ds = new DesignSolution(dsID, cellPosition, row.id)
+        let ds = new DesignSolution(dsID, cellPosition, fr.id)
         ds.description = description
         ds.image = image
 
-        this.rowToRequirementMap[row.id].designSolutions.push(ds)
+        this.frMap[fr.id].designSolutions.push(ds)
 
         let newCell = row.insertCell(cellPosition)
         newCell.id = dsID
         newCell.verticalAlign = "top"
 
         // Map ID for easy object lookup
-        this.cellToDesignSolutionMap[dsID] = ds
+        this.dsMap[dsID] = ds
 
         // Create form in which a description can be written
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, {
@@ -666,11 +669,12 @@ class MorphMatrix {
             let savedFr = save.functionalRequirements[frN]
             this.addFunctionalRequirement({
                 id: savedFr.id,
+                rowID: savedFr.rowID,
                 description: savedFr.description
             })
             for (let dsN = 0; dsN < savedFr.designSolutions.length; dsN++) {
                 let savedDs = savedFr.designSolutions[dsN]
-                this.addDesignSolution('row-'+savedFr.id, {
+                this.addDesignSolution(savedFr, {
                     id: savedDs.id,
                     description: savedDs.description,
                     image: savedDs.image

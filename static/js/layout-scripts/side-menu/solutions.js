@@ -255,7 +255,7 @@ module.exports = {
         const matrix = workspace.getMatrix()
         const frArray = matrix.functionalRequirements
 
-        if (Object.keys(matrix.cellToDesignSolutionMap).length < 2) {
+        if (Object.keys(matrix.dsMap).length < 2) {
             popup.error('You need to create more design solutions before randomizing')
             return
         }
@@ -270,7 +270,7 @@ module.exports = {
 
             let dsIndex = randomInt(0, fr.designSolutions.length - 1)
             let randomDs = fr.designSolutions[dsIndex]
-            randomSolution.bindFrToDs('row-'+fr.id, randomDs.id)
+            randomSolution.bindFrToDs(fr.id, randomDs.id)
         }
 
         matrix.addSolution(randomSolution)

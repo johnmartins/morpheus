@@ -55,7 +55,7 @@ class SolutionRenderer {
             // Loop through FRs again
             for (let j = 0; j < this.frArray.length; j++) {
                 const fr = this.frArray[j]
-                const dsID = solution.getDsForFr('row-'+fr.id)
+                const dsID = solution.getDsForFr(fr.id)
                 const ds = this.dsMap[dsID]
 
                 console.log(ds)

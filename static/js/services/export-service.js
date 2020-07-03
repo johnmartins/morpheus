@@ -131,7 +131,7 @@ module.exports = {
                 const matrix = workspace.getMatrix()
                 const solution =  matrix.solutions[solutionID]
                 const frArray = matrix.functionalRequirements
-                const dsMap = matrix.cellToDesignSolutionMap
+                const dsMap = matrix.dsMap
 
                 if (!solution) throw new Error('Solution does not exist')
 
@@ -139,7 +139,7 @@ module.exports = {
 
                 for (let i = 0; i < frArray.length; i++) {
                     const fr = frArray[i]
-                    const frID = 'row-'+fr.id
+                    const frID = fr.id
 
                     csv += fr.description + ';\t'
                 
@@ -203,7 +203,7 @@ module.exports = {
                         csv += fr.description + ';\t'
                     }
 
-                    let mappedDsID = solution.getDsForFr('row-'+fr.id)
+                    let mappedDsID = solution.getDsForFr(fr.id)
                     
                     // If this solution has mapped this FR to a DS
                     if (mappedDsID) {
@@ -253,7 +253,7 @@ module.exports = {
                 let solutionArray = [solution]
                 let frArray = matrix.functionalRequirements
         
-                let renderer = new SolutionRenderer(workspace.getLayout(), solutionArray, frArray, matrix.cellToDesignSolutionMap)
+                let renderer = new SolutionRenderer(workspace.getLayout(), solutionArray, frArray, matrix.dsMap)
                 let renderedElement = renderer.render()
 
                 // Set workspace to "visible" to avoid cropping in the image
@@ -303,7 +303,7 @@ module.exports = {
                     solutionArray.push(matrix.solutions[solutionID])
                 }
         
-                let renderer = new SolutionRenderer(workspace.getLayout(), solutionArray, frArray, matrix.cellToDesignSolutionMap)
+                let renderer = new SolutionRenderer(workspace.getLayout(), solutionArray, frArray, matrix.dsMap)
                 let renderedElement = renderer.render()
 
                 // Set workspace to "visible" to avoid cropping in the image

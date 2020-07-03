@@ -142,11 +142,8 @@ module.exports = {
                     const frID = 'row-'+fr.id
 
                     csv += fr.description + ';\t'
-
-                    console.log(frID)
-                    console.log(solution.frToDsMap)
                 
-                    const dsID = solution.frToDsMap[frID]
+                    const dsID = solution.getDsForFr(frID)
                     if (dsID) {
                         const ds = dsMap[dsID]
                         csv += ds.description ? ds.description : ''
@@ -206,7 +203,7 @@ module.exports = {
                         csv += fr.description + ';\t'
                     }
 
-                    let mappedDsID = solution.frToDsMap['row-'+fr.id]
+                    let mappedDsID = solution.getDsForFr('row-'+fr.id)
                     
                     // If this solution has mapped this FR to a DS
                     if (mappedDsID) {

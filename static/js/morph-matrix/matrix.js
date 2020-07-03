@@ -53,6 +53,21 @@ class Solution {
     bindFrToDs (frID, dsID) {
         this.frToDsMap[frID] = dsID
     }
+
+    unbindFrFromDs (frID) {
+        delete this.frToDsMap[frID]
+        if (Object.keys(this.frToDsMap).length === 0) {
+            console.error('The solution is empty. Todo: remove solution or warn user.')
+        }
+    }
+
+    getDsForFr (frID) {
+        return this.frToDsMap[frID]
+    }
+
+    getMappedFunctionsArray () {
+        return Object.keys(this.frToDsMap)
+    }
 }
 
 /**
@@ -391,10 +406,11 @@ class MorphMatrix {
 
     renderSolution(solutionID) {
         let solution = this.solutions[solutionID]
-        let frIDs = Object.keys(solution.frToDsMap)
+        console.log(solution)
+        let frIDs = solution.getMappedFunctionsArray()
         for (let i = 0; i < frIDs.length; i++) {
             let frID = frIDs[i]
-            let dsID = solution.frToDsMap[frID]
+            let dsID = solution.getDsForFr(frID)
 
             // Create overlay for selected design solution
             let overlay = document.createElement('div')
@@ -411,14 +427,14 @@ class MorphMatrix {
         let currentSolutionID = state.workspaceSelectedSolution
         let solution = this.solutions[currentSolutionID]
         if (!solution) throw new Error('No such solution')
-
-        let currentDsID = solution.frToDsMap[ds.frID]
+        
+        let currentDsID = solution.getDsForFr(ds.frID)
         if (currentDsID === ds.id) {
             // toggle off
-            delete solution.frToDsMap[ds.frID]
+            solution.unbindFrFromDs(ds.frID)
         } else {
             // toggle on
-            solution.frToDsMap[ds.frID] = ds.id
+            solution.bindFrToDs(ds.frID, ds.id)
         }
         
         this.clearSolutionRender()
@@ -496,7 +512,7 @@ class MorphMatrix {
         let solutionIDs = Object.keys(this.solutions)
         for (let i = 0; i < solutionIDs.length; i++) {
             let solution = this.solutions[solutionIDs[i]]
-            delete solution.frToDsMap[frRowID]
+            solution.unbindFrFromDs(frRowID)
         }
     }
 
@@ -531,8 +547,8 @@ class MorphMatrix {
         let solutionIDs = Object.keys(this.solutions)
         for (let i = 0; i < solutionIDs.length; i++) {
             let solution = this.solutions[solutionIDs[i]]
-            if (solution.frToDsMap[frID] === dsID) {
-                delete solution.frToDsMap[frID]
+            if (solution.getDsForFr(frID) === dsID) {
+                solution.unbindFrFromDs(frID)
             }
         }
     }
@@ -662,7 +678,21 @@ class MorphMatrix {
             }
         }
 
-        this.solutions = save.solutions
+        for (const solutionID in save.solutions) {
+            const savedSolution = save.solutions[solutionID]
+            let solution = new Solution()
+            solution.name = savedSolution.name
+            solution.id = savedSolution.id
+            solution.color = savedSolution.color
+
+            // Set FR -> DS mapping
+            for (const frID in savedSolution.frToDsMap) {
+                console.log(`Copying binding: ${frID} -> ${savedSolution.frToDsMap[frID]}`)
+                solution.bindFrToDs(frID, savedSolution.frToDsMap[frID])
+            }   
+
+            this.solutions[solutionID] = solution
+        }
 
         GlobalObserver.emit('matrix-imported', save)
     }

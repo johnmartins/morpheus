@@ -73,7 +73,7 @@ module.exports = {
         // RESET UI
         module.exports.resetUI()
 
-        if (Object.keys(solution.frToDsMap).length === 0) {
+        if (solution.getMappedFunctionsArray().length === 0) {
             // No DS has been mapped to any FR.
             matrix.removeSolution(solution.id)
             return

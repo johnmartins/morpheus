@@ -10,6 +10,12 @@ module.exports = {
 
         toggleDsBtn.onclick = () => {
             console.log('toggle away')
+            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) {
+                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+            } else {
+                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DISABLE
+            }
+            
         }
 
         newIncompatibilityBtn.onclick = () => {

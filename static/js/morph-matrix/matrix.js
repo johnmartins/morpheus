@@ -46,8 +46,13 @@ class DesignSolution {
         this.disabled = disabled
     }
 
-    setIncompatibleWith(dsID) {
+    /**
+     * Creates a mirrored incompatibillity delimitation. 
+     * @param {DesignSolution} ds 
+     */
+    setIncompatibleWith(ds) {
         this.incompatibleWith.add(dsID)
+        ds.incompatibleWith.add(this.id)
     }
 }
 
@@ -63,8 +68,12 @@ class Solution {
         this.color = `hsl(${randint},80%,65%)`
     }
 
-    bindFrToDs (frID, dsID) {
-        this.frToDsMap[frID] = dsID
+    bindFrToDs (fr, ds) {
+        if (ds.disabled) {
+            console.log('Selected DS is disabled')
+            return
+        }
+        this.frToDsMap[fr.id] = ds.id
     }
 
     unbindFrFromDs (frID) {
@@ -322,6 +331,18 @@ class MorphMatrix {
         return overlay
     }
 
+    _getDSCellDisableOverlay (overlay, dsID, ds) {
+        if (ds.disabled === true) return null
+        overlay.classList.add('hover-overlay-disabled')
+        overlay.innerHTML = '<i class="fas fa-ban"></i>'
+
+        overlay.onclick = () => {
+            this.setDsDisabled(dsID, true)
+        }
+
+        return overlay
+    }
+
     _getDSCellDefaultOverlay (overlay, dsID, ds) {
         overlay.classList.add('hover-overlay-icons')
 
@@ -398,11 +419,15 @@ class MorphMatrix {
                 overlay = this._getDSCellDefaultOverlay(overlay, dsID, ds)
             } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION) {
                 overlay = this._getDSCellSolutionOverlay(overlay, dsID, ds)
+            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) {
+                overlay = this._getDSCellDisableOverlay(overlay, dsID, ds)
             }
 
+            if (!overlay) return        // No overlay? Screw it.
             dsCell.appendChild(overlay)
         }
         dsCell.onmouseleave = (evt) => {
+            if (!overlay) return
             dsCell.removeChild(overlay)
             overlay = null
         }
@@ -446,7 +471,8 @@ class MorphMatrix {
             solution.unbindFrFromDs(ds.frID)
         } else {
             // toggle on
-            solution.bindFrToDs(ds.frID, ds.id)
+            const fr = this.frMap[ds.frID]
+            solution.bindFrToDs(fr, ds)
         }
         
         this.clearSolutionRender()
@@ -563,6 +589,34 @@ class MorphMatrix {
             if (solution.getDsForFr(frID) === dsID) {
                 solution.unbindFrFromDs(frID)
             }
+        }
+    }
+
+    setDsDisabled (dsID, disabled) {
+        let ds = this.dsMap[dsID]
+        if (!ds) return
+        if (ds.disabled === disabled) return
+
+        ds.disabled = disabled
+
+        // Handle overlay
+        const dsCell = document.getElementById(dsID)
+
+        if (disabled) {
+            // Add overlay
+            let overlay = document.createElement('div')
+            overlay.classList.add('overlay-disabled')
+            overlay.innerHTML = '<i class="fas fa-ban"></i>'
+            overlay.onclick = () => {
+                console.log("CLICK!")
+                if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) return
+                this.setDsDisabled(dsID, false)
+            }
+            dsCell.appendChild(overlay)
+        } else {
+            // Remove overlay
+            let overlay = dsCell.querySelector('.overlay-disabled')
+            dsCell.removeChild(overlay)
         }
     }
 
@@ -696,9 +750,11 @@ class MorphMatrix {
                     description: savedDs.description,
                 })
 
-                for (let i = 0; i < savedDs.incompatibleWith.length; i++) {
-                    ds.setIncompatibleWith(savedDs.incompatibleWith[i])
-                }
+                if (savedDs.incompatibleWith) {
+                    for (let i = 0; i < savedDs.incompatibleWith.length; i++) {
+                        ds.setIncompatibleWith(savedDs.incompatibleWith[i])
+                    }
+                } 
 
                 this.addDesignSolution(savedFr, ds)
             }
@@ -714,7 +770,9 @@ class MorphMatrix {
             // Set FR -> DS mapping
             for (const frID in savedSolution.frToDsMap) {
                 console.log(`Copying binding: ${frID} -> ${savedSolution.frToDsMap[frID]}`)
-                solution.bindFrToDs(frID, savedSolution.frToDsMap[frID])
+                const ds = this.dsMap[savedSolution.frToDsMap[frID]]
+                const fr = this.frMap[frID]
+                solution.bindFrToDs(fr, ds)
             }   
 
             this.solutions[solutionID] = solution

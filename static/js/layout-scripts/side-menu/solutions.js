@@ -270,7 +270,7 @@ module.exports = {
 
             let dsIndex = randomInt(0, fr.designSolutions.length - 1)
             let randomDs = fr.designSolutions[dsIndex]
-            randomSolution.bindFrToDs(fr.id, randomDs.id)
+            randomSolution.bindFrToDs(fr, randomDs)
         }
 
         matrix.addSolution(randomSolution)

@@ -71,6 +71,22 @@
     cursor: pointer;
 }
 
+.matrix .hover-overlay-disabled {
+    @extend .hover-overlay-cover;
+    background-color: rgba(0,0,0,0.5);
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+}
+
+.matrix .overlay-disabled {
+    @extend .hover-overlay-disabled;
+    border: 1px solid red;
+    color: rgba(255,255,255,0.8);
+}
+
 .matrix .hover-overlay-icons .overlay-icon:hover {
     color: $white-high;
 }

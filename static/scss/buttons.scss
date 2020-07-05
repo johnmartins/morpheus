@@ -29,10 +29,18 @@
     background-color: transparent;
     color: $white-medium;
     border: 1px solid $white-medium;
+    transition: all 0.5s;
 }
 
 .btn-secondary:hover {
     background-color: transparent;
     color: $white-high;
     border-color: $white-high;
+}
+
+.btn-secondary.selected {
+    background-color: $white-high;
+    border-color: $white-low;
+    color: $grey-lowest;
+    transition: all 0.2s;
 }

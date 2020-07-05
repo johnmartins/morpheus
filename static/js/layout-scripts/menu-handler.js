@@ -11,6 +11,9 @@ require(path.join(__dirname, './side-menu/solutions')).setupListeners()
 require(path.join(__dirname, './side-menu/export')).setupListeners()
 require(path.join(__dirname, './side-menu/delimitations')).setupListeners()
 
+const state = require('./../state')
+const workspace = require('./../workspace')
+
 let sideMenu = document.getElementById('side-menu-tabs')
 
 let currentTabContent = null
@@ -42,6 +45,8 @@ module.exports = () => {
         if (currentTabContent) currentTabContent.style.display = 'none'
         targetTabContent.style.display = 'flex'
         currentTabContent = targetTabContent
+
+        GlobalObserver.emit('tab-change', tabID)
     }
 }
 

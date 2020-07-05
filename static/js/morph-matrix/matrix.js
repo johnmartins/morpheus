@@ -12,85 +12,10 @@ const random = require('./../utils/random')
 const storageService = require('./../services/storage-service')
 const fileDiagService = require('./../services/file-dialog-service')
 
-class FunctionalRequirement {
-    id = null
-    rowID = null
-    description = null
-    position = null
-    designSolutions = []
-
-    constructor (id, rowID, position) {
-        this.id = id
-        this.position = position
-        this.rowID = rowID
-    }
-}
-
-class DesignSolution {
-    id = null
-    description = null
-    position = null
-    image = null
-    frID = null
-
-    // Delimitation parameters
-    disabled = false
-    incompatibleWith = new Set()
-
-    constructor(id, position, frID, {disabled = false, image = null, description = null} = {}) {
-        this.id = id
-        this.position = position
-        this.frID = frID
-        this.image = image,
-        this.description = description
-        this.disabled = disabled
-    }
-
-    /**
-     * Creates a mirrored incompatibillity delimitation. 
-     * @param {DesignSolution} ds 
-     */
-    setIncompatibleWith(ds) {
-        this.incompatibleWith.add(dsID)
-        ds.incompatibleWith.add(this.id)
-    }
-}
-
-class Solution {
-    id = null
-    name = null
-    frToDsMap = {} // Maps a FR ID to a DS ID (string->string)
-    color = null
-
-    constructor () {
-        this.id = 'sol-'+random.randomString(12)
-        let randint = random.randomInt(0,360)
-        this.color = `hsl(${randint},80%,65%)`
-    }
-
-    bindFrToDs (fr, ds) {
-        if (ds.disabled) {
-            console.log('Selected DS is disabled')
-            return
-        }
-        this.frToDsMap[fr.id] = ds.id
-    }
-
-    unbindFrFromDs (frID) {
-        delete this.frToDsMap[frID]
-        if (Object.keys(this.frToDsMap).length === 0) {
-            console.error('The solution is empty. Todo: remove solution or warn user.')
-        }
-    }
-
-    getDsForFr (frID) {
-        return this.frToDsMap[frID]
-    }
-
-    getMappedFunctionsArray () {
-        return Object.keys(this.frToDsMap)
-    }
-}
+// Morph Matrix classes
+const FunctionalRequirement = require('./FunctionalRequirement')
+const DesignSolution = require('./DesignSolution')
+const Solution = require('./Solution')
 
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
@@ -103,10 +28,10 @@ class MorphMatrix {
     // Object representation of matrix information
     name = "Untitled Morphological Matrix"
     functionalRequirements = []
-    solutions = {}
+    solutions = {}          // Solution ID -> Solution
 
-    frMap = {}
-    dsMap = {}
+    frMap = {}              // FunctionalRequirement ID -> FunctionalRequirement
+    dsMap = {}              // DesignSolution ID -> DesignSolution
 
     // Important layout vars
     containerID = null
@@ -604,20 +529,13 @@ class MorphMatrix {
 
         if (disabled) {
             // Add overlay
-            let overlay = document.createElement('div')
-            overlay.classList.add('overlay-disabled')
-            overlay.innerHTML = '<i class="fas fa-ban"></i>'
-            overlay.onclick = () => {
-                console.log("CLICK!")
-                if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) return
-                this.setDsDisabled(dsID, false)
-            }
-            dsCell.appendChild(overlay)
+            this.renderDisabledDsOverlay(dsCell)
         } else {
             // Remove overlay
-            let overlay = dsCell.querySelector('.overlay-disabled')
-            dsCell.removeChild(overlay)
+            this.clearDisabledDsOverlay(dsCell)
         }
+
+        GlobalObserver.emit('ds-availability-change', ds)
     }
 
     addFunctionalRequirement ({id = null, description = null} = {}) {
@@ -690,6 +608,11 @@ class MorphMatrix {
 
         // Map ID for easy object lookup
         this.dsMap[ds.id] = ds
+
+        // Render disabled overlay if disabled
+        if (ds.disabled) {
+            this.renderDisabledDsOverlay(newCell)
+        }
 
         // Create form in which a description can be written
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, {
@@ -772,7 +695,9 @@ class MorphMatrix {
                 console.log(`Copying binding: ${frID} -> ${savedSolution.frToDsMap[frID]}`)
                 const ds = this.dsMap[savedSolution.frToDsMap[frID]]
                 const fr = this.frMap[frID]
-                solution.bindFrToDs(fr, ds)
+                solution.bindFrToDs(fr, ds, {
+                    ignoreDisabled: true
+                })
             }   
 
             this.solutions[solutionID] = solution
@@ -792,6 +717,22 @@ class MorphMatrix {
             }
             return value;
         })
+    }
+
+    renderDisabledDsOverlay(dsCell) {
+        let overlay = document.createElement('div')
+        overlay.classList.add('overlay-disabled')
+        overlay.innerHTML = '<i class="fas fa-ban"></i>'
+        overlay.onclick = () => {
+            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) return
+            this.setDsDisabled(dsCell.id, false)
+        }
+        dsCell.appendChild(overlay)
+    }
+
+    clearDisabledDsOverlay(dsCell) {
+        let overlay = dsCell.querySelector('.overlay-disabled')
+        dsCell.removeChild(overlay)
     }
 }
 

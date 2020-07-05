@@ -36,6 +36,34 @@ module.exports = {
             // Reset UI
             module.exports.resetUI()
         })
+
+        GlobalObserver.on('ds-availability-change', (ds) => {
+            const matrix = workspace.getMatrix()
+            for (let solutionID in matrix.solutions) {
+                let solution = matrix.solutions[solutionID]
+                if (solution.getDsForFr(ds.frID) === ds.id) {
+                    // This solution contains the affected DS
+                    
+                    if (ds.disabled) {
+                        solution.addConflict(ds.id)
+
+                        // Add warning icon if there isn't already one
+                        addConflictIcon(solution.id)
+                        
+                    } else {
+                        solution.removeConflict(ds.id)
+
+                        // Remove warning icon if there are no conflicts left
+                        if (solution.hasConflicts() === true) continue
+                        removeConflictIcon(solution.id)
+                    }
+                }
+            }
+        })
+
+        GlobalObserver.on('tab-change', (tabID) => {
+            module.exports.resetUI()
+        })
     },
 
     startNewSolution: () => {
@@ -107,11 +135,15 @@ module.exports = {
 
         let solListEntry = document.createElement('li')
         solListEntry.id = ID_PREFIX_SOLUTION_ENTRY+solutionID
-        solListEntry.innerHTML = solution.name
+        solListEntry.innerHTML = '<span class="solution-list-icon-span"></span><span class="solution-list-name">'+solution.name+'</span>'
         solListEntry.classList.add('solution-list-entry')
+
+        // Setup listeners
         solListEntry.onclick = (evt) => {
-            if (evt.target.id !== solListEntry.id) return
+            if (evt.target.classList.contains('overlay')) return
             if (editingSolution) return
+
+            console.log('click!')
 
             if (solListEntry.classList.contains('selected')) { 
                 module.exports.resetUI()
@@ -154,6 +186,12 @@ module.exports = {
         } else {
             solList.appendChild(solListEntry) 
         }
+
+        // Check if the solution contains conflicts.
+        if (solution.hasConflicts()) {
+            addConflictIcon(solutionID)
+        }
+
         GlobalObserver.emit('solution-added', solutionID)
     },
 
@@ -228,6 +266,10 @@ module.exports = {
             unfinishedSolution = false
         }
 
+        if (editingSolution) {
+            module.exports.saveEditedSolution()
+        }
+
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
         button.innerHTML = 'New solution'
         matrix.clearSolutionRender()
@@ -279,6 +321,28 @@ module.exports = {
     }
 }
 
+function addConflictIcon (solutionID) {
+    let listElement = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
+    let listElementIcons = listElement.querySelector('.solution-list-icon-span')
+
+    // Check if it already has such an icon
+    if (listElementIcons.querySelector('.conflict-warning')) return
+
+
+    let conflictIcon = document.createElement('i')
+    conflictIcon.classList.add('fas', 'fa-exclamation-triangle', 'warning-icon', 'conflict-warning')
+    conflictIcon.title = 'Solution contains disabled design solutions'
+    listElementIcons.appendChild(conflictIcon)
+}
+
+function removeConflictIcon (solutionID) {
+    let listElement = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
+    let listElementIcons = listElement.querySelector('.solution-list-icon-span')
+    let conflictWarning = listElementIcons.querySelector('.conflict-warning')
+    conflictWarning.parentElement.removeChild(conflictWarning)
+
+}
+
 function createSolutionEntryOverlay (overlay, solution) {
     overlay.classList.add('overlay')
 
@@ -325,7 +389,7 @@ function findListPosition (solutionName, solutionID) {
 
         if (entry.id === ID_PREFIX_SOLUTION_ENTRY+solutionID) continue
 
-        const compRes = entry.innerHTML.localeCompare(solutionName)
+        const compRes = entry.querySelector('.solution-list-name').innerHTML.localeCompare(solutionName)
 
         if (compRes === -1) continue
 

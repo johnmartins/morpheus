@@ -515,6 +515,8 @@ class MorphMatrix {
                 solution.unbindFrFromDs(frID)
             }
         }
+
+        GlobalObserver.emit('ds-removed')
     }
 
     setDsDisabled (dsID, disabled) {
@@ -645,6 +647,8 @@ class MorphMatrix {
         if (newCell.offsetLeft > val) {
             workspaceElement.scrollLeft += newCell.offsetWidth
         }
+
+        GlobalObserver.emit('ds-added')
     }
 
     getContainerElement() {

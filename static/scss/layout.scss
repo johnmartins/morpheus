@@ -31,3 +31,11 @@
     height: 100%;
     background-color: $grey-low;
 }
+
+.d-inline-block {
+    display: inline-block;
+}
+
+.no-line-break {
+    white-space: nowrap;
+}

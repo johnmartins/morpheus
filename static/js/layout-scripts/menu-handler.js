@@ -17,6 +17,7 @@ const workspace = require('./../workspace')
 let sideMenu = document.getElementById('side-menu-tabs')
 
 let currentTabContent = null
+let currentTabID = null
 
 module.exports = () => {
     // Setup default tab
@@ -46,7 +47,11 @@ module.exports = () => {
         targetTabContent.style.display = 'flex'
         currentTabContent = targetTabContent
 
-        GlobalObserver.emit('tab-change', tabID)
+        GlobalObserver.emit('tab-change', {
+            currentTab: currentTabID,
+            nextTab: tabID
+        })
+        currentTabID = tabID
     }
 }
 

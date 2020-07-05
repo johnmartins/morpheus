@@ -83,7 +83,7 @@
 
 .matrix .overlay-disabled {
     @extend .hover-overlay-disabled;
-    border: 1px solid red;
+    border: 1px solid $red-high;
     color: rgba(255,255,255,0.8);
 }
 

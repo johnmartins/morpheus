@@ -16,6 +16,7 @@ const fileDiagService = require('./../services/file-dialog-service')
 const FunctionalRequirement = require('./FunctionalRequirement')
 const DesignSolution = require('./DesignSolution')
 const Solution = require('./Solution')
+const Incompatibility = require('./Incompatibility')
 
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
@@ -32,6 +33,7 @@ class MorphMatrix {
 
     frMap = {}              // FunctionalRequirement ID -> FunctionalRequirement
     dsMap = {}              // DesignSolution ID -> DesignSolution
+    incompatibilityMap = {} // Incompatibility ID -> Incompatibility
 
     // Important layout vars
     containerID = null
@@ -268,6 +270,17 @@ class MorphMatrix {
         return overlay
     }
 
+    _getDSCellIncompatibleOverlay (overlay, dsID, ds) {
+        overlay.classList.add('hover-overlay-incompatible')
+        overlay.innerHTML = '<i class="fas fa-times"></i>'
+
+        overlay.onclick = () => {
+            GlobalObserver.emit('incompatibility-selection', ds)
+        }
+        
+        return overlay
+    }
+
     _getDSCellDefaultOverlay (overlay, dsID, ds) {
         overlay.classList.add('hover-overlay-icons')
 
@@ -346,6 +359,8 @@ class MorphMatrix {
                 overlay = this._getDSCellSolutionOverlay(overlay, dsID, ds)
             } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) {
                 overlay = this._getDSCellDisableOverlay(overlay, dsID, ds)
+            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+                overlay = this._getDSCellIncompatibleOverlay(overlay, dsID, ds)
             }
 
             if (!overlay) return        // No overlay? Screw it.
@@ -540,6 +555,12 @@ class MorphMatrix {
         GlobalObserver.emit('ds-availability-change', ds)
     }
 
+    setIncompatible (ds1, ds2) {
+        let incompatibility = new Incompatibility(ds1, ds2)
+        this.incompatibilityMap[incompatibility.id] = incompatibility
+        GlobalObserver.emit('ds-incompatibility-change', incompatibility.id)
+    }
+
     addFunctionalRequirement ({id = null, description = null} = {}) {
         // Parameters
         let cellID = id ? id : "fr-"+random.randomString(8)
@@ -723,6 +744,28 @@ class MorphMatrix {
         })
     }
 
+    renderIncompatibleOverlay (dsCell) {
+        let overlay = document.createElement('div')
+        overlay.classList.add('overlay-incompatible')
+        overlay.innerHTML = '<i class="fas fa-times"></i>'
+        overlay.title = 'Incompatible'
+        dsCell.appendChild(overlay)
+    }
+
+    clearIncompatibleOverlay (dsCell) {
+        let overlay = dsCell.querySelector('.overlay-incompatible')
+        dsCell.removeChild(overlay)
+    }
+
+    clearAllIncompatibleOverlays () {
+        let overlays = this.containerElement.querySelectorAll('.overlay-incompatible')
+
+        for (let i = 0; i < overlays.length; i++) {
+            let overlay = overlays[i]
+            overlay.parentElement.removeChild(overlay)
+        }
+    }
+
     renderDisabledDsOverlay(dsCell) {
         let overlay = document.createElement('div')
         overlay.classList.add('overlay-disabled')
@@ -738,6 +781,37 @@ class MorphMatrix {
         let overlay = dsCell.querySelector('.overlay-disabled')
         dsCell.removeChild(overlay)
     }
+
+    /**
+     * Returns the size of the design space. Takes delimitations into account.
+     */
+    countPossibleSolutions() {
+        let solCount = 0;
+
+        const frArray = this.functionalRequirements
+
+        for (let i = 0; i < frArray.length; i++) {
+            const fr = frArray[i]
+            let dsCount = fr.designSolutions.length
+
+            for (let j = 0; j < fr.designSolutions.length; j++) {
+                if (fr.designSolutions[j].disabled) {
+                    dsCount -= 1
+                }
+            }
+
+            if (dsCount === 0) continue
+
+            if (solCount === 0) {
+                solCount = dsCount
+            } else {
+                solCount *= dsCount
+            }
+        }
+
+        return solCount;
+    }
+
 }
 
 module.exports = {

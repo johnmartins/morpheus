@@ -3,24 +3,39 @@
 const state = require('./../../state')
 const workspace = require('./../../workspace')
 
+let unfinishedIncompatibility = false
+let incompatibilitySelection = null
+
 module.exports = {
     setupListeners: () => {
+        const matrix = workspace.getMatrix()
+
         let toggleDsBtn = document.getElementById('btn-toggle-ds')
         let newIncompatibilityBtn = document.getElementById('btn-add-incompatibility')
-        let solutionCounter = document.getElementById('delim-solutions-counter')
 
         toggleDsBtn.onclick = () => {
             if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) {
                 toggleDsBtn.classList.remove('selected')
                 state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
             } else {
+                module.exports.resetUI()
+
                 toggleDsBtn.classList.add('selected')
                 state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DISABLE
             } 
         }
 
         newIncompatibilityBtn.onclick = () => {
-            console.log('new incompat')
+            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+                newIncompatibilityBtn.classList.remove('selected')
+                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+            } else {
+                module.exports.resetUI()
+
+                unfinishedIncompatibility = true
+                newIncompatibilityBtn.classList.add('selected')
+                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY
+            }
         }
 
         // Listen for global events:
@@ -33,42 +48,50 @@ module.exports = {
             if (tabData.currentTab !== 'tab-delimitations') return
             module.exports.resetUI()
         })
+
+        GlobalObserver.on('incompatibility-selection', (ds) => {
+            if (!incompatibilitySelection) {
+                incompatibilitySelection = ds
+                matrix.renderIncompatibleOverlay(document.getElementById(ds.id))
+            } else {
+                // Compatibility pair selected.
+                if (ds.id === incompatibilitySelection.id) {
+                    // If clicked the same -> Clear selection
+                    matrix.clearIncompatibleOverlay(document.getElementById(ds.id))
+                    incompatibilitySelection = null
+                    return
+                }
+
+                // Cant be incompatible with anything from the same row. That makes no sense.
+                if (ds.frID === incompatibilitySelection.frID) return 
+
+                matrix.renderIncompatibleOverlay(document.getElementById(ds.id))
+                matrix.setIncompatible(incompatibilitySelection, ds)
+                incompatibilitySelection = null
+            }
+        })
     },
 
     refreshSolutionCounter: () => {
         console.log('triggered')
         let solutionCounter = document.getElementById('delim-solutions-counter')
         const matrix = workspace.getMatrix()
-        let solCount = 0;
-
-        const frArray = matrix.functionalRequirements
-
-        for (let i = 0; i < frArray.length; i++) {
-            const fr = frArray[i]
-            let dsCount = fr.designSolutions.length
-
-            for (let j = 0; j < fr.designSolutions.length; j++) {
-                if (fr.designSolutions[j].disabled) {
-                    dsCount -= 1
-                }
-            }
-
-            if (dsCount === 0) continue
-
-            if (solCount === 0) {
-                solCount = dsCount
-            } else {
-                solCount *= dsCount
-            }
-        }
+        let solCount = matrix.countPossibleSolutions()
 
         solutionCounter.innerHTML = solCount
     },
 
     resetUI: () => {
         let toggleDsBtn = document.getElementById('btn-toggle-ds')
+        let newIncompatibilityBtn = document.getElementById('btn-add-incompatibility')
         
+        newIncompatibilityBtn.classList.remove('selected')
         toggleDsBtn.classList.remove('selected')
+
+        unfinishedIncompatibility = false
+        incompatibilitySelection = null
+
+        workspace.getMatrix().clearAllIncompatibleOverlays()
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
     }
 }

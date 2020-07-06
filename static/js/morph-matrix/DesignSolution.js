@@ -25,7 +25,7 @@ class DesignSolution {
      * @param {DesignSolution} ds 
      */
     setIncompatibleWith(ds) {
-        this.incompatibleWith.add(dsID)
+        this.incompatibleWith.add(ds.id)
         ds.incompatibleWith.add(this.id)
     }
 }

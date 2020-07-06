@@ -87,6 +87,28 @@
     color: rgba(255,255,255,0.8);
 }
 
+.matrix .hover-overlay-incompatible {
+    @extend .hover-overlay-cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px dotted transparentize($color: $yellow-high, $amount: 0.5);
+    color: transparentize($color: $yellow-high, $amount: 0.5);
+    font-size: 2rem;
+}
+
+.matrix .overlay-incompatible {
+    @extend .hover-overlay-cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px dotted $yellow-high;
+    color: $yellow-high;
+    font-size: 2rem;
+}
+
 .matrix .hover-overlay-icons .overlay-icon:hover {
     color: $white-high;
 }

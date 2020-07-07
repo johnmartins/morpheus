@@ -2,9 +2,13 @@
 
 const state = require('./../../state')
 const workspace = require('./../../workspace')
+const random = require('../../utils/random')
 
 let unfinishedIncompatibility = false
-let incompatibilitySelection = null
+let incompatibilityDsSelection = null
+let incompatibilityListIdSelection = null
+
+const ID_PREFIX_INCOMP_ENTRY = 'incomp-li-'
 
 module.exports = {
     setupListeners: () => {
@@ -42,7 +46,12 @@ module.exports = {
         GlobalObserver.on('ds-added', module.exports.refreshSolutionCounter)
         GlobalObserver.on('ds-removed', module.exports.refreshSolutionCounter)
         GlobalObserver.on('ds-availability-change', module.exports.refreshSolutionCounter)
-        GlobalObserver.on('ds-incompatibility-change', module.exports.refreshSolutionCounter)
+        GlobalObserver.on('ds-incompatibility-change', (incompatibility) => {
+            module.exports.refreshSolutionCounter()
+
+            module.exports.addIncompatibilityToList(incompatibility)
+
+        })
 
         GlobalObserver.on('tab-change', (tabData) => {
             if (tabData.currentTab !== 'tab-delimitations') return
@@ -50,25 +59,33 @@ module.exports = {
         })
 
         GlobalObserver.on('incompatibility-selection', (ds) => {
-            if (!incompatibilitySelection) {
-                incompatibilitySelection = ds
-                matrix.renderIncompatibleOverlay(document.getElementById(ds.id))
-            } else {
-                // Compatibility pair selected.
-                if (ds.id === incompatibilitySelection.id) {
-                    // If clicked the same -> Clear selection
-                    matrix.clearIncompatibleOverlay(document.getElementById(ds.id))
-                    incompatibilitySelection = null
-                    return
-                }
 
-                // Cant be incompatible with anything from the same row. That makes no sense.
-                if (ds.frID === incompatibilitySelection.frID) return 
+            if (!incompatibilityDsSelection) {
+                matrix.clearAllIncompatibleOverlays()
+                incompatibilityDsSelection = ds
+                matrix.renderIncompatibleOverlay(ds.id)
+                state.workspaceSelectedIncompatibleOrigin = ds.id
 
-                matrix.renderIncompatibleOverlay(document.getElementById(ds.id))
-                matrix.setIncompatible(incompatibilitySelection, ds)
-                incompatibilitySelection = null
+                return
+            } 
+            
+            // Compatibility pair selected.
+            if (ds.id === incompatibilityDsSelection.id) {
+                // If clicked the same -> Clear selection
+                matrix.clearIncompatibleOverlay(ds.id)
+                incompatibilityDsSelection = null
+                state.workspaceSelectedIncompatibleOrigin = null
+                return
             }
+
+            // Cant be incompatible with anything from the same row. That makes no sense.
+            if (ds.frID === incompatibilityDsSelection.frID) return 
+
+            matrix.renderIncompatibleOverlay(ds.id)
+            matrix.setIncompatible(incompatibilityDsSelection, ds)
+            incompatibilityDsSelection = null
+            state.workspaceSelectedIncompatibleOrigin = null
+            
         })
     },
 
@@ -81,15 +98,50 @@ module.exports = {
         solutionCounter.innerHTML = solCount
     },
 
+    addIncompatibilityToList: (incompatibility) => {
+        const matrix = workspace.getMatrix()
+
+        let incompList = document.getElementById('menu-incompatibilities-list')
+        let listEntry = document.createElement('li')
+        listEntry.classList.add('solution-list-entry')
+        listEntry.id = ID_PREFIX_INCOMP_ENTRY + '-' + random.randomString(6)
+
+        let titleElement = document.createElement('span')
+        titleElement.classList.add('solution-list-name')
+        titleElement.innerHTML = incompatibility.name
+
+        listEntry.appendChild(titleElement)
+        incompList.appendChild(listEntry)
+
+        listEntry.onclick = (evt) => {
+            if (listEntry.id === incompatibilityListIdSelection) {
+                module.exports.resetUI()
+                return
+            }
+
+            module.exports.resetUI()
+            
+            matrix.renderIncompatibility(incompatibility.id)
+            listEntry.classList.add('selected')
+            incompatibilityListIdSelection = listEntry.id
+        }
+    },
+
     resetUI: () => {
         let toggleDsBtn = document.getElementById('btn-toggle-ds')
         let newIncompatibilityBtn = document.getElementById('btn-add-incompatibility')
-        
+        let incompList = document.getElementById('menu-incompatibilities-list')
+
+        // Clear selections
+        let selectedIncompElement = incompList.querySelector('.selected')
+        if (selectedIncompElement) selectedIncompElement.classList.remove('selected')
         newIncompatibilityBtn.classList.remove('selected')
         toggleDsBtn.classList.remove('selected')
 
+        incompatibilityListIdSelection = null
         unfinishedIncompatibility = false
-        incompatibilitySelection = null
+        incompatibilityDsSelection = null
+        state.workspaceSelectedIncompatibleOrigin = null
 
         workspace.getMatrix().clearAllIncompatibleOverlays()
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT

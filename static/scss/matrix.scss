@@ -92,6 +92,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 10;
 
     border: 1px dotted transparentize($color: $yellow-high, $amount: 0.5);
     color: transparentize($color: $yellow-high, $amount: 0.5);

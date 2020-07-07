@@ -271,9 +271,14 @@ class MorphMatrix {
     }
 
     _getDSCellIncompatibleOverlay (overlay, dsID, ds) {
+        if (state.workspaceSelectedIncompatibleOrigin === ds.id) {
+            // If this is the selected origin of an incompatibility 
+            // then dont create a new hover overlay
+            return
+        }
+
         overlay.classList.add('hover-overlay-incompatible')
         overlay.innerHTML = '<i class="fas fa-times"></i>'
-
         overlay.onclick = () => {
             GlobalObserver.emit('incompatibility-selection', ds)
         }
@@ -558,7 +563,7 @@ class MorphMatrix {
     setIncompatible (ds1, ds2) {
         let incompatibility = new Incompatibility(ds1, ds2)
         this.incompatibilityMap[incompatibility.id] = incompatibility
-        GlobalObserver.emit('ds-incompatibility-change', incompatibility.id)
+        GlobalObserver.emit('ds-incompatibility-change', incompatibility)
     }
 
     addFunctionalRequirement ({id = null, description = null} = {}) {
@@ -744,15 +749,37 @@ class MorphMatrix {
         })
     }
 
-    renderIncompatibleOverlay (dsCell) {
+    renderIncompatibility (incompID) {
+        let incomp = this.incompatibilityMap[incompID]
+
+        this.renderIncompatibleOverlay(incomp.ds1.id)
+        this.renderIncompatibleOverlay(incomp.ds2.id)
+    }
+
+    renderIncompatibleOverlay (dsID) {
+        let dsCell = document.getElementById(dsID)
         let overlay = document.createElement('div')
         overlay.classList.add('overlay-incompatible')
         overlay.innerHTML = '<i class="fas fa-times"></i>'
         overlay.title = 'Incompatible'
+        overlay.onclick = () => {
+            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+                // Wrong workspace mode
+                return
+            }
+            if (state.workspaceSelectedIncompatibleOrigin !== dsID) {
+                // This is not the origin of an incompability
+                return
+            }
+            GlobalObserver.emit('incompatibility-selection', this.dsMap[dsID])
+
+        }
         dsCell.appendChild(overlay)
     }
 
-    clearIncompatibleOverlay (dsCell) {
+    clearIncompatibleOverlay (dsID) {
+        let dsCell = document.getElementById(dsID)
+        console.log('Clearing incomp from dsid: ')
         let overlay = dsCell.querySelector('.overlay-incompatible')
         dsCell.removeChild(overlay)
     }

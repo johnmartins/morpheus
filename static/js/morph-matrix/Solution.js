@@ -25,6 +25,12 @@ class Solution {
             return
         }
 
+        // Check if requested DS is incompatible. In that case noop.
+        if (this.isIncompatible(ds.id)) {
+            console.log('Selected DS is incompatible')
+            return
+        }
+
         if (ds.disabled && ignoreDisabled === true) {
             this.addConflict(ds.id)
         }
@@ -128,6 +134,16 @@ class Solution {
 
     hasConflicts () {
         return this.conflicts.length > 0 ? true : false
+    }
+
+    isIncompatible (dsID) {
+        let incompFrArray = this.incompatibleMap[dsID]
+
+        if (!incompFrArray) return false
+        if (incompFrArray.length === 0) return false
+        // This DS has selected design solutions that are incompatible.
+
+        return true
     }
 }
 

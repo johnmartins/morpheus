@@ -247,7 +247,6 @@ class MorphMatrix {
 
     _getDSCellSolutionOverlay (overlay, dsID, ds) {
         overlay.classList.add('hover-overlay-cover')
-        // box-shadow: inset 0 0 12px white;
         let solution = this.solutions[state.workspaceSelectedSolution]
         overlay.style.boxShadow = `inset 0 0 14px ${solution.color}`
         overlay.style.border = `1px solid ${solution.color}`

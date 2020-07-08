@@ -64,6 +64,7 @@ class Solution {
 
     unbindFrFromDs (frID) {
         let dsID = this.frIdToDsIdMap[frID]
+        console.log(`UNBINDING FR ${frID} from DS ${dsID}`)
         if (this.conflicts.includes(dsID)) {
             this.removeConflict(dsID)
         }
@@ -75,8 +76,12 @@ class Solution {
         if (Object.keys(this.frIdToDsIdMap).length === 0) {
             console.error('The solution is empty. Todo: remove solution or warn user.')
         }
+    }
 
-
+    removeFrMapping (frID) {
+        let mappedDsID = this.frIdToDsIdMap[frID]
+        if (mappedDsID) delete this.dsMap[mappedDsID]
+        delete this.frIdToDsIdMap[frID]
     }
 
     getDsForFr (frID) {
@@ -102,6 +107,7 @@ class Solution {
 
     clearAssociatedIncompatibilities (dsID) {
         // Check if this resolves any incompatibilities
+        console.log('CLEAR ASSOCIATED INCOMPS')
         let ds = this.dsMap[dsID]
         console.log(`Clearing incomps for ${dsID} with frID = ${ds.frID}`)
         for (let incompDsID of ds.getIncompatibleDsIDSet()) {

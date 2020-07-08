@@ -17,7 +17,7 @@ let tempFilePosition = null         // The JSON file
 // Last saved hash is an md5 hash of the json matrix structure of the last save.
 let lastSavedHash = null
 
-const { MorphMatrix } = require ('./morph-matrix/matrix')
+const MorphMatrix = require ('./morph-matrix/matrix')
 
 module.exports = {
 

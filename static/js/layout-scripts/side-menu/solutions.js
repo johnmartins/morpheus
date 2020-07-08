@@ -1,11 +1,10 @@
 'use strict'
 const state = require('./../../state')
 
-const { Solution } = require('./../../morph-matrix/matrix')
+const Solution = require('./../../morph-matrix/Solution')
 const workspace = require('./../../workspace')
 const popup = require('./../popup')
 const { randomInt } = require('../../utils/random')
-const matrix = require('./../../morph-matrix/matrix')
 
 let unfinishedSolution = false      // The user has started a new solution that is unsaved
 let editingSolution = false         // The user is editing a solution

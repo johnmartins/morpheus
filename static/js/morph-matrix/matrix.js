@@ -17,6 +17,7 @@ const FunctionalRequirement = require('./FunctionalRequirement')
 const DesignSolution = require('./DesignSolution')
 const Solution = require('./Solution')
 const Incompatibility = require('./Incompatibility')
+const SolutionCalculator = require('./SolutionCalculator')
 
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
@@ -495,7 +496,7 @@ class MorphMatrix {
         let solutionIDs = Object.keys(this.solutions)
         for (let i = 0; i < solutionIDs.length; i++) {
             let solution = this.solutions[solutionIDs[i]]
-            solution.unbindFrFromDs(frRowID)
+            solution.removeFrMapping(fr.id)
         }
     }
 
@@ -814,37 +815,10 @@ class MorphMatrix {
      * Returns the size of the design space. Takes delimitations into account.
      */
     countPossibleSolutions() {
-        let solCount = 0;
-
-        const frArray = this.functionalRequirements
-
-        for (let i = 0; i < frArray.length; i++) {
-            const fr = frArray[i]
-            let dsCount = fr.designSolutions.length
-
-            for (let j = 0; j < fr.designSolutions.length; j++) {
-                if (fr.designSolutions[j].disabled) {
-                    dsCount -= 1
-                }
-            }
-
-            if (dsCount === 0) continue
-
-            if (solCount === 0) {
-                solCount = dsCount
-            } else {
-                solCount *= dsCount
-            }
-        }
-
-        return solCount;
+        const solCal = new SolutionCalculator(this)
+        return solCal.calculateSkiptIncompatibilities()
     }
 
 }
 
-module.exports = {
-    MorphMatrix: MorphMatrix, 
-    FunctionalRequirement: FunctionalRequirement, 
-    DesignSolution: DesignSolution,
-    Solution: Solution
-}
+module.exports = MorphMatrix

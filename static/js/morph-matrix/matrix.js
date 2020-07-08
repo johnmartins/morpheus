@@ -422,6 +422,7 @@ class MorphMatrix {
         
         this.clearSolutionRender()
         this.renderSolution(currentSolutionID)
+        GlobalObserver.emit('solution-change', solution)
     }
 
     addSolution(solution) {
@@ -686,6 +687,7 @@ class MorphMatrix {
         console.log(`Imported ${save.name}`)
         this.name = save.name
         this.titleElement.innerHTML = this.name
+        this.incompatibilityMap = save.incompatibilityMap
         
         for (let frN = 0; frN < save.functionalRequirements.length; frN++) {
             let savedFr = save.functionalRequirements[frN]
@@ -721,9 +723,9 @@ class MorphMatrix {
             solution.color = savedSolution.color
 
             // Set FR -> DS mapping
-            for (const frID in savedSolution.frToDsMap) {
-                console.log(`Copying binding: ${frID} -> ${savedSolution.frToDsMap[frID]}`)
-                const ds = this.dsMap[savedSolution.frToDsMap[frID]]
+            for (const frID in savedSolution.frIdToDsIdMap) {
+                console.log(`Copying binding: ${frID} -> ${savedSolution.frIdToDsIdMap[frID]}`)
+                const ds = this.dsMap[savedSolution.frIdToDsIdMap[frID]]
                 const fr = this.frMap[frID]
                 solution.bindFrToDs(fr, ds, {
                     ignoreDisabled: true

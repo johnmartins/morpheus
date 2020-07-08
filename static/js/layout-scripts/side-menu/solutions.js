@@ -5,6 +5,7 @@ const { Solution } = require('./../../morph-matrix/matrix')
 const workspace = require('./../../workspace')
 const popup = require('./../popup')
 const { randomInt } = require('../../utils/random')
+const matrix = require('./../../morph-matrix/matrix')
 
 let unfinishedSolution = false      // The user has started a new solution that is unsaved
 let editingSolution = false         // The user is editing a solution
@@ -63,6 +64,14 @@ module.exports = {
 
         GlobalObserver.on('tab-change', (tabID) => {
             module.exports.resetUI()
+        })
+
+        GlobalObserver.on('solution-change', (solution) => {
+            const matrix = workspace.getMatrix()
+            matrix.clearAllIncompatibleOverlays()
+            for (let incompDsID of  solution.getIncompatibleDsIds()) {
+                matrix.renderIncompatibleOverlay(incompDsID)
+            }
         })
     },
 
@@ -241,7 +250,11 @@ module.exports = {
         document.getElementById('solutions-edit-form').classList.add('open')
         
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION
+        // Render relevant objects in matrix
         matrix.renderSolution(solutionID)
+        for (let incompDsID of  solution.getIncompatibleDsIds()) {
+            matrix.renderIncompatibleOverlay(incompDsID)
+        }
 
         nameForm.focus()
         
@@ -273,6 +286,7 @@ module.exports = {
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
         button.innerHTML = 'New solution'
         matrix.clearSolutionRender()
+        matrix.clearAllIncompatibleOverlays()
         button.onclick = module.exports.startNewSolution
         document.getElementById('solutions-edit-form').classList.remove('open')
 

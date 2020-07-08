@@ -9,7 +9,7 @@ class DesignSolution {
 
     // Delimitation parameters
     disabled = false
-    incompatibleWith = new Set()
+    incompatibleWith = new Set()    // Set of all other DSs that are incompatible with this DS.
 
     constructor(id, position, frID, {disabled = false, image = null, description = null} = {}) {
         this.id = id
@@ -27,6 +27,10 @@ class DesignSolution {
     setIncompatibleWith(ds) {
         this.incompatibleWith.add(ds.id)
         ds.incompatibleWith.add(this.id)
+    }
+
+    getIncompatibleDsIDSet() {
+        return this.incompatibleWith
     }
 }
 

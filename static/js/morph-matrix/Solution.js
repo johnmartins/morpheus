@@ -5,7 +5,8 @@ const random = require('./../utils/random')
 class Solution {
     id = null
     name = null
-    frToDsMap = {} // Maps a FR ID to a DS ID (string->string)
+    frIdToDsIdMap = {} // Maps a FR ID to a DS ID (string->string)
+    dsMap = {}
     color = null
 
     incompatibleMap = {}    // Maps incompatible DSs to the FRs (array) that causes it: DsID -> [FrID, FrID]
@@ -28,23 +29,44 @@ class Solution {
             this.addConflict(ds.id)
         }
 
-        // Check if this resolves a conflict.
-        let currentDsID = this.frToDsMap[fr.id]
-        if (this.conflicts.includes(currentDsID)) {
-            this.removeConflict(currentDsID)
+        let currentDsID = this.frIdToDsIdMap[fr.id]
+
+        if (currentDsID) {
+            // Check if this resolves a conflict.
+            if (this.conflicts.includes(currentDsID)) {
+                this.removeConflict(currentDsID)
+            }
+
+            // Check if this resolves incompatibilities
+            console.log('Currend DS ID is defined.')
+            this.clearAssociatedIncompatibilities(currentDsID)
+        }
+        
+        // Add new incompatibilities
+        for (let incompDsID of ds.getIncompatibleDsIDSet()) {
+            let frArray = this.incompatibleMap[incompDsID]
+            if (!frArray) {
+                this.incompatibleMap[incompDsID] = []
+            }
+
+            this.incompatibleMap[incompDsID].push(ds.frID)
         }
 
-        this.frToDsMap[fr.id] = ds.id
+        this.frIdToDsIdMap[fr.id] = ds.id
+        this.dsMap[ds.id] = ds
     }
 
     unbindFrFromDs (frID) {
-        let dsID = this.frToDsMap[frID]
+        let dsID = this.frIdToDsIdMap[frID]
         if (this.conflicts.includes(dsID)) {
             this.removeConflict(dsID)
         }
 
-        delete this.frToDsMap[frID]
-        if (Object.keys(this.frToDsMap).length === 0) {
+        this.clearAssociatedIncompatibilities(dsID)
+
+        delete this.frIdToDsIdMap[frID]
+        delete this.dsMap[dsID]
+        if (Object.keys(this.frIdToDsIdMap).length === 0) {
             console.error('The solution is empty. Todo: remove solution or warn user.')
         }
 
@@ -52,11 +74,11 @@ class Solution {
     }
 
     getDsForFr (frID) {
-        return this.frToDsMap[frID]
+        return this.frIdToDsIdMap[frID]
     }
 
     getMappedFunctionsArray () {
-        return Object.keys(this.frToDsMap)
+        return Object.keys(this.frIdToDsIdMap)
     }
 
     addIncompatibility (frID, dsID) {
@@ -66,6 +88,26 @@ class Solution {
             this.incompatibleMap[dsID] = []
             this.incompatibleMap[dsID].push(frID)
         }
+    }
+
+    getIncompatibleDsIds () {
+        return Object.keys(this.incompatibleMap)
+    }
+
+    clearAssociatedIncompatibilities (dsID) {
+        // Check if this resolves any incompatibilities
+        let ds = this.dsMap[dsID]
+        console.log(`Clearing incomps for ${dsID} with frID = ${ds.frID}`)
+        for (let incompDsID of ds.getIncompatibleDsIDSet()) {
+            let frArray = this.incompatibleMap[incompDsID]
+            if (frArray) {
+                let frIndex = frArray.indexOf(ds.frID)
+                frArray.splice(frIndex, 1)
+                if (frArray.length === 0) {
+                    delete this.incompatibleMap[incompDsID]
+                }
+            }
+        }   
     }
 
     addConflict (dsID) {

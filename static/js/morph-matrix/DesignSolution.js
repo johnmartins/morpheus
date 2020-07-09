@@ -1,5 +1,7 @@
 'use strict'
 
+const {IncompatibilityExistsError} = require('./../errors')
+
 class DesignSolution {
     id = null
     description = null
@@ -25,6 +27,9 @@ class DesignSolution {
      * @param {DesignSolution} ds 
      */
     setIncompatibleWith(ds) {
+        if (this.incompatibleWith.has(ds.id)) {
+            throw new IncompatibilityExistsError('Incomp already exists')
+        }
         this.incompatibleWith.add(ds.id)
         ds.incompatibleWith.add(this.id)
     }

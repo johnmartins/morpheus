@@ -562,9 +562,15 @@ class MorphMatrix {
     }
 
     setIncompatible (ds1, ds2) {
-        let incompatibility = new Incompatibility(ds1, ds2)
-        this.incompatibilityMap[incompatibility.id] = incompatibility
-        GlobalObserver.emit('ds-incompatibility-change', incompatibility)
+        try {
+            let incompatibility = new Incompatibility(ds1, ds2)
+            this.incompatibilityMap[incompatibility.id] = incompatibility
+            GlobalObserver.emit('ds-incompatibility-change', incompatibility)
+        } catch (err) {
+            if (err.code === 'INCOMP_EXISTS') {
+                console.log('Requested incompatibility already exists')
+            }
+        }
     }
 
     addFunctionalRequirement ({id = null, description = null} = {}) {

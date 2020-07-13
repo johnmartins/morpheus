@@ -36,6 +36,11 @@ class DesignSolution {
         ds.incompatibleWith[this.id] = incompatibility.id
     }
 
+    removeIncompatibilityWith(ds) {
+        delete this.incompatibleWith[ds.id]
+        delete ds.incompatibleWith[this.id]
+    }
+
     getIncompatibleDsIDArray() {
         return Object.keys(this.incompatibleWith)
     }

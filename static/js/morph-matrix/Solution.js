@@ -101,6 +101,19 @@ class Solution {
         }
     }
 
+    removeIncompatibility (ds1, ds2) {
+        console.log('Deleting incomp from solution')
+        if (this.incompatibleMap[ds1.id]) {
+            delete this.incompatibleMap[ds1.id]
+        } else if (this.incompatibleMap[ds2.id]) {
+            delete this.incompatibleMap[ds2.id]
+        } else {
+            console.error('No such incompatibility was found.')
+            return
+        }
+        console.log('Deleted incomp inside solution')
+    }
+
     getIncompatibleDsIds () {
         return Object.keys(this.incompatibleMap)
     }

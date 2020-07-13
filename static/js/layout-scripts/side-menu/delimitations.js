@@ -33,6 +33,7 @@ module.exports = {
             if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
                 newIncompatibilityBtn.classList.remove('selected')
                 state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+                unfinishedIncompatibility = false
             } else {
                 module.exports.resetUI()
 
@@ -118,6 +119,13 @@ module.exports = {
         }
     },
 
+    removeFromList: (incompatibilityID) => {
+        let incompList = document.getElementById('menu-incompatibilities-list')
+        let targetID = ID_PREFIX_INCOMP_ENTRY + '-' + incompatibilityID
+        let targetElement = incompList.querySelector(`#${targetID}`)
+        incompList.removeChild(targetElement)
+    },
+
     addIncompatibilityToList: (incompatibility) => {
         console.log('Adding incomp to list: '+incompatibility.name)
         const matrix = workspace.getMatrix()
@@ -125,7 +133,7 @@ module.exports = {
         let incompList = document.getElementById('menu-incompatibilities-list')
         let listEntry = document.createElement('li')
         listEntry.classList.add('solution-list-entry')
-        listEntry.id = ID_PREFIX_INCOMP_ENTRY + '-' + random.randomString(6)
+        listEntry.id = ID_PREFIX_INCOMP_ENTRY + '-' + incompatibility.id
 
         let titleElement = document.createElement('span')
         titleElement.classList.add('solution-list-name')
@@ -135,6 +143,8 @@ module.exports = {
         incompList.appendChild(listEntry)
 
         listEntry.onclick = (evt) => {
+            console.log(evt.target)
+            if (evt.target.classList.contains('icon')) return
             if (listEntry.id === incompatibilityListIdSelection) {
                 module.exports.resetUI()
                 return
@@ -145,6 +155,23 @@ module.exports = {
             matrix.renderIncompatibility(incompatibility.id)
             listEntry.classList.add('selected')
             incompatibilityListIdSelection = listEntry.id
+        }
+
+        let overlay = null
+
+        listEntry.onmouseover = () => {
+            if (overlay) return
+            if (unfinishedIncompatibility) return
+
+            overlay = document.createElement('div')
+            createListEntryOverlay(overlay, incompatibility)
+            listEntry.appendChild(overlay)
+        }
+
+        listEntry.onmouseleave = () => {
+            if (!overlay) return
+            listEntry.removeChild(overlay)
+            overlay = null
         }
     },
 
@@ -167,4 +194,19 @@ module.exports = {
         workspace.getMatrix().clearAllIncompatibleOverlays()
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
     }
+}
+
+
+function createListEntryOverlay (overlay, incompatibility) {
+    overlay.classList.add('overlay')
+
+    let deleteIcon = document.createElement('i')
+    deleteIcon.classList.add('fas', 'fa-trash-alt', 'icon')
+    deleteIcon.onclick = () => {
+        console.log('Clicked delete icon')
+        workspace.getMatrix().removeIncompatibility(incompatibility.id)
+        module.exports.removeFromList(incompatibility.id)
+    }
+
+    overlay.appendChild(deleteIcon)
 }

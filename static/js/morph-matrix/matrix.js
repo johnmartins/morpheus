@@ -578,6 +578,29 @@ class MorphMatrix {
         }
     }
 
+    /**
+     * Removes all matrix references to specified incompatibility
+     * @param {String} incompatibilityID 
+     */
+    removeIncompatibility (incompatibilityID) {
+        let incompatibility = this.incompatibilityMap[incompatibilityID]
+        if (!incompatibility) {
+            console.error('Failed to delete incompatibility. No incomp with ID = '+incompatibilityID)
+            return
+        }
+        
+        let ds1 = incompatibility.ds1
+        let ds2 = incompatibility.ds2
+        ds1.removeIncompatibilityWith(ds2) // Implicitly mirrors action onto ds2
+        delete this.incompatibilityMap[incompatibilityID]
+
+        // Loop through solutions and remove references
+        for (let solID in this.solutions) {
+            let solution = this.solutions[solID]
+            solution.removeIncompatibility(ds1, ds2)
+        }
+    }
+
     addFunctionalRequirement ({id = null, description = null} = {}) {
         // Parameters
         let cellID = id ? id : "fr-"+random.randomString(8)

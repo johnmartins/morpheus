@@ -38,27 +38,7 @@ module.exports = {
         })
 
         GlobalObserver.on('ds-availability-change', (ds) => {
-            const matrix = workspace.getMatrix()
-            for (let solutionID in matrix.solutions) {
-                let solution = matrix.solutions[solutionID]
-                if (solution.getDsForFr(ds.frID) === ds.id) {
-                    // This solution contains the affected DS
-                    
-                    if (ds.disabled) {
-                        solution.addConflict(ds.id)
-
-                        // Add warning icon if there isn't already one
-                        addConflictIcon(solution.id)
-                        
-                    } else {
-                        solution.removeConflict(ds.id)
-
-                        // Remove warning icon if there are no conflicts left
-                        if (solution.hasConflicts() === true) continue
-                        removeConflictIcon(solution.id)
-                    }
-                }
-            }
+            refreshConflictIcons()
         })
 
         GlobalObserver.on('tab-change', (tabID) => {
@@ -352,6 +332,7 @@ function removeConflictIcon (solutionID) {
     let listElement = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
     let listElementIcons = listElement.querySelector('.solution-list-icon-span')
     let conflictWarning = listElementIcons.querySelector('.conflict-warning')
+    if (!conflictWarning) return
     conflictWarning.parentElement.removeChild(conflictWarning)
 
 }
@@ -410,4 +391,17 @@ function findListPosition (solutionName, solutionID) {
     }
 
     return null
+}
+
+function refreshConflictIcons () {
+    const matrix = workspace.getMatrix()
+    // Loop through solutions. Add/remove conflict icons
+    for (let solutionID in matrix.solutions) {
+        let solution = matrix.solutions[solutionID]
+        if (solution.hasConflicts()) {
+            addConflictIcon(solution.id)
+        } else {
+            removeConflictIcon(solution.id)
+        }
+    }
 }

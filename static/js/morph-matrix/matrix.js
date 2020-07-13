@@ -558,6 +558,19 @@ class MorphMatrix {
             this.clearDisabledDsOverlay(dsCell)
         }
 
+        // Update solution conflicts
+        for (let solutionID in this.solutions) {
+            let solution = this.solutions[solutionID]
+            if (solution.getDsForFr(ds.frID) === ds.id) {
+                // This solution contains the affected DS
+                if (ds.disabled) {
+                    solution.addConflict(ds.id)    
+                } else {
+                    solution.removeConflict(ds.id)
+                }
+            }
+        }
+
         GlobalObserver.emit('ds-availability-change', ds)
     }
 

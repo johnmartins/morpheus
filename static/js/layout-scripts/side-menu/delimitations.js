@@ -87,6 +87,17 @@ module.exports = {
             state.workspaceSelectedIncompatibleOrigin = null
             
         })
+
+        GlobalObserver.on('matrix-imported', () => {
+            module.exports.refreshSolutionCounter()
+
+            // Existing incompatibilities are implicitly imported by the matrix import function
+        })
+
+        GlobalObserver.on('matrix-created', () => {
+            module.exports.clearIncompatibilityList()
+            module.exports.resetUI()
+        })
     },
 
     refreshSolutionCounter: () => {
@@ -98,7 +109,17 @@ module.exports = {
         solutionCounter.innerHTML = solCount
     },
 
+    clearIncompatibilityList() {
+        const incompList = document.getElementById('menu-incompatibilities-list')
+        let incompElements = incompList.querySelectorAll('.solution-list-entry')
+
+        for (let element of incompElements) {
+            element.parentElement.removeChild(element)
+        }
+    },
+
     addIncompatibilityToList: (incompatibility) => {
+        console.log('Adding incomp to list: '+incompatibility.name)
         const matrix = workspace.getMatrix()
 
         let incompList = document.getElementById('menu-incompatibilities-list')

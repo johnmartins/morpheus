@@ -49,7 +49,7 @@ class Solution {
         }
         
         // Add new incompatibilities
-        for (let incompDsID of ds.getIncompatibleDsIDSet()) {
+        for (let incompDsID of ds.getIncompatibleDsIDArray()) {
             let frArray = this.incompatibleMap[incompDsID]
             if (!frArray) {
                 this.incompatibleMap[incompDsID] = []
@@ -110,7 +110,7 @@ class Solution {
         console.log('CLEAR ASSOCIATED INCOMPS')
         let ds = this.dsMap[dsID]
         console.log(`Clearing incomps for ${dsID} with frID = ${ds.frID}`)
-        for (let incompDsID of ds.getIncompatibleDsIDSet()) {
+        for (let incompDsID of ds.getIncompatibleDsIDArray()) {
             let frArray = this.incompatibleMap[incompDsID]
             if (frArray) {
                 let frIndex = frArray.indexOf(ds.frID)

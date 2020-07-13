@@ -561,14 +561,19 @@ class MorphMatrix {
         GlobalObserver.emit('ds-availability-change', ds)
     }
 
-    setIncompatible (ds1, ds2) {
+    setIncompatible (ds1, ds2, {incompID = null, incompName = null} = {}) {
         try {
-            let incompatibility = new Incompatibility(ds1, ds2)
+            let incompatibility = new Incompatibility(ds1, ds2, {
+                id: incompID,
+                name: incompName
+            })
             this.incompatibilityMap[incompatibility.id] = incompatibility
             GlobalObserver.emit('ds-incompatibility-change', incompatibility)
         } catch (err) {
             if (err.code === 'INCOMP_EXISTS') {
                 console.log('Requested incompatibility already exists')
+            } else {
+                throw err
             }
         }
     }
@@ -690,11 +695,13 @@ class MorphMatrix {
 
     import(save) {
         // Rebuild matrix from json dump
-        console.log(`Imported ${save.name}`)
+        console.log(`Importing "${save.name}"..`)
         this.name = save.name
         this.titleElement.innerHTML = this.name
-        this.incompatibilityMap = save.incompatibilityMap
         
+        console.log('Imported title')
+
+        // Import FR -> DS mapping and structure
         for (let frN = 0; frN < save.functionalRequirements.length; frN++) {
             let savedFr = save.functionalRequirements[frN]
             this.addFunctionalRequirement({
@@ -710,16 +717,27 @@ class MorphMatrix {
                     image: savedDs.image,
                     description: savedDs.description,
                 })
-
-                if (savedDs.incompatibleWith) {
-                    for (let i = 0; i < savedDs.incompatibleWith.length; i++) {
-                        ds.setIncompatibleWith(savedDs.incompatibleWith[i])
-                    }
-                } 
-
                 this.addDesignSolution(savedFr, ds)
             }
         }
+
+        console.log('Imported FR and DS structure')
+
+        // Import incompatibilities
+        this.incompatibilityMap = save.incompatibilityMap
+        for (let savedIncompID in save.incompatibilityMap) {
+            let savedIncomp = save.incompatibilityMap[savedIncompID]
+            const incompDs1ID = savedIncomp.ds1.id
+            const incompDs2ID = savedIncomp.ds2.id
+            const incompDs1 = this.dsMap[incompDs1ID]
+            const incompDs2 = this.dsMap[incompDs2ID]
+            this.setIncompatible(incompDs1, incompDs2, {
+                incompID: savedIncomp.id,
+                incompName: savedIncomp.name
+            })
+        }
+
+        console.log('Imported incompatibilities')
 
         for (const solutionID in save.solutions) {
             const savedSolution = save.solutions[solutionID]
@@ -740,6 +758,8 @@ class MorphMatrix {
 
             this.solutions[solutionID] = solution
         }
+
+        console.log('Imported solutions')
 
         GlobalObserver.emit('matrix-imported', save)
     }

@@ -593,7 +593,7 @@ class MorphMatrix {
                 }
             }
             
-            GlobalObserver.emit('ds-incompatibility-change', incompatibility)
+            GlobalObserver.emit('ds-incompatibility-change', incompatibility.id)
         } catch (err) {
             if (err.code === 'INCOMP_EXISTS') {
                 console.log('Requested incompatibility already exists')
@@ -624,6 +624,8 @@ class MorphMatrix {
             let solution = this.solutions[solID]
             solution.removeIncompatibility(ds1, ds2)
         }
+
+        GlobalObserver.emit('ds-incompatibility-change', incompatibilityID)
     }
 
     addFunctionalRequirement ({id = null, description = null} = {}) {
@@ -800,7 +802,7 @@ class MorphMatrix {
                 const ds = this.dsMap[savedSolution.frIdToDsIdMap[frID]]
                 const fr = this.frMap[frID]
                 solution.bindFrToDs(fr, ds, {
-                    ignoreDisabled: true
+                    ignoreDelimitations: true
                 })
             }   
 
@@ -891,6 +893,10 @@ class MorphMatrix {
     countPossibleSolutions() {
         const solCal = new SolutionCalculator(this)
         return solCal.calculateSkiptIncompatibilities()
+    }
+
+    getIncompatibility(incompatibilityID) {
+        return this.incompatibilityMap[incompatibilityID]
     }
 
 }

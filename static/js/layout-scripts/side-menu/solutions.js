@@ -41,7 +41,7 @@ module.exports = {
             refreshConflictIcons()
         })
 
-        GlobalObserver.on('ds-incompatibility-change', (incompatibility) => {
+        GlobalObserver.on('ds-incompatibility-change', (incompatibilityID) => {
             refreshConflictIcons()
         })
 

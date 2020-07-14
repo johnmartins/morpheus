@@ -17,20 +17,20 @@ class Solution {
         this.color = `hsl(191,80%,65%)`
     }
 
-    bindFrToDs (fr, ds, {ignoreDisabled = false} = {}) {
+    bindFrToDs (fr, ds, {ignoreDelimitations = false} = {}) {
         // Check if requested DS is disabled. In that case noop.
-        if (ds.disabled && ignoreDisabled === false) {
+        if (ds.disabled && ignoreDelimitations === false) {
             console.log('Selected DS is disabled')
             return
+        } else if (ds.disabled && ignoreDelimitations === true) {
+            this.addConflict(ds.id)
         }
 
         // Check if requested DS is incompatible. In that case noop.
-        if (this.isIncompatible(ds.id)) {
+        if (this.isIncompatible(ds.id) && ignoreDelimitations === false) {
             console.log('Selected DS is incompatible')
             return
-        }
-
-        if (ds.disabled && ignoreDisabled === true) {
+        } else if (this.isIncompatible(ds.id) && ignoreDelimitations === true) {
             this.addConflict(ds.id)
         }
 
@@ -142,14 +142,27 @@ class Solution {
 
     removeIncompatibility (ds1, ds2) {
         console.log('Deleting incomp from solution')
-        if (this.incompatibleMap[ds1.id]) {
-            delete this.incompatibleMap[ds1.id]
-        } else if (this.incompatibleMap[ds2.id]) {
-            delete this.incompatibleMap[ds2.id]
-        } else {
+
+        if (!this.incompatibleMap[ds1.id] && !this.incompatibleMap[ds2.id])         {
             console.error('No such incompatibility was found.')
             return
         }
+
+        if (this.incompatibleMap[ds1.id]) {
+            delete this.incompatibleMap[ds1.id]
+
+            if (!ds1.isDisabled()) {
+                this.removeConflict(ds1.id)
+            }
+        } 
+        
+        if (this.incompatibleMap[ds2.id]) {
+            delete this.incompatibleMap[ds2.id]
+
+            if (!ds2.isDisabled()) {
+                this.removeConflict(ds2.id)
+            }
+        }  
     }
 
     getIncompatibleDsIds () {

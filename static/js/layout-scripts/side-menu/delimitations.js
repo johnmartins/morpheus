@@ -47,11 +47,14 @@ module.exports = {
         GlobalObserver.on('ds-added', module.exports.refreshSolutionCounter)
         GlobalObserver.on('ds-removed', module.exports.refreshSolutionCounter)
         GlobalObserver.on('ds-availability-change', module.exports.refreshSolutionCounter)
-        GlobalObserver.on('ds-incompatibility-change', (incompatibility) => {
+        GlobalObserver.on('ds-incompatibility-change', (incompatibilityID) => {
+            let incompatibility = workspace.getMatrix().getIncompatibility(incompatibilityID)
             module.exports.refreshSolutionCounter()
 
-            module.exports.addIncompatibilityToList(incompatibility)
-
+            // If defined, then add to list. If undefined, then it was deleted.
+            if (incompatibility) {
+                module.exports.addIncompatibilityToList(incompatibility)
+            }
         })
 
         GlobalObserver.on('tab-change', (tabData) => {

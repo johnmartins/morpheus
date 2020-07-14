@@ -54,6 +54,8 @@ module.exports = {
             // If defined, then add to list. If undefined, then it was deleted.
             if (incompatibility) {
                 module.exports.addIncompatibilityToList(incompatibility)
+            } else {
+                module.exports.removeFromList(incompatibilityID)
             }
         })
 
@@ -208,7 +210,6 @@ function createListEntryOverlay (overlay, incompatibility) {
     deleteIcon.onclick = () => {
         console.log('Clicked delete icon')
         workspace.getMatrix().removeIncompatibility(incompatibility.id)
-        module.exports.removeFromList(incompatibility.id)
     }
 
     overlay.appendChild(deleteIcon)

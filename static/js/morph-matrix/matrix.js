@@ -537,6 +537,15 @@ class MorphMatrix {
             }
         }
 
+        // Delete incompabilities that reference this DS
+        let incompatibilityIDs = Object.keys(this.incompatibilityMap)
+        for (let i = 0; i < incompatibilityIDs.length; i++) {
+            let incompatibility = this.incompatibilityMap[incompatibilityIDs[i]]
+            if (incompatibility.ds1.id === dsID || incompatibility.ds2.id === dsID) {
+                this.removeIncompatibility(incompatibility.id)
+            }
+        }
+
         GlobalObserver.emit('ds-removed')
     }
 

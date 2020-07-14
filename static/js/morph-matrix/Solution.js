@@ -179,7 +179,9 @@ class Solution {
             if (frArray) {
                 let frIndex = frArray.indexOf(ds.frID)
                 frArray.splice(frIndex, 1)
+                console.log('Spliced one')
                 if (frArray.length === 0) {
+                    console.log('fr array is now empty. Deleting..')
                     delete this.incompatibleMap[incompDsID]
                 }
             }

@@ -45,6 +45,10 @@ module.exports = {
             refreshConflictIcons()
         })
 
+        GlobalObserver.on('ds-removed', () => {
+            refreshConflictIcons()
+        })
+
         GlobalObserver.on('tab-change', (tabID) => {
             module.exports.resetUI()
         })

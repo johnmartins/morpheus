@@ -14,8 +14,7 @@ class Solution {
 
     constructor () {
         this.id = 'sol-'+random.randomString(12)
-        let randint = random.randomInt(0,360)
-        this.color = `hsl(${randint},80%,65%)`
+        this.color = `hsl(191,80%,65%)`
     }
 
     bindFrToDs (fr, ds, {ignoreDisabled = false} = {}) {
@@ -36,11 +35,16 @@ class Solution {
         }
 
         let currentDsID = this.frIdToDsIdMap[fr.id]
+        let currentDs = this.dsMap[currentDsID]
 
         if (currentDsID) {
-            // Check if this resolves a conflict.
+            console.log('currentDs exists')
+            // Check if this indirectly resolves a conflict (due to incompatibilities)
+            this._clearIndirectIncompatibilityConflicts(currentDs)
+
+            // Check if this directly resolves a conflict (due to disabled DS)
             if (this.conflicts.includes(currentDsID)) {
-                this.removeConflict(currentDsID)
+                this.removeConflict(currentDsID) // Evaluate first?
             }
 
             // Check if this resolves incompatibilities
@@ -64,7 +68,13 @@ class Solution {
 
     unbindFrFromDs (frID) {
         let dsID = this.frIdToDsIdMap[frID]
+        let ds = this.dsMap[dsID]
         console.log(`UNBINDING FR ${frID} from DS ${dsID}`)
+
+        // Remove indirect conflicts
+        this._clearIndirectIncompatibilityConflicts(ds)
+
+        // Remove direct conflicts
         if (this.conflicts.includes(dsID)) {
             this.removeConflict(dsID)
         }
@@ -75,6 +85,26 @@ class Solution {
         delete this.dsMap[dsID]
         if (Object.keys(this.frIdToDsIdMap).length === 0) {
             console.error('The solution is empty. Todo: remove solution or warn user.')
+        }
+    }
+
+    /**
+     * If a design solution is removed from the solution, then that could potentially resolve conflicts
+     * that were caused by that design solution being incompatible with other selected design solutions.
+     * This function resolves those conflicts, unless the conflicting DSs are disabled, in which case
+     * the conflict remains.
+     * @param {DesignSolution} ds 
+     */
+    _clearIndirectIncompatibilityConflicts (ds) {
+        for (let incompDsID in ds.getIncompatibilityMap()) {
+            let indirectDs = this.dsMap[incompDsID]
+            if (indirectDs) {
+                // The removed DS is incompatible with a DS that is selected in this solution.
+                // Thus, an indirect conflict has been resolved.
+                if (!indirectDs.disabled) {
+                    this.removeConflict(indirectDs.id)
+                }
+            }
         }
     }
 
@@ -92,12 +122,21 @@ class Solution {
         return Object.keys(this.frIdToDsIdMap)
     }
 
-    addIncompatibility (frID, dsID) {
-        let conflictArray = this.incompatibleMap[dsID]
+    /**
+     * Adds a ONE WAY incompatibility where ds1 is the root cause, and ds2 is the resulting incompatibility.
+     * Thus, ds2 is the only DS that will show up as "incompatible" when editing the solution.
+     * @param {DesignSolution} ds1 
+     * @param {DesignSolution} ds2 
+     */
+    addIncompatibility (ds1, ds2) {
+        let frArray = this.incompatibleMap[ds2.id]
+        if (!frArray) {
+            this.incompatibleMap[ds2.id] = []
+        }
+        this.incompatibleMap[ds2.id].push(ds1.frID)
 
-        if (!conflictArray) {
-            this.incompatibleMap[dsID] = []
-            this.incompatibleMap[dsID].push(frID)
+        if (this.dsMap[ds2.id]) {
+            this.addConflict(ds2.id)
         }
     }
 
@@ -111,7 +150,6 @@ class Solution {
             console.error('No such incompatibility was found.')
             return
         }
-        console.log('Deleted incomp inside solution')
     }
 
     getIncompatibleDsIds () {
@@ -164,6 +202,27 @@ class Solution {
 
         return true
     }
+
+    /**
+     * Returns false if this DS is in conflict with the solution for any reason
+     * Returns true if this DS can be used in the solution without issues
+     * @param {String} dsID 
+     */
+    evaluateDsConflict (dsID) {
+        const ds = this.dsMap[dsID]
+        const isDisabled = ds.disabled
+        if (isDisabled) return false
+        const incompatibleRow = this.incompatibleMap[dsID]
+        if (incompatibleRow) return false
+        return true
+    }
+
+    containsDS (dsID) {
+        if (this.dsMap[dsID]) return true
+        return false
+    }
+
+    
 }
 
 module.exports = Solution

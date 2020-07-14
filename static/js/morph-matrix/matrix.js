@@ -563,10 +563,10 @@ class MorphMatrix {
             let solution = this.solutions[solutionID]
             if (solution.getDsForFr(ds.frID) === ds.id) {
                 // This solution contains the affected DS
-                if (ds.disabled) {
-                    solution.addConflict(ds.id)    
-                } else {
+                if (solution.evaluateDsConflict(ds.id)) {
                     solution.removeConflict(ds.id)
+                } else {
+                    solution.addConflict(ds.id)
                 }
             }
         }
@@ -581,6 +581,18 @@ class MorphMatrix {
                 name: incompName
             })
             this.incompatibilityMap[incompatibility.id] = incompatibility
+            
+            // Add conflicts to existing solutions that use both of these DS 
+            for (let solutionID in this.solutions) {
+                const solution = this.solutions[solutionID]
+                if (solution.containsDS(ds1.id)) {
+                    solution.addIncompatibility(ds1, ds2)
+                }
+                if (solution.containsDS(ds2.id)) {
+                    solution.addIncompatibility(ds2, ds1)
+                }
+            }
+            
             GlobalObserver.emit('ds-incompatibility-change', incompatibility)
         } catch (err) {
             if (err.code === 'INCOMP_EXISTS') {

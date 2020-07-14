@@ -13,10 +13,6 @@ class Incompatibility {
         this.ds2 = ds2
 
         ds1.setIncompatibleWith(ds2, this) // Is automatically mirrored
-
-        console.log('NEW INCOMPATIBILITY')
-        console.log(ds1)
-        console.log(ds2)
     }
 
     _getDefaultName () {
@@ -26,7 +22,6 @@ class Incompatibility {
         if (String(number).length === 2) number = `0${number}`
         return `incompatibility ${number}`
     }
-
 }
 
 module.exports = Incompatibility

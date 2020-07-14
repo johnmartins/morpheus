@@ -41,6 +41,10 @@ module.exports = {
             refreshConflictIcons()
         })
 
+        GlobalObserver.on('ds-incompatibility-change', (incompatibility) => {
+            refreshConflictIcons()
+        })
+
         GlobalObserver.on('tab-change', (tabID) => {
             module.exports.resetUI()
         })
@@ -184,6 +188,16 @@ module.exports = {
     },
 
     removeFromSolutionList: (solutionID) => {
+        if (editingSolution) {
+            popup.error('A solution is currently being edited. Save it first.')
+            return
+        }
+        
+        if (unfinishedSolution) {
+            popup.error('A solution is currently being created. Save it first.')
+            return
+        }
+
         let matrix = workspace.getMatrix()
         let solution = matrix.getSolution(solutionID)
         let solutionName = solution.name
@@ -321,10 +335,9 @@ function addConflictIcon (solutionID) {
     // Check if it already has such an icon
     if (listElementIcons.querySelector('.conflict-warning')) return
 
-
     let conflictIcon = document.createElement('i')
     conflictIcon.classList.add('fas', 'fa-exclamation-triangle', 'warning-icon', 'conflict-warning')
-    conflictIcon.title = 'Solution contains disabled design solutions'
+    conflictIcon.title = 'Solution contains disabled or incompatible design solutions'
     listElementIcons.appendChild(conflictIcon)
 }
 

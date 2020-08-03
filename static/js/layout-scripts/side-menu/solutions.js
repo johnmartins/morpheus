@@ -148,8 +148,6 @@ module.exports = {
             if (evt.target.classList.contains('overlay')) return
             if (editingSolution) return
 
-            console.log('click!')
-
             if (solListEntry.classList.contains('selected')) { 
                 module.exports.resetUI()
                 return;
@@ -448,7 +446,6 @@ function isSolutionUnique (solution) {
         if (solID === solution.id) continue
         let otherSolution = matrix.solutions[solID]
 
-        console.log(otherSolution.solutionString + ' vs ' + solution.solutionString)
         if (otherSolution.solutionString === solution.solutionString) {
             return false
         }

@@ -103,10 +103,13 @@ module.exports = {
             return
         }
 
-        if (!isSolutionUnique(solution)) {
+        let duplicateSolution = checkIfUnique(solution)
+        if (duplicateSolution) {
             console.error('WARNING: SOLUTION IS NOT UNIQUE')
-            popup.warning('The solution is not unique. Click "Cancel" to remove the new solution, or click "Continue" to keep it anyway.', {
-                callbackCancel: () => {
+
+            // TODO: Allow user to keep the duplicate if they really want to, maybe?
+            popup.error(`The solution is not unique. <strong>"${duplicateSolution.name}"</strong> has the same scheme. This solution will now be removed.`, {
+                callbackContinue: () => {
                     module.exports.removeListedSolution(solution.id)
                 }
             })
@@ -436,10 +439,11 @@ function refreshConflictIcons () {
 }
 
 /**
- * O(n) search for equivalent solution
+ * O(n) search for equivalent solution.  Returns the solution which this is equal to.
  * @param {Solution} solution 
+ * @returns {Solution} duplicate solution
  */
-function isSolutionUnique (solution) {
+function checkIfUnique (solution) {
     const matrix = workspace.getMatrix()
 
     for (let solID in matrix.solutions) {
@@ -447,9 +451,9 @@ function isSolutionUnique (solution) {
         let otherSolution = matrix.solutions[solID]
 
         if (otherSolution.solutionString === solution.solutionString) {
-            return false
+            return otherSolution
         }
     }
 
-    return true
+    return null
 }

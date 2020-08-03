@@ -103,6 +103,15 @@ module.exports = {
             return
         }
 
+        if (!isSolutionUnique(solution)) {
+            console.error('WARNING: SOLUTION IS NOT UNIQUE')
+            popup.warning('The solution is not unique. Click "Cancel" to remove the new solution, or click "Continue" to keep it anyway.', {
+                callbackCancel: () => {
+                    module.exports.removeListedSolution(solution.id)
+                }
+            })
+        }
+
         // Verify solution name. If unset (or useless) then automatically set a name.
         if (solution.name === null || /^\s+$/.test(solution.name) || solution.name.length === 0){
             let number = Object.keys(matrix.getSolutionMap()).length
@@ -212,11 +221,7 @@ module.exports = {
                 return
             },
             callbackContinue: () => {
-                GlobalObserver.emit('solution-removed', solutionID)
-                matrix.removeSolution(solutionID)
-                let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
-                listEntry.parentElement.removeChild(listEntry)
-                matrix.clearSolutionRender()
+                module.exports.removeListedSolution(solutionID)
             }
         })
     },
@@ -329,6 +334,15 @@ module.exports = {
         matrix.addSolution(randomSolution)
         module.exports.completeSolution()
         
+    },
+
+    removeListedSolution: (solutionID) => {
+        const matrix = workspace.getMatrix()
+        GlobalObserver.emit('solution-removed', solutionID)
+        matrix.removeSolution(solutionID)
+        let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
+        listEntry.parentElement.removeChild(listEntry)
+        matrix.clearSolutionRender()
     }
 }
 
@@ -421,4 +435,24 @@ function refreshConflictIcons () {
             removeConflictIcon(solution.id)
         }
     }
+}
+
+/**
+ * O(n) search for equivalent solution
+ * @param {Solution} solution 
+ */
+function isSolutionUnique (solution) {
+    const matrix = workspace.getMatrix()
+
+    for (let solID in matrix.solutions) {
+        if (solID === solution.id) continue
+        let otherSolution = matrix.solutions[solID]
+
+        console.log(otherSolution.solutionString + ' vs ' + solution.solutionString)
+        if (otherSolution.solutionString === solution.solutionString) {
+            return false
+        }
+    }
+
+    return true
 }

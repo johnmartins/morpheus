@@ -412,8 +412,9 @@ class MorphMatrix {
         
         let currentDsID = solution.getDsForFr(ds.frID)
         if (currentDsID === ds.id) {
+            let fr = this.frMap[ds.frID]
             // toggle off
-            solution.unbindFrFromDs(ds.frID)
+            solution.unbindFrFromDs(fr)
         } else {
             // toggle on
             const fr = this.frMap[ds.frID]
@@ -469,6 +470,13 @@ class MorphMatrix {
             this.deleteDesignSolution(fr.designSolutions[i].id)
         }
 
+        // Delete solution references
+        let solutionIDs = Object.keys(this.solutions)
+        for (let i = 0; i < solutionIDs.length; i++) {
+            let solution = this.solutions[solutionIDs[i]]
+            solution.removeFrMapping(fr, true)
+        }
+
         // Delete FR object
         let deleteIndex = -1
         for (let i = 0; i < this.functionalRequirements.length; i++) {
@@ -491,13 +499,6 @@ class MorphMatrix {
 
         // Delete map reference
         delete this.frMap[frRowID]
-
-        // Delete solution references
-        let solutionIDs = Object.keys(this.solutions)
-        for (let i = 0; i < solutionIDs.length; i++) {
-            let solution = this.solutions[solutionIDs[i]]
-            solution.removeFrMapping(fr.id)
-        }
     }
 
     deleteDesignSolution (dsID) {
@@ -533,7 +534,7 @@ class MorphMatrix {
         for (let i = 0; i < solutionIDs.length; i++) {
             let solution = this.solutions[solutionIDs[i]]
             if (solution.getDsForFr(frID) === dsID) {
-                solution.unbindFrFromDs(frID)
+                solution.unbindFrFromDs(fr)
             }
         }
 

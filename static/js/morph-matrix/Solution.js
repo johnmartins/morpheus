@@ -9,6 +9,10 @@ class Solution {
     dsMap = {}
     color = null
 
+    // Identification variables (used to ensure solution uniqueness)
+    solutionArray = []
+    solutionString = null
+
     incompatibleMap = {}    // Maps incompatible DSs to the FRs (array) that causes it: DsID -> [FrID, FrID]
     conflicts = []          // Lists DSs that are incompatible with set delimitations
 
@@ -64,9 +68,13 @@ class Solution {
 
         this.frIdToDsIdMap[fr.id] = ds.id
         this.dsMap[ds.id] = ds
+
+        this.solutionArray[fr.position - 1] = ds.id
+        this.solutionString = this.solutionArray.join('')
     }
 
-    unbindFrFromDs (frID) {
+    unbindFrFromDs (fr) {
+        let frID = fr.id
         let dsID = this.frIdToDsIdMap[frID]
         let ds = this.dsMap[dsID]
         console.log(`UNBINDING FR ${frID} from DS ${dsID}`)
@@ -86,6 +94,9 @@ class Solution {
         if (Object.keys(this.frIdToDsIdMap).length === 0) {
             console.error('The solution is empty. Todo: remove solution or warn user.')
         }
+
+        this.solutionArray[fr.position - 1] = null
+        this.solutionString = this.solutionArray.join('')
     }
 
     /**
@@ -108,10 +119,21 @@ class Solution {
         }
     }
 
-    removeFrMapping (frID) {
+    /**
+     * Remove all references to a specific FunctionalRequirement from this Solution.
+     * @param {*} fr FunctionalRequirement
+     * @param {*} siftSolutionArray Removes solutionArray element entierly. Required if the FR was deleted from the matrix.
+     */
+    removeFrMapping (fr, siftSolutionArray) {
+        let frID = fr.id
         let mappedDsID = this.frIdToDsIdMap[frID]
         if (mappedDsID) delete this.dsMap[mappedDsID]
         delete this.frIdToDsIdMap[frID]
+
+        if (siftSolutionArray) {
+            this.solutionArray.splice(fr.position - 1, 1)
+            this.solutionString = this.solutionArray.join('')
+        }
     }
 
     getDsForFr (frID) {

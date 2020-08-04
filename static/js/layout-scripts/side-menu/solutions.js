@@ -446,6 +446,7 @@ function refreshConflictIcons () {
 function checkIfUnique (solution) {
     const matrix = workspace.getMatrix()
 
+    // TODO: Could potentially be upgrated to utilize sets, turning O(n) -> O(1) if too slow for large sets of similar strings/solutions
     for (let solID in matrix.solutions) {
         if (solID === solution.id) continue
         let otherSolution = matrix.solutions[solID]

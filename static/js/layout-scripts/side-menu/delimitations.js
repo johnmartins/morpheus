@@ -107,7 +107,6 @@ module.exports = {
     },
 
     refreshSolutionCounter: () => {
-        console.log('triggered')
         let solutionCounter = document.getElementById('delim-solutions-counter')
         const matrix = workspace.getMatrix()
         let solCount = matrix.countPossibleSolutions()
@@ -148,7 +147,6 @@ module.exports = {
         incompList.appendChild(listEntry)
 
         listEntry.onclick = (evt) => {
-            console.log(evt.target)
             if (evt.target.classList.contains('icon')) return
             if (listEntry.id === incompatibilityListIdSelection) {
                 module.exports.resetUI()

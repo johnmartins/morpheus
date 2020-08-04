@@ -43,9 +43,6 @@ class SolutionCalculator {
     }
 
     calculate() {
-
-        console.log('TRIGGERED CALCULATION')
-
         const frArray = this.matrix.functionalRequirements
         let solutionCountNoDelimitations = 0
 

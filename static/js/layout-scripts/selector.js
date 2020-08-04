@@ -85,7 +85,6 @@ class Selector {
         // If removed option is selected, select another value or default
 
         if (this.value === value) {
-            console.log('removed selected value')
             this.value = null
             this.currentValueElement.innerHTML = 'Select a solution'
         }
@@ -119,7 +118,6 @@ class Selector {
 
         // Update stored value
         this.value = value
-        console.log('current value: '+this.value)
     }
 
     /**

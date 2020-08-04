@@ -361,7 +361,6 @@ function prepareMatrixForCapture (container) {
     let overlays = container.querySelectorAll('.hover-overlay-icons')
 
     for (let i = 0; i < overlays.length; i++) {
-        console.log('it happens')
         let overlay = overlays[i]
         overlay.style.display = 'none'
     }

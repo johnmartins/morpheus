@@ -5,6 +5,16 @@
 @import "font-awesome/regular.scss";
 @import "font-awesome/solid.scss";
 
+@font-face {
+    font-family: 'fontawesome';
+    src: url('../webfonts/fa-solid-900.woff') format('woff');
+}
+
+.fa, .far, .fas {
+    font-family: 'fontawesome' !important;
+}
+
+
 .fonts-loaded {
     font-family: 'Barlow';
 }

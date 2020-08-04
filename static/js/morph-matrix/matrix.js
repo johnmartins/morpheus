@@ -845,10 +845,15 @@ class MorphMatrix {
     }
 
     renderIncompatibleOverlay (dsID) {
+        const ds = this.dsMap[dsID]
+
         let dsCell = document.getElementById(dsID)
         let overlay = document.createElement('div')
+
         overlay.classList.add('overlay-incompatible')
-        overlay.innerHTML = '<i class="fas fa-times"></i>'
+        if (!ds.isDisabled()) {
+            overlay.innerHTML = '<i class="fas fa-times"></i>'
+        }
         overlay.title = 'Incompatible'
         overlay.onclick = () => {
             if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {

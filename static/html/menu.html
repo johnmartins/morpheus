@@ -1,14 +1,15 @@
 <div id="side-menu" class="menu" style="overflow: hidden;">
     <div id="side-menu-tabs" class="tab-container">
-        <div id="menu-solutions" class="tab-element selected" target="tab-solutions">Solutions</div>
-        <div id="menu-exports" class="tab-element" target="tab-export">Export</div>
+        <div id="menu-solutions" class="tab-element selected" target="tab-solutions" title="Solutions">Solutions</div>
+        <div id="menu-exports" class="tab-element" target="tab-export" title="Export">Export</div>
+        <div id="menu-delimitations" class="tab-element" target="tab-delimitations" title="Delimitations">Delimitations</div>
     </div>
     <div class="tab-content-container" style="overflow: hidden;">
 
         <!-- Solutions tab -->
         <div id="tab-solutions" class="tab-content">
             <span class="menu-title">Solutions</span>
-            <div class="tab-subsection" style="flex: 2;">
+            <div class="tab-subsection" style="flex: 3;">
                 <ul id="menu-solution-list" class="solution-list">
                 
                 </ul>
@@ -21,6 +22,7 @@
             <!-- Generate -->
             <span class="menu-title">Generate</span>
             <div class="tab-subsection">
+                <button id="btn-generate-all" class="btn btn-max-width btn-secondary">Generate all solutions</button>
                 <button id="btn-generate-random" class="btn btn-max-width btn-secondary">Random solution</button>
             </div>
         </div>
@@ -71,5 +73,23 @@
             </div>
             <button class="btn btn-max-width" id="btn-export-solutions">Export solution(s)</button>
         </div>
+
+        <!-- Delimitations tab -->
+        <div id="tab-delimitations" class="tab-content">
+            <span class="menu-title">Incompatibilities</span>
+            <div class="tab-subsection" style="flex: 3;">
+                <ul id="menu-incompatibilities-list" class="solution-list">
+                </ul>
+            </div>
+            <button id="btn-add-incompatibility" class="btn btn-max-width btn-secondary" style="margin-top: 4px; margin-bottom: 4px;">New incompatibility</button>
+            <span class="menu-title">Other delimitations</span>
+            <div class="tab-subsection" style="flex: 1;">
+                <button id="btn-toggle-ds" class="btn btn-max-width btn-secondary" style="margin-top: 4px; margin-bottom: 4px;">Toggle DS availability</button>
+
+            </div>
+            <div class="d-inline-block no-line-break"><span>Possible solutions: </span><span id="delim-solutions-counter">0</span></div>
+        </div>
+
+        <!-- End of tab space-->
     </div>
 </div>

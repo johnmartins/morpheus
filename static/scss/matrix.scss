@@ -71,6 +71,45 @@
     cursor: pointer;
 }
 
+.matrix .hover-overlay-disabled {
+    @extend .hover-overlay-cover;
+    background-color: rgba(0,0,0,0.5);
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+}
+
+.matrix .overlay-disabled {
+    @extend .hover-overlay-disabled;
+    border: 1px solid $red-high;
+    color: rgba(255,255,255,0.8);
+}
+
+.matrix .hover-overlay-incompatible {
+    @extend .hover-overlay-cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+
+    border: 1px dotted transparentize($color: $yellow-high, $amount: 0.5);
+    color: transparentize($color: $yellow-high, $amount: 0.5);
+    font-size: 2rem;
+}
+
+.matrix .overlay-incompatible {
+    @extend .hover-overlay-cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px dotted $yellow-high;
+    color: $yellow-high;
+    font-size: 2rem;
+}
+
 .matrix .hover-overlay-icons .overlay-icon:hover {
     color: $white-high;
 }

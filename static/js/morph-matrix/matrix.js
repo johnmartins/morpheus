@@ -12,48 +12,12 @@ const random = require('./../utils/random')
 const storageService = require('./../services/storage-service')
 const fileDiagService = require('./../services/file-dialog-service')
 
-class FunctionalRequirement {
-    id = null
-    description = null
-    position = null
-    designSolutions = []
-
-    constructor (id, position) {
-        this.id = id
-        this.position = position
-    }
-}
-
-class DesignSolution {
-    id = null
-    description = null
-    position = null
-    image = null
-    frID = null
-
-    constructor(id, position, frID) {
-        this.id = id
-        this.position = position
-        this.frID = frID
-    }
-}
-
-class Solution {
-    id = null
-    name = null
-    frToDsMap = {} // Maps a FR ID to a DS ID (string->string)
-    color = null
-
-    constructor () {
-        this.id = 'sol-'+random.randomString(12)
-        let randint = random.randomInt(0,360)
-        this.color = `hsl(${randint},80%,65%)`
-    }
-
-    bindFrToDs (frID, dsID) {
-        this.frToDsMap[frID] = dsID
-    }
-}
+// Morph Matrix classes
+const FunctionalRequirement = require('./FunctionalRequirement')
+const DesignSolution = require('./DesignSolution')
+const Solution = require('./Solution')
+const Incompatibility = require('./Incompatibility')
+const SolutionCalculator = require('./SolutionCalculator')
 
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
@@ -66,10 +30,11 @@ class MorphMatrix {
     // Object representation of matrix information
     name = "Untitled Morphological Matrix"
     functionalRequirements = []
-    solutions = {}
+    solutions = {}          // Solution ID -> Solution
 
-    rowToRequirementMap = {}
-    cellToDesignSolutionMap = {}
+    frMap = {}              // FunctionalRequirement ID -> FunctionalRequirement
+    dsMap = {}              // DesignSolution ID -> DesignSolution
+    incompatibilityMap = {} // Incompatibility ID -> Incompatibility
 
     // Important layout vars
     containerID = null
@@ -105,7 +70,7 @@ class MorphMatrix {
         if (res.data.type !== 'attach-img') return
         if (!res.data.targetElement) throw new Error('No target element')
 
-        let ds = this.cellToDesignSolutionMap[res.data.targetElement]
+        let ds = this.dsMap[res.data.targetElement]
 
         if (!ds) {
             console.error('Target element no longer exists')
@@ -228,7 +193,7 @@ class MorphMatrix {
      * @param {*} frRowID 
      * @param {*} fr 
      */
-    _getFRCellDefaultOverlay (overlay, frCellID, frRowID, fr) {
+    _getFRCellDefaultOverlay (overlay, fr) {
 
         overlay.classList.add('hover-overlay-icons')
         // Overlay icons
@@ -248,31 +213,30 @@ class MorphMatrix {
         overlay.appendChild(deleteOverlay)
 
         moveUpOverlay.onclick = (evt) => {
-            let otherRowID = 'row-'+this.functionalRequirements[fr.position - 2].id
-            this.switchRowPosition(otherRowID, frRowID)
+            let otherID = this.functionalRequirements[fr.position - 2].id
+            this.switchRowPosition(otherID, fr.id)
         }
         
         moveDownOverlay.onclick = (evt) => {
-            let otherRowID = 'row-'+this.functionalRequirements[fr.position].id
-            this.switchRowPosition(frRowID, otherRowID)
+            let otherID = this.functionalRequirements[fr.position].id
+            this.switchRowPosition(fr.id, otherID)
         }
 
         deleteOverlay.onclick = (evt) => {
-            this.deleteFunctionalRequirement(frCellID)
+            this.deleteFunctionalRequirement(fr.id)
         }
         return overlay
     }
     
-    _createFRCellOverlay (frCell) {
+    _createFRCellOverlay (fr, frCell) {
         let overlay = null
         let frCellID = frCell.id
-        let frRowID = 'row-'+frCellID
-        let fr = this.rowToRequirementMap[frRowID]
+        let frRowID = fr.rowID
         
         frCell.onmouseover = (evt) => {
             if (overlay) return
             overlay = document.createElement('div')
-            overlay = this._getFRCellDefaultOverlay(overlay, frCellID, frRowID, fr)
+            overlay = this._getFRCellDefaultOverlay(overlay, fr)
             frCell.appendChild(overlay)
         }
 
@@ -284,7 +248,6 @@ class MorphMatrix {
 
     _getDSCellSolutionOverlay (overlay, dsID, ds) {
         overlay.classList.add('hover-overlay-cover')
-        // box-shadow: inset 0 0 12px white;
         let solution = this.solutions[state.workspaceSelectedSolution]
         overlay.style.boxShadow = `inset 0 0 14px ${solution.color}`
         overlay.style.border = `1px solid ${solution.color}`
@@ -292,6 +255,34 @@ class MorphMatrix {
             this.toggleSolutionDS(ds)
         }
 
+        return overlay
+    }
+
+    _getDSCellDisableOverlay (overlay, dsID, ds) {
+        if (ds.disabled === true) return null
+        overlay.classList.add('hover-overlay-disabled')
+        overlay.innerHTML = '<i class="fas fa-ban"></i>'
+
+        overlay.onclick = () => {
+            this.setDsDisabled(dsID, true)
+        }
+
+        return overlay
+    }
+
+    _getDSCellIncompatibleOverlay (overlay, dsID, ds) {
+        if (state.workspaceSelectedIncompatibleOrigin === ds.id) {
+            // If this is the selected origin of an incompatibility 
+            // then dont create a new hover overlay
+            return
+        }
+
+        overlay.classList.add('hover-overlay-incompatible')
+        overlay.innerHTML = '<i class="fas fa-times"></i>'
+        overlay.onclick = () => {
+            GlobalObserver.emit('incompatibility-selection', ds)
+        }
+        
         return overlay
     }
 
@@ -360,7 +351,7 @@ class MorphMatrix {
     _createDSCellOverlay (dsCell) {
         let overlay = null
         let dsID = dsCell.id
-        let ds = this.cellToDesignSolutionMap[dsID]
+        let ds = this.dsMap[dsID]
 
         // Setup hover functionality
         dsCell.onmouseover = (evt) => {
@@ -371,11 +362,17 @@ class MorphMatrix {
                 overlay = this._getDSCellDefaultOverlay(overlay, dsID, ds)
             } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION) {
                 overlay = this._getDSCellSolutionOverlay(overlay, dsID, ds)
+            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) {
+                overlay = this._getDSCellDisableOverlay(overlay, dsID, ds)
+            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+                overlay = this._getDSCellIncompatibleOverlay(overlay, dsID, ds)
             }
 
+            if (!overlay) return        // No overlay? Screw it.
             dsCell.appendChild(overlay)
         }
         dsCell.onmouseleave = (evt) => {
+            if (!overlay) return
             dsCell.removeChild(overlay)
             overlay = null
         }
@@ -391,10 +388,11 @@ class MorphMatrix {
 
     renderSolution(solutionID) {
         let solution = this.solutions[solutionID]
-        let frIDs = Object.keys(solution.frToDsMap)
+        console.log(solution)
+        let frIDs = solution.getMappedFunctionsArray()
         for (let i = 0; i < frIDs.length; i++) {
             let frID = frIDs[i]
-            let dsID = solution.frToDsMap[frID]
+            let dsID = solution.getDsForFr(frID)
 
             // Create overlay for selected design solution
             let overlay = document.createElement('div')
@@ -411,18 +409,21 @@ class MorphMatrix {
         let currentSolutionID = state.workspaceSelectedSolution
         let solution = this.solutions[currentSolutionID]
         if (!solution) throw new Error('No such solution')
-
-        let currentDsID = solution.frToDsMap[ds.frID]
+        
+        let currentDsID = solution.getDsForFr(ds.frID)
         if (currentDsID === ds.id) {
+            let fr = this.frMap[ds.frID]
             // toggle off
-            delete solution.frToDsMap[ds.frID]
+            solution.unbindFrFromDs(fr)
         } else {
             // toggle on
-            solution.frToDsMap[ds.frID] = ds.id
+            const fr = this.frMap[ds.frID]
+            solution.bindFrToDs(fr, ds)
         }
         
         this.clearSolutionRender()
         this.renderSolution(currentSolutionID)
+        GlobalObserver.emit('solution-change', solution)
     }
 
     addSolution(solution) {
@@ -442,9 +443,9 @@ class MorphMatrix {
         return this.solutions;
     }
 
-    switchRowPosition(rowID1, rowID2) {
-        let fr1 = this.rowToRequirementMap[rowID1]
-        let fr2 = this.rowToRequirementMap[rowID2]
+    switchRowPosition(frID1, frID2) {
+        let fr1 = this.frMap[frID1]
+        let fr2 = this.frMap[frID2]
 
         // Change fr.position attribute
         let pos1 = fr1.position
@@ -457,16 +458,23 @@ class MorphMatrix {
         this.functionalRequirements[pos2 - 1] = fr1
 
         // Switch position in DOM
-        this.tbodyElement.insertBefore(document.getElementById(rowID2), document.getElementById(rowID1))
+        this.tbodyElement.insertBefore(document.getElementById(fr2.rowID), document.getElementById(fr1.rowID))
     }
 
     deleteFunctionalRequirement (frID) {
-        let frRowID = 'row-'+frID
-        let fr = this.rowToRequirementMap[frRowID]
+        let fr = this.frMap[frID]
+        let frRowID = fr.rowID
 
         // Delete design solutions existing for this FR
         for (let i = fr.designSolutions.length-1; i >= 0; i--) {
             this.deleteDesignSolution(fr.designSolutions[i].id)
+        }
+
+        // Delete solution references
+        let solutionIDs = Object.keys(this.solutions)
+        for (let i = 0; i < solutionIDs.length; i++) {
+            let solution = this.solutions[solutionIDs[i]]
+            solution.removeFrMapping(fr, true)
         }
 
         // Delete FR object
@@ -490,20 +498,14 @@ class MorphMatrix {
         this.tbodyElement.removeChild(frRow)
 
         // Delete map reference
-        delete this.rowToRequirementMap[frRowID]
-
-        // Delete solution references
-        let solutionIDs = Object.keys(this.solutions)
-        for (let i = 0; i < solutionIDs.length; i++) {
-            let solution = this.solutions[solutionIDs[i]]
-            delete solution.frToDsMap[frRowID]
-        }
+        delete this.frMap[frRowID]
     }
 
     deleteDesignSolution (dsID) {
-        let ds = this.cellToDesignSolutionMap[dsID]
+        let ds = this.dsMap[dsID]
+        console.log(ds)
         let frID = ds.frID
-        let fr = this.rowToRequirementMap[frID]
+        let fr = this.frMap[frID]
 
         // Delete reference from functional requirement
         let deleteIndex = -1
@@ -521,20 +523,119 @@ class MorphMatrix {
 
         // Delete DOM element
         let dsElement = document.getElementById(dsID)
-        let frRow = document.getElementById(frID)
+        let frRow = document.getElementById(fr.rowID)
         frRow.removeChild(dsElement)
 
         // Delete map reference
-        delete this.cellToDesignSolutionMap[dsID]
+        delete this.dsMap[dsID]
 
         // Delete solution references
         let solutionIDs = Object.keys(this.solutions)
         for (let i = 0; i < solutionIDs.length; i++) {
             let solution = this.solutions[solutionIDs[i]]
-            if (solution.frToDsMap[frID] === dsID) {
-                delete solution.frToDsMap[frID]
+            if (solution.getDsForFr(frID) === dsID) {
+                solution.unbindFrFromDs(fr)
             }
         }
+
+        // Delete incompabilities that reference this DS
+        let incompatibilityIDs = Object.keys(this.incompatibilityMap)
+        for (let i = 0; i < incompatibilityIDs.length; i++) {
+            let incompatibility = this.incompatibilityMap[incompatibilityIDs[i]]
+            if (incompatibility.ds1.id === dsID || incompatibility.ds2.id === dsID) {
+                this.removeIncompatibility(incompatibility.id)
+            }
+        }
+
+        GlobalObserver.emit('ds-removed')
+    }
+
+    setDsDisabled (dsID, disabled) {
+        let ds = this.dsMap[dsID]
+        if (!ds) return
+        if (ds.disabled === disabled) return
+
+        ds.disabled = disabled
+
+        // Handle overlay
+        const dsCell = document.getElementById(dsID)
+
+        if (disabled) {
+            // Add overlay
+            this.renderDisabledDsOverlay(dsCell)
+        } else {
+            // Remove overlay
+            this.clearDisabledDsOverlay(dsCell)
+        }
+
+        // Update solution conflicts
+        for (let solutionID in this.solutions) {
+            let solution = this.solutions[solutionID]
+            if (solution.getDsForFr(ds.frID) === ds.id) {
+                // This solution contains the affected DS
+                if (solution.evaluateDsConflict(ds.id)) {
+                    solution.removeConflict(ds.id)
+                } else {
+                    solution.addConflict(ds.id)
+                }
+            }
+        }
+
+        GlobalObserver.emit('ds-availability-change', ds)
+    }
+
+    setIncompatible (ds1, ds2, {incompID = null, incompName = null} = {}) {
+        try {
+            let incompatibility = new Incompatibility(ds1, ds2, {
+                id: incompID,
+                name: incompName
+            })
+            this.incompatibilityMap[incompatibility.id] = incompatibility
+            
+            // Add conflicts to existing solutions that use both of these DS 
+            for (let solutionID in this.solutions) {
+                const solution = this.solutions[solutionID]
+                if (solution.containsDS(ds1.id)) {
+                    solution.addIncompatibility(ds1, ds2)
+                }
+                if (solution.containsDS(ds2.id)) {
+                    solution.addIncompatibility(ds2, ds1)
+                }
+            }
+            
+            GlobalObserver.emit('ds-incompatibility-change', incompatibility.id)
+        } catch (err) {
+            if (err.code === 'INCOMP_EXISTS') {
+                console.log('Requested incompatibility already exists')
+            } else {
+                throw err
+            }
+        }
+    }
+
+    /**
+     * Removes all matrix references to specified incompatibility
+     * @param {String} incompatibilityID 
+     */
+    removeIncompatibility (incompatibilityID) {
+        let incompatibility = this.incompatibilityMap[incompatibilityID]
+        if (!incompatibility) {
+            console.error('Failed to delete incompatibility. No incomp with ID = '+incompatibilityID)
+            return
+        }
+        
+        let ds1 = incompatibility.ds1
+        let ds2 = incompatibility.ds2
+        ds1.removeIncompatibilityWith(ds2) // Implicitly mirrors action onto ds2
+        delete this.incompatibilityMap[incompatibilityID]
+
+        // Loop through solutions and remove references
+        for (let solID in this.solutions) {
+            let solution = this.solutions[solID]
+            solution.removeIncompatibility(ds1, ds2)
+        }
+
+        GlobalObserver.emit('ds-incompatibility-change', incompatibilityID)
     }
 
     addFunctionalRequirement ({id = null, description = null} = {}) {
@@ -545,15 +646,16 @@ class MorphMatrix {
         let position = this.tableElement.rows.length - 1
 
         // Create model representation
-        let fr = new FunctionalRequirement(cellID, position)
+        let fr = new FunctionalRequirement(cellID, rowID, position)
         fr.description = description
+        fr.id = cellID
         this.functionalRequirements.push(fr)
 
         let newRow = this.tbodyElement.insertRow(position)
         newRow.id = rowID
 
         // Store row -> requirement connection
-        this.rowToRequirementMap[newRow.id] = fr
+        this.frMap[fr.id] = fr
 
         let newCell = newRow.insertCell()
         newCell.id = cellID
@@ -564,7 +666,7 @@ class MorphMatrix {
             styleClass: 'func-req'
         } )
 
-        this._createFRCellOverlay(newCell)
+        this._createFRCellOverlay(fr, newCell)
 
         // Create a new "Add DS"-cell on this row
         let newAddCell = newRow.insertCell()
@@ -573,7 +675,7 @@ class MorphMatrix {
         newAddCell.align = "center"
         newAddCell.classList.add('mm-add-cell')
         newAddCell.onclick = () => {
-            this.addDesignSolution(rowID)
+            this.addDesignSolution(fr)
         }
 
         // Automatically scroll to the bottom of the page
@@ -585,28 +687,37 @@ class MorphMatrix {
      * Add a new DS to the morph matrix
      * @param {Number} rowPosition To which row the design solution should be added
      */
-    addDesignSolution (rowID, { id = null, description = null, image = null } = {}) {
-        let row = document.getElementById(rowID)
+    addDesignSolution (fr, newDs) {
+        let row = document.getElementById(fr.rowID)
         let cellPosition = row.cells.length - 1     // Cell position. 0th position is the FR.
 
-        let dsID = id ? id : "ds-"+random.randomString(8)
-        let ds = new DesignSolution(dsID, cellPosition, row.id)
-        ds.description = description
-        ds.image = image
+        let ds = null
 
-        this.rowToRequirementMap[row.id].designSolutions.push(ds)
+        if (newDs) {
+            ds = newDs
+        } else {
+            let dsID = "ds-"+random.randomString(8)
+            ds = new DesignSolution(dsID, cellPosition, fr.id)
+        }
+
+        this.frMap[fr.id].designSolutions.push(ds)
 
         let newCell = row.insertCell(cellPosition)
-        newCell.id = dsID
+        newCell.id = ds.id
         newCell.verticalAlign = "top"
 
         // Map ID for easy object lookup
-        this.cellToDesignSolutionMap[dsID] = ds
+        this.dsMap[ds.id] = ds
+
+        // Render disabled overlay if disabled
+        if (ds.disabled) {
+            this.renderDisabledDsOverlay(newCell)
+        }
 
         // Create form in which a description can be written
         this._createCellForm(newCell, `Design Solution ${cellPosition}`, {
             onChangeCallback: (value) => ds.description = value,
-            defaultValue: description,
+            defaultValue: ds.description,
         })
         // If the user clicks anywhere within the cell, then set focus to the textarea.
         newCell.onclick = (evt) => {
@@ -617,7 +728,7 @@ class MorphMatrix {
 
         // Create initially empty image field
         let imgElement = document.createElement('img')
-        imgElement.id = 'img-'+dsID
+        imgElement.id = 'img-'+ds.id
         newCell.appendChild(imgElement)
         
         if (this.dsLabelCell.colSpan < row.cells.length - 2) {
@@ -626,7 +737,7 @@ class MorphMatrix {
 
         this._createDSCellOverlay(newCell)
 
-        if (image) this._addImage(imgElement.id, image)
+        if (ds.image) this._addImage(imgElement.id, ds.image)
 
         // Scroll right
         let workspaceElement = document.querySelector("#layout-workspace")
@@ -634,6 +745,8 @@ class MorphMatrix {
         if (newCell.offsetLeft > val) {
             workspaceElement.scrollLeft += newCell.offsetWidth
         }
+
+        GlobalObserver.emit('ds-added')
     }
 
     getContainerElement() {
@@ -642,27 +755,73 @@ class MorphMatrix {
 
     import(save) {
         // Rebuild matrix from json dump
-        console.log(`Imported ${save.name}`)
+        console.log(`Importing "${save.name}"..`)
         this.name = save.name
         this.titleElement.innerHTML = this.name
         
+        console.log('Imported title')
+
+        // Import FR -> DS mapping and structure
         for (let frN = 0; frN < save.functionalRequirements.length; frN++) {
             let savedFr = save.functionalRequirements[frN]
             this.addFunctionalRequirement({
                 id: savedFr.id,
+                rowID: savedFr.rowID,
                 description: savedFr.description
             })
             for (let dsN = 0; dsN < savedFr.designSolutions.length; dsN++) {
                 let savedDs = savedFr.designSolutions[dsN]
-                this.addDesignSolution('row-'+savedFr.id, {
-                    id: savedDs.id,
+
+                let ds = new DesignSolution(savedDs.id, savedDs.position, savedDs.frID, {
+                    disabled: savedDs.disabled,
+                    image: savedDs.image,
                     description: savedDs.description,
-                    image: savedDs.image
                 })
+                this.addDesignSolution(savedFr, ds)
             }
         }
 
-        this.solutions = save.solutions
+        console.log('Imported FR and DS structure')
+
+        // Import incompatibilities
+        this.incompatibilityMap = save.incompatibilityMap
+        let count = 0
+        for (let savedIncompID in save.incompatibilityMap) {
+            let savedIncomp = save.incompatibilityMap[savedIncompID]
+            const incompDs1ID = savedIncomp.ds1.id
+            const incompDs2ID = savedIncomp.ds2.id
+            const incompDs1 = this.dsMap[incompDs1ID]
+            const incompDs2 = this.dsMap[incompDs2ID]
+            this.setIncompatible(incompDs1, incompDs2, {
+                incompID: savedIncomp.id,
+                incompName: savedIncomp.name
+            })
+            count += 1
+        }
+        Incompatibility.count = count
+
+        console.log('Imported incompatibilities')
+
+        for (const solutionID in save.solutions) {
+            const savedSolution = save.solutions[solutionID]
+            let solution = new Solution()
+            solution.name = savedSolution.name
+            solution.id = savedSolution.id
+            solution.color = savedSolution.color
+
+            // Set FR -> DS mapping
+            for (const frID in savedSolution.frIdToDsIdMap) {
+                const ds = this.dsMap[savedSolution.frIdToDsIdMap[frID]]
+                const fr = this.frMap[frID]
+                solution.bindFrToDs(fr, ds, {
+                    ignoreDelimitations: true
+                })
+            }   
+
+            this.solutions[solutionID] = solution
+        }
+
+        console.log('Imported solutions')
 
         GlobalObserver.emit('matrix-imported', save)
     }
@@ -671,14 +830,92 @@ class MorphMatrix {
      * Returns serialized object
      */
     export() {
-        // Grab images and pack them
-        return JSON.stringify(this)
+        return JSON.stringify(this, (key, value) => {
+            // JSON can't handle "Set" datastructures. Thus, they must be converted into arrays.
+            if (typeof value === 'object' && value instanceof Set) {
+                return [...value];
+            }
+            return value;
+        })
     }
+
+    renderIncompatibility (incompID) {
+        let incomp = this.incompatibilityMap[incompID]
+
+        this.renderIncompatibleOverlay(incomp.ds1.id)
+        this.renderIncompatibleOverlay(incomp.ds2.id)
+    }
+
+    renderIncompatibleOverlay (dsID) {
+        const ds = this.dsMap[dsID]
+
+        let dsCell = document.getElementById(dsID)
+        let overlay = document.createElement('div')
+
+        overlay.classList.add('overlay-incompatible')
+        if (!ds.isDisabled()) {
+            overlay.innerHTML = '<i class="fas fa-times"></i>'
+        }
+        overlay.title = 'Incompatible'
+        overlay.onclick = () => {
+            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+                // Wrong workspace mode
+                return
+            }
+            if (state.workspaceSelectedIncompatibleOrigin !== dsID) {
+                // This is not the origin of an incompability
+                return
+            }
+            GlobalObserver.emit('incompatibility-selection', this.dsMap[dsID])
+
+        }
+        dsCell.appendChild(overlay)
+    }
+
+    clearIncompatibleOverlay (dsID) {
+        let dsCell = document.getElementById(dsID)
+        console.log('Clearing incomp from dsid: ')
+        let overlay = dsCell.querySelector('.overlay-incompatible')
+        dsCell.removeChild(overlay)
+    }
+
+    clearAllIncompatibleOverlays () {
+        let overlays = this.containerElement.querySelectorAll('.overlay-incompatible')
+
+        for (let i = 0; i < overlays.length; i++) {
+            let overlay = overlays[i]
+            overlay.parentElement.removeChild(overlay)
+        }
+    }
+
+    renderDisabledDsOverlay(dsCell) {
+        let overlay = document.createElement('div')
+        overlay.classList.add('overlay-disabled')
+        overlay.innerHTML = '<i class="fas fa-ban"></i>'
+        overlay.onclick = () => {
+            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) return
+            this.setDsDisabled(dsCell.id, false)
+        }
+        dsCell.appendChild(overlay)
+    }
+
+    clearDisabledDsOverlay(dsCell) {
+        let overlay = dsCell.querySelector('.overlay-disabled')
+        dsCell.removeChild(overlay)
+    }
+
+    /**
+     * Returns the size of the design space. Takes delimitations into account.
+     */
+    countPossibleSolutions() {
+        const solCal = new SolutionCalculator(this)
+        return solCal.calculateSkiptIncompatibilities()
+    }
+
+    getIncompatibility(incompatibilityID) {
+        return this.incompatibilityMap[incompatibilityID]
+    }
+
 }
 
-module.exports = {
-    MorphMatrix: MorphMatrix, 
-    FunctionalRequirement: FunctionalRequirement, 
-    DesignSolution: DesignSolution,
-    Solution: Solution
-}
+module.exports = MorphMatrix

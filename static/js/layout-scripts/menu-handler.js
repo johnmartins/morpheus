@@ -9,10 +9,15 @@ const path = require('path')
 // Setup side menus
 require(path.join(__dirname, './side-menu/solutions')).setupListeners()
 require(path.join(__dirname, './side-menu/export')).setupListeners()
+require(path.join(__dirname, './side-menu/delimitations')).setupListeners()
+
+const state = require('./../state')
+const workspace = require('./../workspace')
 
 let sideMenu = document.getElementById('side-menu-tabs')
 
 let currentTabContent = null
+let currentTabID = null
 
 module.exports = () => {
     // Setup default tab
@@ -41,6 +46,12 @@ module.exports = () => {
         if (currentTabContent) currentTabContent.style.display = 'none'
         targetTabContent.style.display = 'flex'
         currentTabContent = targetTabContent
+
+        GlobalObserver.emit('tab-change', {
+            currentTab: currentTabID,
+            nextTab: tabID
+        })
+        currentTabID = tabID
     }
 }
 

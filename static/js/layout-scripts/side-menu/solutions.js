@@ -1,7 +1,7 @@
 'use strict'
 const state = require('./../../state')
 
-const { Solution } = require('./../../morph-matrix/matrix')
+const Solution = require('./../../morph-matrix/Solution')
 const workspace = require('./../../workspace')
 const popup = require('./../popup')
 const { randomInt } = require('../../utils/random')
@@ -35,6 +35,30 @@ module.exports = {
 
             // Reset UI
             module.exports.resetUI()
+        })
+
+        GlobalObserver.on('ds-availability-change', (ds) => {
+            refreshConflictIcons()
+        })
+
+        GlobalObserver.on('ds-incompatibility-change', (incompatibilityID) => {
+            refreshConflictIcons()
+        })
+
+        GlobalObserver.on('ds-removed', () => {
+            refreshConflictIcons()
+        })
+
+        GlobalObserver.on('tab-change', (tabID) => {
+            module.exports.resetUI()
+        })
+
+        GlobalObserver.on('solution-change', (solution) => {
+            const matrix = workspace.getMatrix()
+            matrix.clearAllIncompatibleOverlays()
+            for (let incompDsID of  solution.getIncompatibleDsIds()) {
+                matrix.renderIncompatibleOverlay(incompDsID)
+            }
         })
     },
 
@@ -73,10 +97,22 @@ module.exports = {
         // RESET UI
         module.exports.resetUI()
 
-        if (Object.keys(solution.frToDsMap).length === 0) {
+        if (solution.getMappedFunctionsArray().length === 0) {
             // No DS has been mapped to any FR.
             matrix.removeSolution(solution.id)
             return
+        }
+
+        let duplicateSolution = checkIfUnique(solution)
+        if (duplicateSolution) {
+            console.error('WARNING: SOLUTION IS NOT UNIQUE')
+
+            // TODO: Allow user to keep the duplicate if they really want to, maybe?
+            popup.error(`The solution is not unique. <strong>"${duplicateSolution.name}"</strong> has the same scheme. This solution will now be removed.`, {
+                callbackContinue: () => {
+                    module.exports.removeListedSolution(solution.id)
+                }
+            })
         }
 
         // Verify solution name. If unset (or useless) then automatically set a name.
@@ -107,10 +143,12 @@ module.exports = {
 
         let solListEntry = document.createElement('li')
         solListEntry.id = ID_PREFIX_SOLUTION_ENTRY+solutionID
-        solListEntry.innerHTML = solution.name
+        solListEntry.innerHTML = '<span class="solution-list-icon-span"></span><span class="solution-list-name">'+solution.name+'</span>'
         solListEntry.classList.add('solution-list-entry')
+
+        // Setup listeners
         solListEntry.onclick = (evt) => {
-            if (evt.target.id !== solListEntry.id) return
+            if (evt.target.classList.contains('overlay')) return
             if (editingSolution) return
 
             if (solListEntry.classList.contains('selected')) { 
@@ -154,10 +192,26 @@ module.exports = {
         } else {
             solList.appendChild(solListEntry) 
         }
+
+        // Check if the solution contains conflicts.
+        if (solution.hasConflicts()) {
+            addConflictIcon(solutionID)
+        }
+
         GlobalObserver.emit('solution-added', solutionID)
     },
 
     removeFromSolutionList: (solutionID) => {
+        if (editingSolution) {
+            popup.error('A solution is currently being edited. Save it first.')
+            return
+        }
+        
+        if (unfinishedSolution) {
+            popup.error('A solution is currently being created. Save it first.')
+            return
+        }
+
         let matrix = workspace.getMatrix()
         let solution = matrix.getSolution(solutionID)
         let solutionName = solution.name
@@ -168,11 +222,7 @@ module.exports = {
                 return
             },
             callbackContinue: () => {
-                GlobalObserver.emit('solution-removed', solutionID)
-                matrix.removeSolution(solutionID)
-                let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
-                listEntry.parentElement.removeChild(listEntry)
-                matrix.clearSolutionRender()
+                module.exports.removeListedSolution(solutionID)
             }
         })
     },
@@ -203,7 +253,11 @@ module.exports = {
         document.getElementById('solutions-edit-form').classList.add('open')
         
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION
+        // Render relevant objects in matrix
         matrix.renderSolution(solutionID)
+        for (let incompDsID of  solution.getIncompatibleDsIds()) {
+            matrix.renderIncompatibleOverlay(incompDsID)
+        }
 
         nameForm.focus()
         
@@ -228,9 +282,14 @@ module.exports = {
             unfinishedSolution = false
         }
 
+        if (editingSolution) {
+            module.exports.saveEditedSolution()
+        }
+
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
         button.innerHTML = 'New solution'
         matrix.clearSolutionRender()
+        matrix.clearAllIncompatibleOverlays()
         button.onclick = module.exports.startNewSolution
         document.getElementById('solutions-edit-form').classList.remove('open')
 
@@ -255,7 +314,7 @@ module.exports = {
         const matrix = workspace.getMatrix()
         const frArray = matrix.functionalRequirements
 
-        if (Object.keys(matrix.cellToDesignSolutionMap).length < 2) {
+        if (Object.keys(matrix.dsMap).length < 2) {
             popup.error('You need to create more design solutions before randomizing')
             return
         }
@@ -270,13 +329,44 @@ module.exports = {
 
             let dsIndex = randomInt(0, fr.designSolutions.length - 1)
             let randomDs = fr.designSolutions[dsIndex]
-            randomSolution.bindFrToDs('row-'+fr.id, randomDs.id)
+            randomSolution.bindFrToDs(fr, randomDs)
         }
 
         matrix.addSolution(randomSolution)
         module.exports.completeSolution()
         
+    },
+
+    removeListedSolution: (solutionID) => {
+        const matrix = workspace.getMatrix()
+        GlobalObserver.emit('solution-removed', solutionID)
+        matrix.removeSolution(solutionID)
+        let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
+        listEntry.parentElement.removeChild(listEntry)
+        matrix.clearSolutionRender()
     }
+}
+
+function addConflictIcon (solutionID) {
+    let listElement = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
+    let listElementIcons = listElement.querySelector('.solution-list-icon-span')
+
+    // Check if it already has such an icon
+    if (listElementIcons.querySelector('.conflict-warning')) return
+
+    let conflictIcon = document.createElement('i')
+    conflictIcon.classList.add('fas', 'fa-exclamation-triangle', 'warning-icon', 'conflict-warning')
+    conflictIcon.title = 'Solution contains disabled or incompatible design solutions'
+    listElementIcons.appendChild(conflictIcon)
+}
+
+function removeConflictIcon (solutionID) {
+    let listElement = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
+    let listElementIcons = listElement.querySelector('.solution-list-icon-span')
+    let conflictWarning = listElementIcons.querySelector('.conflict-warning')
+    if (!conflictWarning) return
+    conflictWarning.parentElement.removeChild(conflictWarning)
+
 }
 
 function createSolutionEntryOverlay (overlay, solution) {
@@ -325,11 +415,45 @@ function findListPosition (solutionName, solutionID) {
 
         if (entry.id === ID_PREFIX_SOLUTION_ENTRY+solutionID) continue
 
-        const compRes = entry.innerHTML.localeCompare(solutionName)
+        const compRes = entry.querySelector('.solution-list-name').innerHTML.localeCompare(solutionName)
 
         if (compRes === -1) continue
 
         return entry
+    }
+
+    return null
+}
+
+function refreshConflictIcons () {
+    const matrix = workspace.getMatrix()
+    // Loop through solutions. Add/remove conflict icons
+    for (let solutionID in matrix.solutions) {
+        let solution = matrix.solutions[solutionID]
+        if (solution.hasConflicts()) {
+            addConflictIcon(solution.id)
+        } else {
+            removeConflictIcon(solution.id)
+        }
+    }
+}
+
+/**
+ * O(n) search for equivalent solution.  Returns the solution which this is equal to.
+ * @param {Solution} solution 
+ * @returns {Solution} duplicate solution
+ */
+function checkIfUnique (solution) {
+    const matrix = workspace.getMatrix()
+
+    // TODO: Could potentially be upgrated to utilize sets, turning O(n) -> O(1) if too slow for large sets of similar strings/solutions
+    for (let solID in matrix.solutions) {
+        if (solID === solution.id) continue
+        let otherSolution = matrix.solutions[solID]
+
+        if (otherSolution.solutionString === solution.solutionString) {
+            return otherSolution
+        }
     }
 
     return null

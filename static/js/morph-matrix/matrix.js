@@ -785,6 +785,7 @@ class MorphMatrix {
 
         // Import incompatibilities
         this.incompatibilityMap = save.incompatibilityMap
+        let count = 0
         for (let savedIncompID in save.incompatibilityMap) {
             let savedIncomp = save.incompatibilityMap[savedIncompID]
             const incompDs1ID = savedIncomp.ds1.id
@@ -795,7 +796,9 @@ class MorphMatrix {
                 incompID: savedIncomp.id,
                 incompName: savedIncomp.name
             })
+            count += 1
         }
+        Incompatibility.count = count
 
         console.log('Imported incompatibilities')
 
@@ -808,7 +811,6 @@ class MorphMatrix {
 
             // Set FR -> DS mapping
             for (const frID in savedSolution.frIdToDsIdMap) {
-                console.log(`Copying binding: ${frID} -> ${savedSolution.frIdToDsIdMap[frID]}`)
                 const ds = this.dsMap[savedSolution.frIdToDsIdMap[frID]]
                 const fr = this.frMap[frID]
                 solution.bindFrToDs(fr, ds, {

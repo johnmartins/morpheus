@@ -12,7 +12,6 @@ const ID_PREFIX_INCOMP_ENTRY = 'incomp-li-'
 
 module.exports = {
     setupListeners: () => {
-        const matrix = workspace.getMatrix()
 
         let toggleDsBtn = document.getElementById('btn-toggle-ds')
         let newIncompatibilityBtn = document.getElementById('btn-add-incompatibility')
@@ -65,6 +64,7 @@ module.exports = {
         })
 
         GlobalObserver.on('incompatibility-selection', (ds) => {
+            const matrix = workspace.getMatrix()
 
             if (!incompatibilityDsSelection) {
                 matrix.clearAllIncompatibleOverlays()

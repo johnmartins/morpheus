@@ -7,8 +7,7 @@ class SolutionGenerator {
 
     }
 
-    generateAll({limit=100}={}) {
-        let count = 0
+    generateAll({limit=100, onlyCount=false}={}) {
         let frArray = []
         
         // Remove any FRs that does not contain availabe DSs
@@ -25,6 +24,7 @@ class SolutionGenerator {
 
         // Create one tree per DS in the first FR 
         // If the amount of branches exceeds the limit, then break.
+        let solutionTreeArray = []
         const firstFr = frArray.shift()
         for (let firstDs of firstFr.designSolutions) {
 
@@ -32,6 +32,7 @@ class SolutionGenerator {
             let tree = new SolutionTree({maxWidth: limit})
             let rootNode = new SolutionNode(tree, firstFr.position, firstDs)
             tree.setRootNode(rootNode)
+            solutionTreeArray.push(tree)
 
             previousLevel.push(rootNode)
 
@@ -41,9 +42,12 @@ class SolutionGenerator {
                 let dsArray = fr.designSolutions
                 let nextLevel = []
 
+                // Go through each DS for this FR
                 for (let ds of dsArray) {
                     if (ds.isDisabled()) continue
 
+                    // For all nodes of the previous level: 
+                    // add the new DSs if they are compatible
                     for (let node of previousLevel) {
                         if (node.isIncompatile(ds)) {
                             continue
@@ -53,6 +57,8 @@ class SolutionGenerator {
                             parent: node
                         })
                         node.addBranch(newNode)
+
+                        // Queue new nodes for the next trip through the loop
                         nextLevel.push(newNode)
                     }
                 }
@@ -60,6 +66,26 @@ class SolutionGenerator {
                 previousLevel = nextLevel
             }
         }
+
+        // Get solution count
+        let solCount = 0
+        for (let tree of solutionTreeArray) {
+            console.log('Top tree level width: '+tree.topLevelWidth)
+            solCount += tree.topLevelWidth
+        }
+
+        if (onlyCount === true) return solCount
+
+        return solCount
+
+    }
+
+    _createSolutionFromTrees(treeArray) {
+
+        for (let tree of treeArray) {
+
+        }
+
     }
 }
 
@@ -71,6 +97,9 @@ class SolutionTree {
         this.maxWidth = maxWidth
         this.rootNode = null
         this.levelData = new Map() // FR position -> amout of branches from that level
+        
+        this.topLevel = 0
+        this.topLevelWidth = 0
     }
 
     setRootNode (node, level) {
@@ -82,7 +111,13 @@ class SolutionTree {
         if (!this.levelData.get(level)) {
             this.levelData.set(level, 0)
         }
-        this.levelData.set(level, this.levelData.get(level)+1)
+        let levelWidth = this.levelData.get(level)+1
+        this.levelData.set(level, levelWidth)
+
+        if (level > this.topLevel) {
+            this.topLevel = level
+        }
+        this.topLevelWidth = levelWidth
     }
 
     getLevelWidth (level) {
@@ -97,16 +132,20 @@ class SolutionNode {
         this.level = level  // Level = FR position
         this.ds = ds
         this.branches = []
-
+        this.incompatibleDsSet = new Set()
+        
         // Handle accumulated incompatibilities from parent node and new DS
-        if (!parent) {
-            // No inherited incompatibilities. Ds incomps only
-            this.incompatibleDsSet = new Set(ds.getIncompatibleDsIDArray())
-        } else {
-            // Inherit parent incompatibilities, and add ds incomps
-            let incomps = ds.getIncompatibleDsIDArray().concat(parent.getIncompatibilitySet())
-            this.incompatibleDsSet = new Set(incomps)
+        if (parent) {
+            // Inherit parent incompatibilities
+            this.incompatibleDsSet = new Set(parent.getIncompatibilitySet())
         }
+
+        let incomps = ds.getIncompatibleDsIDArray()
+        for (let dsID of incomps) {
+            this.addIncompatibility(dsID)
+        }
+
+        console.log(this.incompatibleDsSet)
     }
 
     addBranch (node) {
@@ -132,8 +171,8 @@ class SolutionNode {
         return this.incompatibleDsSet
     }
 
-    addIncompatibility (ds) {
-        this.incompatibleDsSet.add(ds.id)
+    addIncompatibility (dsID) {
+        this.incompatibleDsSet.add(dsID)
     }
 }
 

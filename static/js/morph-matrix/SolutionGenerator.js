@@ -1,6 +1,7 @@
 'use strict'
 
-let Solution = require('./Solution')
+const Solution = require('./Solution')
+const numbersUtil = require('./../utils/numbers')
 
 class SolutionGenerator {
     constructor (matrix) {
@@ -77,7 +78,6 @@ class SolutionGenerator {
         // Get solution count
         let solCount = 0
         for (let tree of solutionTreeArray) {
-            console.log('Top tree level width: '+tree.topLevelWidth)
             solCount += tree.topLevelWidth
         }
 
@@ -91,14 +91,14 @@ class SolutionGenerator {
 
     _createSolutionFromTrees(treeArray) {
 
-        let solutionNumber = 0
+        let solutionNumber = 1
 
         for (let tree of treeArray) {
             for (let topNode of tree.topLevelNodes) { // <--- Use these and walk backwards using parents
 
                 let currentNode = topNode
                 let solution = new Solution()
-                solution.name = `generated-solution-${solutionNumber}`
+                solution.name = `generated-solution-${numbersUtil.fillWithZeros(solutionNumber, 4)}`
 
                 solutionNumber += 1
 
@@ -176,8 +176,6 @@ class SolutionNode {
         for (let dsID of incomps) {
             this.addIncompatibility(dsID)
         }
-
-        console.log(this.incompatibleDsSet)
     }
 
     addBranch (node) {
@@ -188,8 +186,6 @@ class SolutionNode {
         }
 
         this.branches.push(node)
-
-        console.log(this.tree.getLevelWidth(this.level))
     }
 
     isIncompatile (ds) {

@@ -109,9 +109,15 @@ module.exports = {
     refreshSolutionCounter: () => {
         let solutionCounter = document.getElementById('delim-solutions-counter')
         const matrix = workspace.getMatrix()
-        let solCount = matrix.countPossibleSolutions()
 
-        solutionCounter.innerHTML = solCount
+        try {
+            let solCount = matrix.countPossibleSolutions()
+            solutionCounter.innerHTML = solCount
+        } catch (err) {
+            solutionCounter.innerHTML = "Too many solutions"
+        }
+        
+        
     },
 
     clearIncompatibilityList() {

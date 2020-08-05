@@ -907,13 +907,14 @@ class MorphMatrix {
 
     /**
      * Returns the size of the design space. Takes delimitations into account.
+     * Throws if the number is too big
      */
     countPossibleSolutions() {
         //const solCal = new SolutionCalculator(this)
         //return solCal.calculateSkiptIncompatibilities()
-
         const solGen = new SolutionGenerator(this)
-        return solGen.generateAll({limit: 1000, onlyCount: true})
+        let count = solGen.generateAll({limit: 200, onlyCount: true})
+        return count
     }
 
     getIncompatibility(incompatibilityID) {

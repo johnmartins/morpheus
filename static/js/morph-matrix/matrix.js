@@ -18,6 +18,7 @@ const DesignSolution = require('./DesignSolution')
 const Solution = require('./Solution')
 const Incompatibility = require('./Incompatibility')
 const SolutionCalculator = require('./SolutionCalculator')
+const SolutionGenerator = require('./SolutionGenerator')
 
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
@@ -908,12 +909,19 @@ class MorphMatrix {
      * Returns the size of the design space. Takes delimitations into account.
      */
     countPossibleSolutions() {
-        const solCal = new SolutionCalculator(this)
-        return solCal.calculateSkiptIncompatibilities()
+        //const solCal = new SolutionCalculator(this)
+        //return solCal.calculateSkiptIncompatibilities()
+
+        const solGen = new SolutionGenerator(this)
+        return solGen.generateAll({limit: 1000, onlyCount: true})
     }
 
     getIncompatibility(incompatibilityID) {
         return this.incompatibilityMap[incompatibilityID]
+    }
+
+    getFunctionalRequirement(frID) {
+        return this.frMap[frID]
     }
 
 }

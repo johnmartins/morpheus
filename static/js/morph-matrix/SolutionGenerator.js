@@ -1,5 +1,7 @@
 'use strict'
 
+let Solution = require('./Solution')
+
 class SolutionGenerator {
     constructor (matrix) {
 
@@ -27,6 +29,7 @@ class SolutionGenerator {
         let solutionTreeArray = []
         const firstFr = frArray.shift()
         for (let firstDs of firstFr.designSolutions) {
+            if (firstDs.isDisabled()) continue
 
             let previousLevel = []
             let tree = new SolutionTree({maxWidth: limit})
@@ -64,6 +67,10 @@ class SolutionGenerator {
                 }
 
                 previousLevel = nextLevel
+
+                if (nextLevel.length > 0) {
+                    tree.setTopLevelNodes(nextLevel)
+                }
             }
         }
 
@@ -76,16 +83,36 @@ class SolutionGenerator {
 
         if (onlyCount === true) return solCount
 
+        this._createSolutionFromTrees(solutionTreeArray)
+
         return solCount
 
     }
 
     _createSolutionFromTrees(treeArray) {
 
+        let solutionNumber = 0
+
         for (let tree of treeArray) {
+            for (let topNode of tree.topLevelNodes) { // <--- Use these and walk backwards using parents
 
+                let currentNode = topNode
+                let solution = new Solution()
+                solution.name = `generated-solution-${solutionNumber}`
+
+                solutionNumber += 1
+
+                while(currentNode) {
+                    const ds = currentNode.ds
+                    const fr = this.matrix.getFunctionalRequirement(ds.frID)
+                    solution.bindFrToDs(fr, ds)
+
+                    currentNode = currentNode.parent
+                }
+
+                this.matrix.addSolution(solution)
+            }
         }
-
     }
 }
 
@@ -100,6 +127,7 @@ class SolutionTree {
         
         this.topLevel = 0
         this.topLevelWidth = 0
+        this.topLevelNodes = []
     }
 
     setRootNode (node, level) {
@@ -122,6 +150,10 @@ class SolutionTree {
 
     getLevelWidth (level) {
         return this.levelData.get(level)
+    }
+
+    setTopLevelNodes (topLevelNodeArray) {
+        this.topLevelNodes = topLevelNodeArray
     }
 }
 

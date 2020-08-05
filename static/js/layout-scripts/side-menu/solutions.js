@@ -4,6 +4,7 @@ const state = require('./../../state')
 const Solution = require('./../../morph-matrix/Solution')
 const workspace = require('./../../workspace')
 const popup = require('./../popup')
+const SolutionGenerator = require('./../../morph-matrix/SolutionGenerator')
 const { randomInt } = require('../../utils/random')
 
 let unfinishedSolution = false      // The user has started a new solution that is unsaved
@@ -19,14 +20,12 @@ module.exports = {
         let btnRandomize = document.getElementById('btn-generate-random')
         btnRandomize.onclick = module.exports.createRandomSolution
 
+        let btnGenerate = document.getElementById('btn-generate-all')
+        btnGenerate.onclick = module.exports.generateAllSolutions
+
         // New import -> Setup solution list
         GlobalObserver.on('matrix-imported', () => {
-            let matrix = workspace.getMatrix()
-            let solutionIDs = Object.keys(matrix.solutions)
-            for (let i = 0; i < solutionIDs.length; i++) {
-                let solutionID = solutionIDs[i]
-                module.exports.addToSolutionList(solutionID)
-            }
+            listSolutionsFromMatrix()
         })
 
         GlobalObserver.on('matrix-created', () => {
@@ -344,6 +343,19 @@ module.exports = {
         let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
         listEntry.parentElement.removeChild(listEntry)
         matrix.clearSolutionRender()
+    },
+
+    generateAllSolutions: () => {
+        console.log('Generate ALL solutions request')
+        const matrix = workspace.getMatrix()
+
+        let generator = new SolutionGenerator(matrix)
+        generator.generateAll({
+            limit: 1000,
+            onlyCount: false
+        })
+
+        listSolutionsFromMatrix()
     }
 }
 
@@ -457,4 +469,13 @@ function checkIfUnique (solution) {
     }
 
     return null
+}
+
+function listSolutionsFromMatrix () {
+    const matrix = workspace.getMatrix()
+    let solutionIDs = Object.keys(matrix.solutions)
+    for (let i = 0; i < solutionIDs.length; i++) {
+        let solutionID = solutionIDs[i]
+        module.exports.addToSolutionList(solutionID)
+    }
 }

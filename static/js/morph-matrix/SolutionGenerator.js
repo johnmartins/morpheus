@@ -2,6 +2,7 @@
 
 const Solution = require('./Solution')
 const numbersUtil = require('./../utils/numbers')
+const {NoDesignSolutionsError, GenerationCapacityError} = require('./../errors')
 
 /**
  * The SolutionGenerator class can be used to generate all possible solutions 
@@ -28,8 +29,7 @@ class SolutionGenerator {
             }
         }
         if (frArray.length === 0) {
-            console.error('No DSs detected. Can not generate solutions.')
-            return
+            throw new NoDesignSolutionsError('No design solutions in matrix. Failed to generate solution trees.')
         }
 
         // Create one tree per DS in the first FR 
@@ -204,7 +204,7 @@ class SolutionNode {
         this.tree.addLevelWidth(this.level)
 
         if (this.tree.getLevelWidth(this.level) > this.tree.maxWidth) {
-            throw new Error(`Tree width exceeded limit of ${this.tree.maxWidth}`)
+            throw new GenerationCapacityError(`Solution tree width exceeded limit of ${this.tree.maxWidth}`)
         }
 
         this.branches.push(node)

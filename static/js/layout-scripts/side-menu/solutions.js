@@ -367,12 +367,23 @@ module.exports = {
         let fieldMaxGens = document.getElementById('gen-max-field')
 
         let generator = new SolutionGenerator(matrix)
-        generator.generateAll({
-            limit: fieldMaxGens.value,
-            onlyCount: false
-        })
 
-        listSolutionsFromMatrix()
+        try {
+            generator.generateAll({
+                limit: fieldMaxGens.value,
+                onlyCount: false
+            })
+
+            listSolutionsFromMatrix()
+        } catch (err) {
+            if (err.code === 'NO_DS_IN_MATRIX') {
+                popup.error(`No design solutions in Matrix.<br><br>Error message: ${err.message}`)
+            } else if (err.code === 'GEN_CAP') {
+                popup.error(`Generation capacity reached!<br><br>Error message: ${err.message}`)
+            } else {
+                popup.error('An unidentified error occured when attempting to generate all solutions.')
+            }
+        }
     }
 }
 

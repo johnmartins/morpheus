@@ -23,6 +23,22 @@ module.exports = {
         let btnGenerate = document.getElementById('btn-generate-all')
         btnGenerate.onclick = module.exports.generateAllSolutions
 
+        // Solution generation controls
+        let rangeMaxGens = document.getElementById('gen-max-range')
+        let fieldMaxGens = document.getElementById('gen-max-field')
+        rangeMaxGens.oninput = () => {
+            fieldMaxGens.value = rangeMaxGens.value
+        }
+        fieldMaxGens.onchange = () => {
+            let val = fieldMaxGens.value
+
+            if (val > 2000) val = 2000
+            if (val < 10) val = 10
+
+            rangeMaxGens.value = val
+            fieldMaxGens.value = val
+        }
+
         // New import -> Setup solution list
         GlobalObserver.on('matrix-imported', () => {
             listSolutionsFromMatrix()
@@ -348,10 +364,11 @@ module.exports = {
     generateAllSolutions: () => {
         console.log('Generate ALL solutions request')
         const matrix = workspace.getMatrix()
+        let fieldMaxGens = document.getElementById('gen-max-field')
 
         let generator = new SolutionGenerator(matrix)
         generator.generateAll({
-            limit: 1000,
+            limit: fieldMaxGens.value,
             onlyCount: false
         })
 

@@ -3,11 +3,18 @@
 const Solution = require('./Solution')
 const numbersUtil = require('./../utils/numbers')
 
+/**
+ * The SolutionGenerator class can be used to generate all possible solutions 
+ * that can be derived from an instance of the MorphMatrix class.
+ * It can also be used to only count the solutions, which uses parts of the same algorithm.
+ * 
+ * The SolutionGenerator requires an associated MorphMatrix instance. 
+ * The function "generateAll" can then be used to either generate all solutions, 
+ * or count the possible solutions.
+ */
 class SolutionGenerator {
     constructor (matrix) {
-
         this.matrix = matrix
-
     }
 
     generateAll({limit=100, onlyCount=false}={}) {
@@ -93,8 +100,14 @@ class SolutionGenerator {
 
         let solutionNumber = 1
 
+        // There is one tree for each lowest level DS. Thus, if your first FR has three DSs attached to it, 
+        // and none of them are disabled, then you will also have three trees.
         for (let tree of treeArray) {
-            for (let topNode of tree.topLevelNodes) { // <--- Use these and walk backwards using parents
+            // This algorithm uses the top level nodes (Highest level FR design solutions), and walks backwards
+            // until the lowest level is reached. Each node has an associated DS, which is added to the solution.
+            // Once the lowest level is reached (the root node), the solution is completed, and the algorithm moves on to the next 
+            // available top node.
+            for (let topNode of tree.topLevelNodes) { 
 
                 let currentNode = topNode
                 let solution = new Solution()
@@ -102,6 +115,8 @@ class SolutionGenerator {
 
                 solutionNumber += 1
 
+                // The final step of this loop sets currentNode to its own parent.
+                // Thus, if will loop until it reaches the bottom of the tree, the root node, which has no parent.
                 while(currentNode) {
                     const ds = currentNode.ds
                     const fr = this.matrix.getFunctionalRequirement(ds.frID)
@@ -117,7 +132,9 @@ class SolutionGenerator {
 }
 
 /**
- * Maps out all possible solutions from a single DS
+ * Maps out all possible solutions that can be derived from a single DS (the root node) 
+ * and all nodes that it can be combined with.
+ * The SolutionTree class is used by the SolutionGenerator class, and serves no other purpose.
  */
 class SolutionTree {
     constructor ({maxWidth = 100} = {}) {
@@ -157,6 +174,11 @@ class SolutionTree {
     }
 }
 
+/**
+ * A solution node represents one DS. Besides the DS, the node also contains information about which other nodes on the next level
+ * this node can be combined with. It also contains all acumulated incompatibilities from lower level nodes, and the parent of this node.
+ * The SolutionNode class is used by the SolutionTree class, and serves no other purpose.
+ */
 class SolutionNode {
     constructor (tree, level, ds, {parent = null} = {}) {
         this.parent = parent

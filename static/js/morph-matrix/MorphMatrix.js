@@ -937,9 +937,9 @@ class MorphMatrix {
      * Returns the size of the design space. Takes delimitations into account.
      * Throws if the number is too big
      */
-    countPossibleSolutions() {
+    countPossibleSolutions(maxWidth) {
         const solGen = new SolutionGenerator(this)
-        let count = solGen.generateAll({limit: 200, onlyCount: true})
+        let count = solGen.generateAll({limit: maxWidth, onlyCount: true})
         return count
     }
 

@@ -107,11 +107,12 @@ module.exports = {
     },
 
     refreshSolutionCounter: () => {
+        let maxWidth = document.getElementById('gen-max-field').value
         let solutionCounter = document.getElementById('delim-solutions-counter')
         const matrix = workspace.getMatrix()
 
         try {
-            let solCount = matrix.countPossibleSolutions()
+            let solCount = matrix.countPossibleSolutions(maxWidth)
             solutionCounter.innerHTML = solCount
         } catch (err) {
             solutionCounter.innerHTML = "Too many solutions"

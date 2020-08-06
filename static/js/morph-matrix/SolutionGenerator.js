@@ -20,6 +20,9 @@ class SolutionGenerator {
 
     generateAll({limit=100, onlyCount=false}={}) {
         let frArray = []
+
+        SolutionTree.highLevelBranches = 0
+        SolutionTree.maxWidth = limit
         
         // Remove any FRs that does not contain availabe DSs
         for (let i = 0; i < this.matrix.functionalRequirements.length; i++) {
@@ -146,8 +149,11 @@ class SolutionGenerator {
  * The SolutionTree class is used by the SolutionGenerator class, and serves no other purpose.
  */
 class SolutionTree {
-    constructor ({maxWidth = 100} = {}) {
-        this.maxWidth = maxWidth
+
+    static highLevelBranches = 0
+    static maxWidth = 100
+
+    constructor () {
         this.rootNode = null
         this.levelData = new Map() // FR position -> amout of branches from that level
         
@@ -170,7 +176,11 @@ class SolutionTree {
 
         if (level > this.topLevel) {
             this.topLevel = level
+            SolutionTree.highLevelBranches -= this.topLevelWidth
         }
+
+        SolutionTree.highLevelBranches += 1
+
         this.topLevelWidth = levelWidth
     }
 
@@ -212,8 +222,8 @@ class SolutionNode {
     addBranch (node) {
         this.tree.addLevelWidth(this.level)
 
-        if (this.tree.getLevelWidth(this.level) > this.tree.maxWidth) {
-            throw new GenerationCapacityError(`Solution tree width exceeded limit of ${this.tree.maxWidth}`)
+        if (SolutionTree.highLevelBranches > SolutionTree.maxWidth) {
+            throw new GenerationCapacityError(`Solution tree width exceeded limit of ${SolutionTree.maxWidth}`)
         }
 
         this.branches.push(node)

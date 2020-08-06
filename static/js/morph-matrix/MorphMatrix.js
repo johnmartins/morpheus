@@ -7,17 +7,16 @@
  * @author Julian Martinsson
  */
 
-const state = require('./../state')
-const random = require('./../utils/random')
-const storageService = require('./../services/storage-service')
-const fileDiagService = require('./../services/file-dialog-service')
+const state = require('../state')
+const random = require('../utils/random')
+const storageService = require('../services/storage-service')
+const fileDiagService = require('../services/file-dialog-service')
 
 // Morph Matrix classes
 const FunctionalRequirement = require('./FunctionalRequirement')
 const DesignSolution = require('./DesignSolution')
 const Solution = require('./Solution')
 const Incompatibility = require('./Incompatibility')
-const SolutionCalculator = require('./SolutionCalculator')
 const SolutionGenerator = require('./SolutionGenerator')
 
 /**
@@ -910,8 +909,6 @@ class MorphMatrix {
      * Throws if the number is too big
      */
     countPossibleSolutions() {
-        //const solCal = new SolutionCalculator(this)
-        //return solCal.calculateSkiptIncompatibilities()
         const solGen = new SolutionGenerator(this)
         let count = solGen.generateAll({limit: 200, onlyCount: true})
         return count

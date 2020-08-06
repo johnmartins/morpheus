@@ -27,10 +27,23 @@ module.exports = {
         btnGenerate.onclick = module.exports.generateAllSolutions
 
         // Solution generation controls
+        let genWarningText = document.getElementById('gen-max-warning-text')
+        const showWarningText = (val) => {
+            if (val > 500) {
+                genWarningText.style.display="inline-block"
+            } else {
+                genWarningText.style.display="none"
+            }
+        }
         let rangeMaxGens = document.getElementById('gen-max-range')
         let fieldMaxGens = document.getElementById('gen-max-field')
+
+        showWarningText(rangeMaxGens.value)
+
         rangeMaxGens.oninput = () => {
             fieldMaxGens.value = rangeMaxGens.value
+
+            showWarningText(rangeMaxGens.value)
         }
         fieldMaxGens.onchange = () => {
             let val = fieldMaxGens.value
@@ -40,6 +53,8 @@ module.exports = {
 
             rangeMaxGens.value = val
             fieldMaxGens.value = val
+
+            showWarningText(val)
         }
 
         // New import -> Setup solution list
@@ -516,27 +531,6 @@ function refreshConflictIcons () {
             removeConflictIcon(solution.id)
         }
     }
-}
-
-/**
- * O(n) search for equivalent solution.  Returns the solution which this is equal to.
- * @param {Solution} solution 
- * @returns {Solution} duplicate solution
- */
-function checkIfUnique (solution) {
-    const matrix = workspace.getMatrix()
-
-    // TODO: Could potentially be upgrated to utilize sets, turning O(n) -> O(1) if too slow for large sets of similar strings/solutions
-    for (let solID in matrix.solutions) {
-        if (solID === solution.id) continue
-        let otherSolution = matrix.solutions[solID]
-
-        if (otherSolution.solutionString === solution.solutionString) {
-            return otherSolution
-        }
-    }
-
-    return null
 }
 
 function listSolutionsFromMatrix () {

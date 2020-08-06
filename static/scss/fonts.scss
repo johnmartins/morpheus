@@ -20,9 +20,13 @@
 }
 
 .text-red {
-    color: $red-high
+    color: $red-high;
 }
 
 .text-selectable {
     user-select: text;
+}
+
+.text-yellow {
+    color: $yellow-high;
 }

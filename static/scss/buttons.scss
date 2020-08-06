@@ -44,3 +44,12 @@
     color: $grey-lowest;
     transition: all 0.2s;
 }
+
+.btn-red {
+    background-color: $red-medium;
+    color: $white-high;
+}
+
+.btn-red:hover {
+    background-color: $red-high;
+}

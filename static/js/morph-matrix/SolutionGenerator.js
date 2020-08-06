@@ -2,7 +2,7 @@
 
 const Solution = require('./Solution')
 const numbersUtil = require('./../utils/numbers')
-const {NoDesignSolutionsError, GenerationCapacityError} = require('./../errors')
+const {NoDesignSolutionsError, GenerationCapacityError, SolutionExistsError} = require('./../errors')
 
 /**
  * The SolutionGenerator class can be used to generate all possible solutions 
@@ -125,7 +125,16 @@ class SolutionGenerator {
                     currentNode = currentNode.parent
                 }
 
-                this.matrix.addSolution(solution)
+                try {
+                    this.matrix.addSolution(solution)
+                } catch (err) {
+                    if (err.code === 'SOLUTION_EXISTS') {
+                        console.log('Skipping one existing solution')
+                    } else {
+                        throw err
+                    }
+                }
+                
             }
         }
     }

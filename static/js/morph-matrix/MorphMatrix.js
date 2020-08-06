@@ -9,6 +9,7 @@
 
 const state = require('../state')
 const random = require('../utils/random')
+const {SolutionExistsError} = require('./../errors')
 const storageService = require('../services/storage-service')
 const fileDiagService = require('../services/file-dialog-service')
 
@@ -31,6 +32,7 @@ class MorphMatrix {
     name = "Untitled Morphological Matrix"
     functionalRequirements = []
     solutions = {}          // Solution ID -> Solution
+    solutionStringSet = new Set() // Used to ensure solution uniqueness
 
     frMap = {}              // FunctionalRequirement ID -> FunctionalRequirement
     dsMap = {}              // DesignSolution ID -> DesignSolution
@@ -427,16 +429,45 @@ class MorphMatrix {
     }
 
     addSolution(solution) {
-        this.solutions[solution.id] = solution
+        try {
+            this.registerSolution(solution)
+            this.solutions[solution.id] = solution
+        } catch (err) {
+            throw err
+        }    
+    }
+
+    /**
+     * Ensures that a solution is unique. If it is, then it is stored in the solution set
+     */
+    registerSolution(solution) {
+        if (solution.solutionString === null) return
+        const exists = this.solutionStringSet.has(solution.solutionString)
+        if (exists) {
+            throw new SolutionExistsError('Solution was not added since it already exists.')
+        }
+        this.solutionStringSet.add(solution.solutionString)
+    }
+
+    unregisterSolution(solution) {
+        this.solutionStringSet.delete(solution.solutionString)
     }
 
     getSolution(solutionID) {
         return this.solutions[solutionID]
     }
 
-    removeSolution(solutionID) {
-        console.log("DELETING "+solutionID)
+    removeSolution(solutionID, skipUnregister) {
+        let solution = this.solutions[solutionID]
+        if (skipUnregister !== true) {
+            this.unregisterSolution(solution)
+        }
         delete this.solutions[solutionID]
+    }
+
+    removeAllSolutions () {
+        this.solutions = {}
+        this.solutionStringSet = new Set()
     }
 
     getSolutionMap() {
@@ -503,7 +534,6 @@ class MorphMatrix {
 
     deleteDesignSolution (dsID) {
         let ds = this.dsMap[dsID]
-        console.log(ds)
         let frID = ds.frID
         let fr = this.frMap[frID]
 
@@ -874,7 +904,6 @@ class MorphMatrix {
 
     clearIncompatibleOverlay (dsID) {
         let dsCell = document.getElementById(dsID)
-        console.log('Clearing incomp from dsid: ')
         let overlay = dsCell.querySelector('.overlay-incompatible')
         dsCell.removeChild(overlay)
     }

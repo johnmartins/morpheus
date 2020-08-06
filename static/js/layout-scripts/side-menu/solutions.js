@@ -17,6 +17,9 @@ module.exports = {
         let btnSolutions = document.getElementById('btn-new-solution')
         btnSolutions.onclick = module.exports.startNewSolution
 
+        let btnDeleteAllSolutions = document.getElementById('btn-clear-solutions')
+        btnDeleteAllSolutions.onclick = module.exports.clearAllSolutions
+
         let btnRandomize = document.getElementById('btn-generate-random')
         btnRandomize.onclick = module.exports.createRandomSolution
 
@@ -118,16 +121,33 @@ module.exports = {
             return
         }
 
-        let duplicateSolution = checkIfUnique(solution)
-        if (duplicateSolution) {
-            console.error('WARNING: SOLUTION IS NOT UNIQUE')
+        try {
+            matrix.registerSolution(solution)
 
-            // TODO: Allow user to keep the duplicate if they really want to, maybe?
-            popup.error(`The solution is not unique. <strong>"${duplicateSolution.name}"</strong> has the same scheme. This solution will now be removed.`, {
-                callbackContinue: () => {
-                    module.exports.removeListedSolution(solution.id)
+        } catch (err) {
+            if (err.code === 'SOLUTION_EXISTS') {
+                console.error('WARNING: SOLUTION IS NOT UNIQUE')
+
+                let duplicateSolution = null
+
+                for (let solID in matrix.getSolutionMap()) {
+                    let storedSolution = matrix.getSolutionMap()[solID]
+
+                    if (storedSolution.solutionString === solution.solutionString) {
+                        duplicateSolution = storedSolution
+                        break
+                    }
                 }
-            })
+
+                popup.error(`The solution is not unique. <strong>"${duplicateSolution.name}"</strong> has the same scheme. This solution will not be added.`)
+            } else {
+                popup.error('An unidentified error occurred.')
+            }
+
+            // Remove solution, but since this is a duplicate we do not want to
+            // unregister the solution, since it exists in the other copy.
+            matrix.removeSolution(solution.id, true)
+            return
         }
 
         // Verify solution name. If unset (or useless) then automatically set a name.
@@ -149,6 +169,11 @@ module.exports = {
         editingSolution = false
 
         module.exports.completeSolution()
+    },
+
+    clearSolutionList: () => {
+        let solList = document.getElementById('menu-solution-list')
+        solList.innerHTML = ''
     },
 
     addToSolutionList: (solutionID) => {
@@ -251,6 +276,7 @@ module.exports = {
 
         module.exports.resetUI()
         editingSolution = true
+        matrix.unregisterSolution(solution) // Remove stores solution string from set
         solEl.classList.add('selected')
         
         state.workspaceSelectedSolution = solutionID
@@ -382,8 +408,22 @@ module.exports = {
                 popup.error(`Generation capacity reached!<br><br>Error message: ${err.message}`)
             } else {
                 popup.error('An unidentified error occured when attempting to generate all solutions.')
+                console.error(err.message)
+                console.error(err.stack)
             }
         }
+    },
+
+    clearAllSolutions: () => {
+        popup.warning('Are you sure you want to delete ALL solutions permanently?', {
+            titleTxt: 'Delete all solutions',
+            callbackContinue: () => {
+                const matrix = workspace.getMatrix()
+                module.exports.clearSolutionList()
+                matrix.removeAllSolutions()
+            }
+        })
+
     }
 }
 
@@ -500,6 +540,8 @@ function checkIfUnique (solution) {
 }
 
 function listSolutionsFromMatrix () {
+    module.exports.clearSolutionList()
+
     const matrix = workspace.getMatrix()
     let solutionIDs = Object.keys(matrix.solutions)
     for (let i = 0; i < solutionIDs.length; i++) {

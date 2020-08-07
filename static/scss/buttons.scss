@@ -27,14 +27,14 @@
 
 .btn-secondary {
     background-color: transparent;
-    color: $white-medium;
+    color: $white-high;
     border: 1px solid $white-medium;
     transition: all 0.5s;
 }
 
 .btn-secondary:hover {
-    background-color: transparent;
-    color: $white-high;
+    background-color: $white-high;
+    color: $grey-lowest;
     border-color: $white-high;
 }
 
@@ -43,6 +43,7 @@
     border-color: $white-low;
     color: $grey-lowest;
     transition: all 0.2s;
+    box-shadow: inset 0 0 4px $grey-lowest;
 }
 
 .btn-red {

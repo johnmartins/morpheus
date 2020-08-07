@@ -116,7 +116,13 @@ module.exports = {
             let solCount = matrix.countPossibleSolutions(maxWidth)
             solutionCounter.innerHTML = solCount
         } catch (err) {
-            solutionCounter.innerHTML = `>${maxWidth}`
+            if (err.code === 'NO_DS_IN_MATRIX') {
+                solutionCounter.innerHTML = '0'
+            } else if (err.code === 'GEN_CAP') {
+                solutionCounter.innerHTML = `>${maxWidth}`
+            } else {
+                solutionCounter.innerHTML = 'Calculation failed'
+            }
         }
     },
 

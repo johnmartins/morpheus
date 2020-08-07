@@ -6,7 +6,7 @@ const html2canvas = require('html2canvas')
 const workspace = require('./../workspace')
 const fileDiagService = require('./file-dialog-service')
 const popup = require('./../layout-scripts/popup')
-const SolutionRenderer = require('./../morph-matrix/solution-renderer')
+const SolutionRenderer = require('./../morph-matrix/SolutionRenderer')
 
 module.exports = {
 

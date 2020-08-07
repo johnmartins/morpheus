@@ -848,7 +848,7 @@ class MorphMatrix {
                 })
             }   
 
-            this.solutions[solutionID] = solution
+            this.addSolution(solution)
         }
 
         console.log('Imported solutions')

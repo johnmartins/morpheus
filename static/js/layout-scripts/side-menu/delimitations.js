@@ -59,6 +59,7 @@ module.exports = {
         })
 
         GlobalObserver.on('tab-change', (tabData) => {
+            module.exports.refreshSolutionCounter()
             if (tabData.currentTab !== 'tab-delimitations') return
             module.exports.resetUI()
         })
@@ -115,10 +116,8 @@ module.exports = {
             let solCount = matrix.countPossibleSolutions(maxWidth)
             solutionCounter.innerHTML = solCount
         } catch (err) {
-            solutionCounter.innerHTML = "Too many solutions"
+            solutionCounter.innerHTML = `>${maxWidth}`
         }
-        
-        
     },
 
     clearIncompatibilityList() {

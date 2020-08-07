@@ -1,6 +1,6 @@
 'use strict'
 
-const Selector = require('./../selector')
+const Selector = require('../Selector')
 const workspace = require('./../../workspace')
 const exportService = require('./../../services/export-service')
 

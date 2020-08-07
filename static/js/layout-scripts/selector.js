@@ -1,6 +1,6 @@
 'use strict'
 
-const random = require('./../utils/random')
+const random = require('../utils/random')
 
 
 class Selector {

@@ -59,6 +59,7 @@ module.exports = {
         })
 
         GlobalObserver.on('tab-change', (tabData) => {
+            module.exports.refreshSolutionCounter()
             if (tabData.currentTab !== 'tab-delimitations') return
             module.exports.resetUI()
         })
@@ -107,11 +108,16 @@ module.exports = {
     },
 
     refreshSolutionCounter: () => {
+        let maxWidth = document.getElementById('gen-max-field').value
         let solutionCounter = document.getElementById('delim-solutions-counter')
         const matrix = workspace.getMatrix()
-        let solCount = matrix.countPossibleSolutions()
 
-        solutionCounter.innerHTML = solCount
+        try {
+            let solCount = matrix.countPossibleSolutions(maxWidth)
+            solutionCounter.innerHTML = solCount
+        } catch (err) {
+            solutionCounter.innerHTML = `>${maxWidth}`
+        }
     },
 
     clearIncompatibilityList() {

@@ -106,6 +106,9 @@ module.exports = {
 }
 
 function createPopupWindow () {
+    // Ensure that the user cant interact with anything behind the popup using keypress
+    if (document.activeElement) document.activeElement.blur()
+
     let id = random.randomString(5)
 
     // The mask blocks the user from clicking on things outside the popup
@@ -140,6 +143,10 @@ function createPopupWindow () {
 
 function removePopup (id) {
     console.log(`remove popup ${id}`)
+
+    // Remove document keypress listener
+    document.onkeypress = null
+
     let mask = document.getElementById(ID_PREFIX_MASK+id)
     mask.parentElement.removeChild(mask)
 

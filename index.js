@@ -2,6 +2,11 @@
 
 const { app, BrowserWindow} = require('electron')
 const menu = require('./main/menu')
+const setupEvents = require('./installers/setupEvents')
+
+if (setupEvents.handleSquirrelEvent()) {
+    process.exit(0)
+}
 
 function createWindow () {
     let win = new BrowserWindow({

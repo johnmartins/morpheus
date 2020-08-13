@@ -24,4 +24,4 @@ To build a windows installer, run `npm run make`.
 To build a windows package, run `npm run package-win`
 
 ### Signing the windows installer
-To sign your windows installer you need the files `win.pfx` and `win-pwd.txt`. These files needs to be in the `build-resources/certificates/` directory.
+To sign your windows installer you need the files `win.pfx` and `win-pwd.txt`. These files needs to be in the `build-resources/certificates/` directory. They are not included in this project repository since they are secret (and should be kept secret by the developers) for security reasons.

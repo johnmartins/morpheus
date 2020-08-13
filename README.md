@@ -9,3 +9,19 @@ This is a graphical tool for creating morphological matrices. It can be used to 
 - `npm run make` builds the executable
 - `npm run watch` tracks changes to scss files
 
+# Build
+
+## Mac
+To build for mac, run `npm run package-mac`. This will yield a .app-directory in `out/` directory
+
+## For windows
+To build for windows you need to either
+- be on a windows machine
+- be on a mac with wine installed
+- be on a linux with mono installed
+
+To build a windows installer, run `npm run make`.
+To build a windows package, run `npm run package-win`
+
+### Signing the windows installer
+To sign your windows installer you need the files `win.pfx` and `win-pwd.txt`. These files needs to be in the `build-resources/certificates/` directory.

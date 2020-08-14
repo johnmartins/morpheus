@@ -1,6 +1,6 @@
 'use strict'
 
-const { app, Menu } = require('electron')
+const { app, Menu, dialog } = require('electron')
 
 module.exports = {
     build: (win) => {
@@ -53,7 +53,18 @@ module.exports = {
                     label: 'Exit',
                     click: () => {win.webContents.send('menu-event', {type: 'exit'})}                                     // First ask renderer for permission
                 }]
-        })
+        },{
+            label: 'Help',
+            submenu: [
+                {
+                    label: 'About',
+                    click: () => {
+                        dialog.showMessageBoxSync({message: `Morpheus Version: ${app.getVersion()}`})
+                    }
+                }
+            ]
+        }
+        )
         
         // Dev menu
         template.push({

@@ -8,10 +8,15 @@ module.exports = {
         WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY: 'wsim-inc', // Used when defining incompatible DSs             
     },
 
+    softwareVersion: null,
+
     workspaceInteractionMode: null,
     workspaceSelectedSolution: null,
     workspaceSelectedIncompatibleOrigin: null,
 
+    /**
+     * Resets all state parameters that depends on user interaction
+     */
     reset: () => {
         module.exports.workspaceInteractionMode = module.exports.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
         module.exports.workspaceSelectedSolution = null

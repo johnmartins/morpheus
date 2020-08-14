@@ -9,7 +9,8 @@ const passwordFilePath = path.join('./', 'build-resources', 'certificates', 'win
 
 module.exports = {
     packagerConfig: {
-        icon: "build-resources/icons/app-icon"
+        icon: "build-resources/icons/app-icon",
+        asar: true
     },
     makers: [
         {

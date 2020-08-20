@@ -31,6 +31,7 @@ function createWindow () {
 
 }
 
+app.allowRendererProcessReuse = false   // If set to true, then the fs module crashes on refresh.
 
 app.whenReady().then(createWindow)
 

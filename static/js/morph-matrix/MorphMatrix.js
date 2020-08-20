@@ -73,6 +73,7 @@ class MorphMatrix {
         canvas.style.width = '100%'
         canvas.style.height = '100%'
         canvas.style.pointerEvents = 'none'
+        this.canvasOverlayElement = canvas
         this.tableElement.appendChild(canvas)
 
         this._setupTableControls()
@@ -417,7 +418,29 @@ class MorphMatrix {
 
             let dsCell = document.getElementById(dsID)
             dsCell.appendChild(overlay)
+
+            if (i+1 < frIDs.length) {
+                this.drawLineBetweenDs(solution.getDsForFr(frIDs[i]), solution.getDsForFr(frIDs[i+1]))
+            }
         }
+    }
+
+    drawLineBetweenDs (dsID1, dsID2) {
+        console.log(`drawing line from ${dsID1} to ${dsID2}`)
+        let ds1 = this.dsMap[dsID1]
+        let ds2 = this.dsMap[dsID2]
+        let dsCell1 = document.getElementById(ds1.id)
+        let dsCell2 = document.getElementById(ds2.id)
+        let table = this.tableElement
+
+        let canvas = this.canvasOverlayElement
+        let ctx = canvas.getContext("2d")
+        ctx.beginPath()
+        ctx.moveTo(0,0)
+        ctx.lineTo(50,50)
+        ctx.lineWidth = 8
+        ctx.strokeStyle = 'red'
+        ctx.stroke()
     }
 
     toggleSolutionDS(ds) {

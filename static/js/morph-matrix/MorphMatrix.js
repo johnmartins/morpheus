@@ -41,12 +41,12 @@ class MorphMatrix {
     // Important layout vars
     containerID = null
     containerElement = null
-    canvasOverlayElement = null         // <-- Use this for drawing lines
     titleContainerElement = null
     titleElement = null
     tableElement = null
     tbodyElement = null
     dsLabelCell = null
+    solutionCanvasID = 'solution-canvas-id'
 
     constructor(containerID) {
         this.containerElement = document.getElementById(containerID)
@@ -63,18 +63,6 @@ class MorphMatrix {
         this.tbodyElement = document.createElement('tbody')
         this.tableElement.appendChild(this.tbodyElement)
         this.containerElement.appendChild(this.tableElement)
-
-        // Setup canvas overlay
-        let canvas = document.createElement('canvas')
-        canvas.style.position = 'absolute'
-        canvas.style.border = '1px solid yellow'
-        canvas.style.top = '0'
-        canvas.style.left = '0'
-        canvas.style.width = '100%'
-        canvas.style.height = '100%'
-        canvas.style.pointerEvents = 'none'
-        this.canvasOverlayElement = canvas
-        this.tableElement.appendChild(canvas)
 
         this._setupTableControls()
 
@@ -400,9 +388,11 @@ class MorphMatrix {
             let overlay = solutionRenderOverlays[i]
             overlay.parentElement.removeChild(overlay)
         }
+        this.destroySolutionCanvas()
     }
 
     renderSolution(solutionID) {
+        this.createSolutionCanvas()
         let solution = this.solutions[solutionID]
         console.log(solution)
         let frIDs = solution.getMappedFunctionsArray()
@@ -431,16 +421,57 @@ class MorphMatrix {
         let ds2 = this.dsMap[dsID2]
         let dsCell1 = document.getElementById(ds1.id)
         let dsCell2 = document.getElementById(ds2.id)
-        let table = this.tableElement
 
-        let canvas = this.canvasOverlayElement
+        let canvas = document.getElementById(this.solutionCanvasID)
         let ctx = canvas.getContext("2d")
         ctx.beginPath()
-        ctx.moveTo(0,0)
-        ctx.lineTo(50,50)
-        ctx.lineWidth = 8
+
+        let parentPos = canvas.getBoundingClientRect()
+        let d1Pos = dsCell1.getBoundingClientRect()
+        let d2Pos = dsCell2.getBoundingClientRect()
+        let d1RelativePos = {
+            top: d1Pos.top - parentPos.top,
+            left: d1Pos.left - parentPos.left
+        }
+        let d2RelativePos = {
+            top: d2Pos.top - parentPos.top,
+            left: d2Pos.left - parentPos.left
+        }
+
+        let x1 = d1RelativePos.top + dsCell1.offsetHeight/2
+        let y1 = d1RelativePos.left + dsCell1.offsetWidth/2
+        let x2 = d2RelativePos.top + dsCell2.offsetHeight/2
+        let y2 = d2RelativePos.left + dsCell2.offsetWidth/2
+
+        console.log(`From (${x1},${y1}) to (${x2},${y2})`)
+
+        ctx.moveTo(y1, x1)
+        ctx.lineTo(y2, x2)
+        ctx.lineWidth = 2
         ctx.strokeStyle = 'red'
         ctx.stroke()
+    }
+
+    createSolutionCanvas() {
+        this.destroySolutionCanvas()
+
+        let canvas = document.createElement('canvas')
+        canvas.id = this.solutionCanvasID
+        canvas.style.position = 'absolute'
+        canvas.style.top = '0'
+        canvas.style.left = '0'
+        canvas.style.width = this.tableElement.offsetWidth + 'px'
+        canvas.style.height = this.tableElement.offsetHeight + 'px'
+        canvas.style.pointerEvents = 'none'
+        canvas.width = this.tableElement.offsetWidth
+        canvas.height = this.tableElement.offsetHeight
+        this.canvasOverlayElement = canvas
+        this.tableElement.appendChild(canvas)
+    }
+
+    destroySolutionCanvas() {
+        let canvas = document.getElementById(this.solutionCanvasID)
+        if (canvas) canvas.parentElement.removeChild(canvas)
     }
 
     toggleSolutionDS(ds) {

@@ -20,6 +20,8 @@ const Solution = require('./Solution')
 const Incompatibility = require('./Incompatibility')
 const SolutionGenerator = require('./SolutionGenerator')
 
+const solutionCanvasID = 'solution-canvas-id'
+
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
  * Design Solutions and Solutions. After instanciation it is possible to import
@@ -50,7 +52,7 @@ class MorphMatrix {
     constructor(containerID) {
         this.containerElement = document.getElementById(containerID)
         this.containerID = containerID
-
+        
         if (!this.containerElement) throw new Error('Failed to find matrix container')
         
         // Create title
@@ -58,6 +60,7 @@ class MorphMatrix {
 
         // Create table
         this.tableElement = document.createElement('table')
+        this.tableElement.style.position = 'relative'
         this.tbodyElement = document.createElement('tbody')
         this.tableElement.appendChild(this.tbodyElement)
         this.containerElement.appendChild(this.tableElement)
@@ -386,14 +389,29 @@ class MorphMatrix {
             let overlay = solutionRenderOverlays[i]
             overlay.parentElement.removeChild(overlay)
         }
+        this.destroySolutionCanvas()
     }
 
     renderSolution(solutionID) {
+        this.createSolutionCanvas()
         let solution = this.solutions[solutionID]
         console.log(solution)
         let frIDs = solution.getMappedFunctionsArray()
+
+        // Put together FR array
+        let frArray = []
         for (let i = 0; i < frIDs.length; i++) {
-            let frID = frIDs[i]
+            frArray.push(this.frMap[frIDs[i]])
+        }
+
+        frArray.sort( (a, b) => {
+            if (a.position < b.position) return 1
+            if (a.position > b.position) return -1
+            return 0
+        })
+
+        for (let i = 0; i < frArray.length; i++) {
+            let frID = frArray[i].id
             let dsID = solution.getDsForFr(frID)
 
             // Create overlay for selected design solution
@@ -404,7 +422,71 @@ class MorphMatrix {
 
             let dsCell = document.getElementById(dsID)
             dsCell.appendChild(overlay)
+
+            if (i+1 < frArray.length) {
+                this.drawLineBetweenDs(solution.getDsForFr(frArray[i].id), solution.getDsForFr(frArray[i+1].id))
+            }
         }
+    }
+
+    drawLineBetweenDs (dsID1, dsID2) {
+        console.log(`drawing line from ${dsID1} to ${dsID2}`)
+        let ds1 = this.dsMap[dsID1]
+        let ds2 = this.dsMap[dsID2]
+        let dsCell1 = document.getElementById(ds1.id)
+        let dsCell2 = document.getElementById(ds2.id)
+
+        let canvas = document.getElementById(solutionCanvasID)
+        if (!canvas) throw new Error('Canvas not yet created.')
+        let ctx = canvas.getContext("2d")
+        ctx.beginPath()
+
+        let parentPos = canvas.getBoundingClientRect()
+        let d1Pos = dsCell1.getBoundingClientRect()
+        let d2Pos = dsCell2.getBoundingClientRect()
+        let d1RelativePos = {
+            top: d1Pos.top - parentPos.top,
+            left: d1Pos.left - parentPos.left
+        }
+        let d2RelativePos = {
+            top: d2Pos.top - parentPos.top,
+            left: d2Pos.left - parentPos.left
+        }
+
+        let x1 = d1RelativePos.top + dsCell1.offsetHeight/2
+        let y1 = d1RelativePos.left + dsCell1.offsetWidth/2
+        let x2 = d2RelativePos.top + dsCell2.offsetHeight/2
+        let y2 = d2RelativePos.left + dsCell2.offsetWidth/2
+
+        console.log(`From (${x1},${y1}) to (${x2},${y2})`)
+
+        ctx.moveTo(y1, x1)
+        ctx.lineTo(y2, x2)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = 'rgba(94,211,237,0.5)'
+        ctx.stroke()
+    }
+
+    createSolutionCanvas() {
+        this.destroySolutionCanvas()
+
+        let canvas = document.createElement('canvas')
+        canvas.id = solutionCanvasID
+        canvas.style.position = 'absolute'
+        canvas.style.top = '0'
+        canvas.style.left = '0'
+        canvas.style.width = this.tableElement.offsetWidth + 'px'
+        canvas.style.height = this.tableElement.offsetHeight + 'px'
+        canvas.style.pointerEvents = 'none'
+        canvas.width = this.tableElement.offsetWidth
+        canvas.height = this.tableElement.offsetHeight
+        this.canvasOverlayElement = canvas
+        this.tableElement.appendChild(canvas)
+    }
+
+    destroySolutionCanvas() {
+        let canvas = document.getElementById(solutionCanvasID)
+        if (canvas) canvas.parentElement.removeChild(canvas)
     }
 
     toggleSolutionDS(ds) {
@@ -772,8 +854,10 @@ class MorphMatrix {
         // Scroll right
         let workspaceElement = document.querySelector("#layout-workspace")
         let val = workspaceElement.offsetWidth + workspaceElement.scrollLeft
-        if (newCell.offsetLeft > val) {
+        if (this.tableElement.offsetLeft + newCell.offsetLeft > val) {  // add offsetLeft of table because table has position set to relative.
             workspaceElement.scrollLeft += newCell.offsetWidth
+        } else {
+            console.log('Not gonna scroll. Nope.')
         }
 
         GlobalObserver.emit('ds-added')

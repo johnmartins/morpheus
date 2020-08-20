@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const { exit } = require('process')
 
-const skipCertificate = false
+const skipCertificate = true
 const certFilePath = path.join('./', 'build-resources', 'certificates', 'win.pfx')
 const passwordFilePath = path.join('./', 'build-resources', 'certificates', 'win-pwd.txt')
 

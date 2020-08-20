@@ -24,7 +24,7 @@ class Solution {
     bindFrToDs (fr, ds, {ignoreDelimitations = false} = {}) {
         // Check if requested DS is disabled. In that case noop.
         if (ds.disabled && ignoreDelimitations === false) {
-            console.log('Selected DS is disabled')
+            console.log('Selected SS is disabled')
             return
         } else if (ds.disabled && ignoreDelimitations === true) {
             this.addConflict(ds.id)
@@ -32,7 +32,7 @@ class Solution {
 
         // Check if requested DS is incompatible. In that case noop.
         if (this.isIncompatible(ds.id) && ignoreDelimitations === false) {
-            console.log('Selected DS is incompatible')
+            console.log('Selected SS is incompatible')
             return
         } else if (this.isIncompatible(ds.id) && ignoreDelimitations === true) {
             this.addConflict(ds.id)
@@ -52,7 +52,7 @@ class Solution {
             }
 
             // Check if this resolves incompatibilities
-            console.log('Currend DS ID is defined.')
+            console.log('Current SS ID is defined.')
             this.clearAssociatedIncompatibilities(currentDsID)
         }
         
@@ -77,7 +77,7 @@ class Solution {
         let frID = fr.id
         let dsID = this.frIdToDsIdMap[frID]
         let ds = this.dsMap[dsID]
-        console.log(`UNBINDING FR ${frID} from DS ${dsID}`)
+        console.log(`UNBINDING SF ${frID} from SS ${dsID}`)
 
         // Remove indirect conflicts
         this._clearIndirectIncompatibilityConflicts(ds)

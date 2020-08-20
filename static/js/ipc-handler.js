@@ -6,12 +6,13 @@ const { ipcRenderer, ipcMain } = require('electron')
 const popup = require(path.join(__dirname, '/../js/layout-scripts/popup.js'))
 const osService = require(path.join(__dirname, '/../js/services/open-save-service.js'))
 const workspace = require(path.join(__dirname, '/../js/workspace.js'))
+const state = require(path.join(__dirname, '/../js/state.js'))
 
 // Test IPC connectivity
-console.log('ping')
-ipcRenderer.send('ping')
-ipcRenderer.on('pong', () => {
-    console.log('pong')
+ipcRenderer.send('get-version')
+ipcRenderer.on('return-version', (evt, version) => {
+    console.log('Morpheus version: ' + version)
+    state.softwareVersion = version
 })
 
 ipcRenderer.on('menu-event', (evt, menuEvent) => {handleMenuEvent(menuEvent)})

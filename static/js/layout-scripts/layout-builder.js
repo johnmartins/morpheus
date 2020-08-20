@@ -1,4 +1,4 @@
-
+'use strict';
 // This script is wrapped up in a self executing function to prevent its scope from leaking into all other scripts.
 // This is the only script that (besides the global observer) is directly referenced in the HTML. 
 // Thus, this is the "root" script, which spawns all other scripts.

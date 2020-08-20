@@ -5,9 +5,9 @@ const { ipcMain, dialog, app } = require('electron')
 module.exports = (win) => {
 
     // Test that is run when the renderer starts.
-    ipcMain.on('ping', (evt, arg) => {
-        console.log("Pinged from client")
-        evt.reply('pong')
+    ipcMain.on('get-version', (evt, arg) => {
+        console.log("Client requested software version")
+        evt.reply('return-version', app.getVersion())
     })
 
     ipcMain.on('open-file-dialog', async (evt, data) => {

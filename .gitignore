@@ -112,3 +112,8 @@ user-data/
 
 # Build output files
 out/
+
+# Secret resources
+build-resources/certificates/
+*.pfx
+win-pwd.txt

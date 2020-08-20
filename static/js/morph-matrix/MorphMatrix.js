@@ -839,8 +839,10 @@ class MorphMatrix {
         // Scroll right
         let workspaceElement = document.querySelector("#layout-workspace")
         let val = workspaceElement.offsetWidth + workspaceElement.scrollLeft
-        if (newCell.offsetLeft > val) {
+        if (this.tableElement.offsetLeft + newCell.offsetLeft > val) {  // add offsetLeft of table because table has position set to relative.
             workspaceElement.scrollLeft += newCell.offsetWidth
+        } else {
+            console.log('Not gonna scroll. Nope.')
         }
 
         GlobalObserver.emit('ds-added')

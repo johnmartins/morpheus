@@ -41,6 +41,7 @@ class MorphMatrix {
     // Important layout vars
     containerID = null
     containerElement = null
+    canvasOverlayElement = null         // <-- Use this for drawing lines
     titleContainerElement = null
     titleElement = null
     tableElement = null
@@ -50,7 +51,7 @@ class MorphMatrix {
     constructor(containerID) {
         this.containerElement = document.getElementById(containerID)
         this.containerID = containerID
-
+        
         if (!this.containerElement) throw new Error('Failed to find matrix container')
         
         // Create title
@@ -58,9 +59,21 @@ class MorphMatrix {
 
         // Create table
         this.tableElement = document.createElement('table')
+        this.tableElement.style.position = 'relative'
         this.tbodyElement = document.createElement('tbody')
         this.tableElement.appendChild(this.tbodyElement)
         this.containerElement.appendChild(this.tableElement)
+
+        // Setup canvas overlay
+        let canvas = document.createElement('canvas')
+        canvas.style.position = 'absolute'
+        canvas.style.border = '1px solid yellow'
+        canvas.style.top = '0'
+        canvas.style.left = '0'
+        canvas.style.width = '100%'
+        canvas.style.height = '100%'
+        canvas.style.pointerEvents = 'none'
+        this.tableElement.appendChild(canvas)
 
         this._setupTableControls()
 

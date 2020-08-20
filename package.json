@@ -1,7 +1,7 @@
 {
   "name": "morpheus",
   "productName": "Morpheus",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Morphological Matrix Generation Interface",
   "main": "index.js",
   "scripts": {

@@ -43,6 +43,5 @@ module.exports = {
 function getPassword () {
     // Use FS to sync read passwordFilePath and return the contents without linebreaks
     let content = fs.readFileSync(passwordFilePath, {encoding: 'utf8'})
-    console.log('pwd: '+content.replace('\n','').replace('\r\n',''))
     return content.replace('\n','').replace('\r\n','')
 }

@@ -144,17 +144,17 @@ class MorphMatrix {
         let firstRow = this.tbodyElement.insertRow()
         let rootCell = firstRow.insertCell()
         rootCell.classList.add('mm-label-cell')
-        rootCell.innerHTML = "Functional Requirements"
+        rootCell.innerHTML = "Sub-Functions"
 
         this.dsLabelCell = firstRow.insertCell()
-        this.dsLabelCell.innerHTML = "Design solutions"
+        this.dsLabelCell.innerHTML = "Sub-Solutions"
         this.dsLabelCell.align = "center"
         this.dsLabelCell.classList.add('mm-label-cell')
         this.dsLabelCell.colSpan = 1
 
         let secondRow = this.tbodyElement.insertRow()
         let addRowCell = secondRow.insertCell()
-        addRowCell.innerHTML = '<i style="font-weight: bold;" class="far fa-plus-square"></i> FR'
+        addRowCell.innerHTML = '<i style="font-weight: bold;" class="far fa-plus-square"></i> SF'
         addRowCell.align = "center"
         addRowCell.style.fontSize = "1rem"
         addRowCell.classList.add('mm-add-cell')
@@ -519,7 +519,7 @@ class MorphMatrix {
                 selectedFr.position -= 1
             }
         }
-        if (deleteIndex === -1) throw new Error('Failed to delete FR.')
+        if (deleteIndex === -1) throw new Error('Failed to delete SF.')
         this.functionalRequirements.splice(deleteIndex, 1)
 
         // Delete DOM element
@@ -548,7 +548,7 @@ class MorphMatrix {
                 ds.position -= 1
             }
         }
-        if (deleteIndex === -1) throw new Error('Failed to delete DS.')
+        if (deleteIndex === -1) throw new Error('Failed to delete SS.')
         fr.designSolutions.splice(deleteIndex, 1)
 
         // Delete DOM element
@@ -690,7 +690,7 @@ class MorphMatrix {
         let newCell = newRow.insertCell()
         newCell.id = cellID
         
-        this._createCellForm(newCell, `Functional Requirement ${position}`, {
+        this._createCellForm(newCell, `Sub-Function ${position}`, {
             onChangeCallback: (value) => fr.description = value,
             defaultValue: description,
             styleClass: 'func-req'
@@ -700,7 +700,7 @@ class MorphMatrix {
 
         // Create a new "Add DS"-cell on this row
         let newAddCell = newRow.insertCell()
-        newAddCell.innerHTML = '<i style="font-weight: bold;" class="far fa-plus-square"></i> DS'
+        newAddCell.innerHTML = '<i style="font-weight: bold;" class="far fa-plus-square"></i> SS'
         newAddCell.style.fontSize = "1rem"
         newAddCell.align = "center"
         newAddCell.classList.add('mm-add-cell')
@@ -745,7 +745,7 @@ class MorphMatrix {
         }
 
         // Create form in which a description can be written
-        this._createCellForm(newCell, `Design Solution ${cellPosition}`, {
+        this._createCellForm(newCell, `Sub-Solution ${cellPosition}`, {
             onChangeCallback: (value) => ds.description = value,
             defaultValue: ds.description,
         })
@@ -811,7 +811,7 @@ class MorphMatrix {
             }
         }
 
-        console.log('Imported FR and DS structure')
+        console.log('Imported SF and SS structure')
 
         // Import incompatibilities
         this.incompatibilityMap = save.incompatibilityMap

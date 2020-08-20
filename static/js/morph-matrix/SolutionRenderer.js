@@ -34,7 +34,7 @@ class SolutionRenderer {
         let headerRow = tbody.insertRow()
         let frHeaderCell = headerRow.insertCell()
         frHeaderCell.classList.add('mm-label-cell')
-        frHeaderCell.innerHTML = 'Functional Requirements'
+        frHeaderCell.innerHTML = 'Sub-Functions'
 
         // Loop through FRs
         for (let i = 0; i < this.frArray.length; i++) {

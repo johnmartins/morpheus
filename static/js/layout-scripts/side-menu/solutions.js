@@ -371,7 +371,7 @@ module.exports = {
         const frArray = matrix.functionalRequirements
 
         if (Object.keys(matrix.dsMap).length < 2) {
-            popup.error('You need to create more design solutions before randomizing')
+            popup.error('You need to create more sub-solutions before randomizing')
             return
         }
 
@@ -418,7 +418,7 @@ module.exports = {
             listSolutionsFromMatrix()
         } catch (err) {
             if (err.code === 'NO_DS_IN_MATRIX') {
-                popup.error(`No design solutions in Matrix.<br><br>Error message: ${err.message}`)
+                popup.error(`No sub-solutions in Matrix.<br><br>Error message: ${err.message}`)
             } else if (err.code === 'GEN_CAP') {
                 popup.error(`Generation capacity reached!<br><br>Error message: ${err.message}`)
             } else {
@@ -451,7 +451,7 @@ function addConflictIcon (solutionID) {
 
     let conflictIcon = document.createElement('i')
     conflictIcon.classList.add('fas', 'fa-exclamation-triangle', 'warning-icon', 'conflict-warning')
-    conflictIcon.title = 'Solution contains disabled or incompatible design solutions'
+    conflictIcon.title = 'Solution contains disabled or incompatible sub-solutions'
     listElementIcons.appendChild(conflictIcon)
 }
 

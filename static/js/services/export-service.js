@@ -135,7 +135,7 @@ module.exports = {
 
                 if (!solution) throw new Error('Solution does not exist')
 
-                let csv = 'Functional requirement;\tDesign solution\n'
+                let csv = 'Sub-Function;\tSub-Solution\n'
 
                 for (let i = 0; i < frArray.length; i++) {
                     const fr = frArray[i]
@@ -183,7 +183,7 @@ module.exports = {
             const matrix = workspace.getMatrix()
             const frArray = matrix.functionalRequirements
 
-            let csv = 'Functional Requirement;\t'
+            let csv = 'Sub-Function;\t'
 
             // Create header
             for (const solutionID in matrix.solutions) {

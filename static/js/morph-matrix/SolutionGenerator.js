@@ -32,7 +32,7 @@ class SolutionGenerator {
             }
         }
         if (frArray.length === 0) {
-            throw new NoDesignSolutionsError('No design solutions in matrix. Failed to generate solution trees.')
+            throw new NoDesignSolutionsError('No sub-solutions in matrix. Failed to generate solution trees.')
         }
 
         // Create one tree per DS in the first FR 

@@ -20,6 +20,8 @@ const Solution = require('./Solution')
 const Incompatibility = require('./Incompatibility')
 const SolutionGenerator = require('./SolutionGenerator')
 
+const solutionCanvasID = 'solution-canvas-id'
+
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
  * Design Solutions and Solutions. After instanciation it is possible to import
@@ -46,7 +48,6 @@ class MorphMatrix {
     tableElement = null
     tbodyElement = null
     dsLabelCell = null
-    solutionCanvasID = 'solution-canvas-id'
 
     constructor(containerID) {
         this.containerElement = document.getElementById(containerID)
@@ -396,8 +397,21 @@ class MorphMatrix {
         let solution = this.solutions[solutionID]
         console.log(solution)
         let frIDs = solution.getMappedFunctionsArray()
+
+        // Put together FR array
+        let frArray = []
         for (let i = 0; i < frIDs.length; i++) {
-            let frID = frIDs[i]
+            frArray.push(this.frMap[frIDs[i]])
+        }
+
+        frArray.sort( (a, b) => {
+            if (a.position < b.position) return 1
+            if (a.position > b.position) return -1
+            return 0
+        })
+
+        for (let i = 0; i < frArray.length; i++) {
+            let frID = frArray[i].id
             let dsID = solution.getDsForFr(frID)
 
             // Create overlay for selected design solution
@@ -409,8 +423,8 @@ class MorphMatrix {
             let dsCell = document.getElementById(dsID)
             dsCell.appendChild(overlay)
 
-            if (i+1 < frIDs.length) {
-                this.drawLineBetweenDs(solution.getDsForFr(frIDs[i]), solution.getDsForFr(frIDs[i+1]))
+            if (i+1 < frArray.length) {
+                this.drawLineBetweenDs(solution.getDsForFr(frArray[i].id), solution.getDsForFr(frArray[i+1].id))
             }
         }
     }
@@ -422,7 +436,8 @@ class MorphMatrix {
         let dsCell1 = document.getElementById(ds1.id)
         let dsCell2 = document.getElementById(ds2.id)
 
-        let canvas = document.getElementById(this.solutionCanvasID)
+        let canvas = document.getElementById(solutionCanvasID)
+        if (!canvas) throw new Error('Canvas not yet created.')
         let ctx = canvas.getContext("2d")
         ctx.beginPath()
 
@@ -448,7 +463,7 @@ class MorphMatrix {
         ctx.moveTo(y1, x1)
         ctx.lineTo(y2, x2)
         ctx.lineWidth = 2
-        ctx.strokeStyle = 'red'
+        ctx.strokeStyle = 'rgba(94,211,237,0.5)'
         ctx.stroke()
     }
 
@@ -456,7 +471,7 @@ class MorphMatrix {
         this.destroySolutionCanvas()
 
         let canvas = document.createElement('canvas')
-        canvas.id = this.solutionCanvasID
+        canvas.id = solutionCanvasID
         canvas.style.position = 'absolute'
         canvas.style.top = '0'
         canvas.style.left = '0'
@@ -470,7 +485,7 @@ class MorphMatrix {
     }
 
     destroySolutionCanvas() {
-        let canvas = document.getElementById(this.solutionCanvasID)
+        let canvas = document.getElementById(solutionCanvasID)
         if (canvas) canvas.parentElement.removeChild(canvas)
     }
 

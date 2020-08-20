@@ -11,9 +11,6 @@ This is a graphical tool for creating morphological matrices. It can be used to 
 
 # Build
 
-## Mac
-To build for mac, run `npm run package-mac`. This will yield a .app-directory in `out/` directory
-
 ## For windows
 To build for windows you need to either
 - be on a windows machine
@@ -23,5 +20,15 @@ To build for windows you need to either
 To build a windows installer, run `npm run make`.
 To build a windows package, run `npm run package-win`
 
-### Signing the windows installer
-To sign your windows installer you need the files `win.pfx` and `win-pwd.txt`. These files needs to be in the `build-resources/certificates/` directory. They are not included in this project repository since they are secret (and should be kept secret by the developers) for security reasons.
+### Sign windows installer automatically
+It is possible to automatically sign the installation files when running `npm run make`. However, this does not currently support "timestamping". Thus, the signed files will loose their certified status when the certificate expires (IF the certificate expires).
+
+In the file `forge.config.js` you need to find the variable `const skipCertificate` and set it to true if it isn't already.
+To sign your windows installer you need the files `win.pfx` and `win-pwd.txt`. These files needs to be in the `build-resources/certificates/` directory. They are not included in this project repository since they are secret (and should be kept secret by the developers) for security reasons. 
+
+## Mac
+To build for mac, run `npm run package-mac`. This will yield a .app-directory in `out/` directory.
+
+### Sign mac build
+There is currently no certificate for Mac.
+

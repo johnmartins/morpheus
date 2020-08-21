@@ -445,6 +445,8 @@ module.exports = {
                 module.exports.clearSolutionList()
                 matrix.removeAllSolutions()
                 module.exports.resetUI()
+
+                GlobalObserver.emit('solution-removed-all')
             }
         })
 

@@ -336,6 +336,9 @@ module.exports = {
 function prepareMatrixForCapture (container) {
     console.log('This is where the magic happens')
 
+    const colorCellText = 'black'
+    const colorCellBackground = 'white'
+
     // Replace all text areas with divs containing the same content
     let textareas = container.querySelectorAll('textarea')
 
@@ -356,6 +359,8 @@ function prepareMatrixForCapture (container) {
 
     // Change the font family
     container.style.fontFamily = 'monospace'
+    container.style.color = colorCellText
+    container.style.backgroundColor = colorCellBackground
 
     // Hide all overlays
     let overlays = container.querySelectorAll('.hover-overlay-icons')
@@ -380,6 +385,8 @@ function resetMatrixLayout (container) {
 
     // Change the font family back
     container.style.fontFamily = 'inherit'
+    container.style.color = null
+    container.style.backgroundColor = null
 
     // Enable all overlays
     let overlays = container.querySelectorAll('.hover-overlay-icons')

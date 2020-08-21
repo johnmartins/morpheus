@@ -2,6 +2,11 @@
 
 const storageService = require("../services/storage-service")
 
+const colorHeaderBackground = 'white'
+const colorHeaderText = 'black'
+const colorCellBackground = 'white'
+const colorCellText = 'black'
+
 class SolutionRenderer {
     constructor (container, solutionArray, frArray, dsMap) {
         this.container = container
@@ -28,6 +33,11 @@ class SolutionRenderer {
         let table = document.createElement('table')
         table.style.fontFamily = 'monospace'
         table.style.fontSize = '0.9rem'
+
+        // Main colors
+        table.style.color = colorCellText
+        table.style.backgroundColor = colorCellBackground
+
         let tbody = document.createElement('tbody')
         table.appendChild(tbody)
 
@@ -35,6 +45,10 @@ class SolutionRenderer {
         let frHeaderCell = headerRow.insertCell()
         frHeaderCell.classList.add('mm-label-cell')
         frHeaderCell.innerHTML = 'Sub-Functions'
+
+        // Header colors
+        frHeaderCell.style.backgroundColor = colorHeaderBackground
+        frHeaderCell.style.color = colorHeaderText
 
         // Loop through FRs
         for (let i = 0; i < this.frArray.length; i++) {
@@ -51,6 +65,10 @@ class SolutionRenderer {
             let solutionHeader = table.rows[0].insertCell()
             solutionHeader.classList.add('mm-label-cell')
             solutionHeader.innerHTML = solution.name
+
+            // Header colors
+            solutionHeader.style.color = colorHeaderText
+            solutionHeader.style.backgroundColor = colorHeaderBackground
 
             // Loop through FRs again
             for (let j = 0; j < this.frArray.length; j++) {

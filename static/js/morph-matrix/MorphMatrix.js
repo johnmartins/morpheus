@@ -556,6 +556,11 @@ class MorphMatrix {
         return this.solutions;
     }
 
+    /**
+     * Two adjacent SF rows switch places in the table.
+     * @param {String} frID1 ID of first functional requirement
+     * @param {String} frID2 ID of second functional requirement
+     */
     switchRowPosition(frID1, frID2) {
         let fr1 = this.frMap[frID1]
         let fr2 = this.frMap[frID2]
@@ -572,6 +577,12 @@ class MorphMatrix {
 
         // Switch position in DOM
         this.tbodyElement.insertBefore(document.getElementById(fr2.rowID), document.getElementById(fr1.rowID))
+        
+        // IF a solution is selected, rerender it after manipulating DOM
+        if (state.workspaceSelectedSolution) {
+            this.clearSolutionRender()
+            this.renderSolution(state.workspaceSelectedSolution)
+        }
     }
 
     deleteFunctionalRequirement (frID) {
@@ -612,6 +623,12 @@ class MorphMatrix {
 
         // Delete map reference
         delete this.frMap[frRowID]
+
+        // IF a solution is selected, rerender it after manipulating DOM
+        if (state.workspaceSelectedSolution) {
+            this.clearSolutionRender()
+            this.renderSolution(state.workspaceSelectedSolution)
+        }
     }
 
     deleteDesignSolution (dsID) {
@@ -657,6 +674,12 @@ class MorphMatrix {
             if (incompatibility.ds1.id === dsID || incompatibility.ds2.id === dsID) {
                 this.removeIncompatibility(incompatibility.id)
             }
+        }
+
+        // IF a solution is selected, rerender it after manipulating DOM
+        if (state.workspaceSelectedSolution) {
+            this.clearSolutionRender()
+            this.renderSolution(state.workspaceSelectedSolution)
         }
 
         GlobalObserver.emit('ds-removed')

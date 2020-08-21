@@ -186,6 +186,9 @@ module.exports = {
         module.exports.completeSolution()
     },
 
+    /**
+     * Wipes the list of solutions. But it does not actually delete the solutions.
+     */
     clearSolutionList: () => {
         let solList = document.getElementById('menu-solution-list')
         solList.innerHTML = ''
@@ -257,13 +260,7 @@ module.exports = {
     },
 
     removeFromSolutionList: (solutionID) => {
-        if (editingSolution) {
-            popup.error('A solution is currently being edited. Save it first.')
-            return
-        }
-        
-        if (unfinishedSolution) {
-            popup.error('A solution is currently being created. Save it first.')
+        if (checkIfWorkInProgress()) {
             return
         }
 
@@ -342,7 +339,10 @@ module.exports = {
             module.exports.saveEditedSolution()
         }
 
+        // Reset relevant state variables
         state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+        state.workspaceSelectedSolution = null
+
         button.innerHTML = 'New solution'
         matrix.clearSolutionRender()
         matrix.clearAllIncompatibleOverlays()
@@ -357,13 +357,7 @@ module.exports = {
     },
 
     createRandomSolution: () => {
-        if (editingSolution) {
-            popup.error('A solution is currently being edited. Save it first.')
-            return
-        }
-        
-        if (unfinishedSolution) {
-            popup.error('A solution is currently being created. Save it first.')
+        if (checkIfWorkInProgress()) {
             return
         }
 
@@ -404,6 +398,11 @@ module.exports = {
 
     generateAllSolutions: () => {
         console.log('Generate ALL solutions request')
+
+        if (checkIfWorkInProgress()) {
+            return
+        }
+
         const matrix = workspace.getMatrix()
         let fieldMaxGens = document.getElementById('gen-max-field')
 
@@ -429,13 +428,25 @@ module.exports = {
         }
     },
 
+    /**
+     * Deletes all stored solutions permanentally 
+     */
     clearAllSolutions: () => {
+        console.log('Clear all solutions request')
+
+        if (checkIfWorkInProgress()) {
+            return
+        }
+
         popup.warning('Are you sure you want to delete ALL solutions permanently?', {
             titleTxt: 'Delete all solutions',
             callbackContinue: () => {
                 const matrix = workspace.getMatrix()
                 module.exports.clearSolutionList()
                 matrix.removeAllSolutions()
+                module.exports.resetUI()
+
+                GlobalObserver.emit('solution-removed-all')
             }
         })
 
@@ -541,5 +552,21 @@ function listSolutionsFromMatrix () {
     for (let i = 0; i < solutionIDs.length; i++) {
         let solutionID = solutionIDs[i]
         module.exports.addToSolutionList(solutionID)
+    }
+}
+
+/**
+ * Checks if the user currently is editing och creating a new solution. If so, this returns true.
+ * If there is no work in progress, then this function returns false
+ */
+function checkIfWorkInProgress () {
+    if (editingSolution) {
+        popup.error('A solution is currently being edited. Save it first.')
+        return true
+    }
+    
+    if (unfinishedSolution) {
+        popup.error('A solution is currently being created. Save it first.')
+        return true
     }
 }

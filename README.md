@@ -1,5 +1,15 @@
 # About
-This is a graphical tool for creating morphological matrices. It can be used to quickly create a matrix with "sub-functions" (SF) and "sub-solutions" (SS). New SFs and SSs can be created by clicking the "+ SF" and "+ SS" cells (the + SS cell is only visible after you have created your first SF).  You can attach images to any sub-solution by hovering over its cell and clicking the camera icon. To change the name of the matrix, simply click on the title and rename it to whatever you want.
+This is a graphical tool for creating morphological matrices. It can be used to quickly create a matrix with "sub-functions" (SF) and "sub-solutions" (SS). Once all SFs and SSs have been fed into the matrix the tool can be used to generate all possible solutions.
+
+## Features
+- Add, remove and edit Sub-Functions and Sub-Solutions easily
+- Import images to your sub-solutions for improved clarity
+- Mark sub-solutions as incompatible using the Delimitations-view
+- Get a count of the amount of possible solutions in the Delimitations-view
+- Generate all possible solutions
+- Export your matrix as an image, or a CSV-file
+- Export one or all solutions as an image or a CSV-file
+- Save the matrix as a .morph-file, allowing you to return to it at another time
 
 # Development
 - clone repository

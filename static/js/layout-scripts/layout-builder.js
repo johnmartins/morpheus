@@ -12,7 +12,8 @@
     // Setup matrix layout
     let matrixLayout = fs.readFileSync(path.join(__dirname,'matrix.html'), {encoding: 'utf-8'})
     workspace.setLayoutElementID('layout-workspace')
-    workspace.getLayout().innerHTML = matrixLayout
+    workspace.createToolOverlay()
+    workspace.appendHtmlContent(matrixLayout)
     workspace.setMatrixContainer('matrix-container')
     workspace.createEmptyMatrix()
 

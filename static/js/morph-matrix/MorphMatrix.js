@@ -242,7 +242,7 @@ class MorphMatrix {
             if (overlay) return
             overlay = document.createElement('div')
             
-            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT) {
+            if (state.equalsWim(state.wim.default)) {
                 overlay = this._getFRCellDefaultOverlay(overlay, fr)
             } else {
                 overlay = null
@@ -372,13 +372,13 @@ class MorphMatrix {
             if (overlay) return
             overlay = document.createElement('div')
 
-            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT) {
+            if (state.equalsWim(state.wim.default)) {
                 overlay = this._getDSCellDefaultOverlay(overlay, dsID, ds)
-            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION) {
+            } else if (state.equalsWim(state.wim.solution)) {
                 overlay = this._getDSCellSolutionOverlay(overlay, dsID, ds)
-            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) {
+            } else if (state.equalsWim(state.wim.disable)) {
                 overlay = this._getDSCellDisableOverlay(overlay, dsID, ds)
-            } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+            } else if (state.equalsWim(state.wim.incompatibility)) {
                 overlay = this._getDSCellIncompatibleOverlay(overlay, dsID, ds)
             } else {
                 overlay = null
@@ -868,7 +868,7 @@ class MorphMatrix {
         // If the user clicks anywhere within the cell, then set focus to the textarea.
         newCell.onclick = (evt) => {
             let cellform = newCell.querySelector('textarea')
-            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT) return
+            if (!state.equalsWim(state.wim.default)) return
             if (cellform) cellform.focus()
         }
 
@@ -1006,7 +1006,7 @@ class MorphMatrix {
         }
         overlay.title = 'Incompatible'
         overlay.onclick = () => {
-            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+            if (!state.equalsWim(state.wim.incompatibility)) {
                 // Wrong workspace mode
                 return
             }
@@ -1040,7 +1040,7 @@ class MorphMatrix {
         overlay.classList.add('overlay-disabled')
         overlay.innerHTML = '<i class="fas fa-ban"></i>'
         overlay.onclick = () => {
-            if (state.workspaceInteractionMode !== state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) return
+            if (!state.equalsWim(state.wim.disable)) return
             this.setDsDisabled(dsCell.id, false)
         }
         dsCell.appendChild(overlay)

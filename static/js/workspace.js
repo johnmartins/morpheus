@@ -3,6 +3,7 @@
 const crypto = require('crypto')
 const storageService = require('./services/storage-service')
 const state = require('./state')
+const popup = require('./layout-scripts/popup')
 
 // Workspace layout
 let workspaceLayout = null
@@ -16,6 +17,8 @@ let originalFileLocation = null     // The morph file (or JSON depending on type
 let tempFilePosition = null         // The JSON file
 // Last saved hash is an md5 hash of the json matrix structure of the last save.
 let lastSavedHash = null
+// Tool overlay element contains a small explanation as to which tool the user currently has activated
+let toolOverlayElement = null
 
 const MorphMatrix = require ('./morph-matrix/MorphMatrix')
 
@@ -74,7 +77,7 @@ module.exports = {
         currentMatrix = new MorphMatrix(matrixContainerID)
         currentMatrix.import(json)
         module.exports.saveCurrentHash()
-        module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json')
+        module.exports.setTempFileLocation(storageService.getTmpStorageDirectory() + 'matrix.json') 
     },
     /**
      * Returns the matrix in the workspace
@@ -104,8 +107,38 @@ module.exports = {
         return workspaceLayout
     },
 
+    appendHtmlContent: (content) => {
+        workspaceLayout.innerHTML += content
+    },
+
     setLayoutElementID: (elementID) => {
         workspaceLayout = document.getElementById(elementID)
+    },
+
+    createToolOverlay: () => {
+        toolOverlayElement = document.createElement('div')
+        toolOverlayElement.id = 'tool-overlay-element'
+        toolOverlayElement.classList.add('workspace-tool-indicator')
+        workspaceLayout.append(toolOverlayElement)
+
+        GlobalObserver.on('wim-change', (mode) => {
+            let ol = document.getElementById('tool-overlay-element')
+            ol.classList.remove('blink')
+            ol.innerHTML = ""
+            let helpIcon = document.createElement('i')
+            helpIcon.classList.add('fas', 'fa-question-circle')
+            ol.appendChild(helpIcon)
+            ol.innerHTML += "&nbsp;" + mode.name
+
+            ol.onclick = () => {
+                console.log('User requests help with tool')
+                popup.notify(mode.desc, {titleTxt: 'Interaction mode: '+mode.name})
+            }
+
+            setTimeout( () => {
+                ol.classList.add('blink')
+            }, 50)
+        })
     }
 }
 

@@ -104,7 +104,7 @@ module.exports = {
 
         matrix.clearSolutionRender()
         button.innerHTML = 'Save solution'
-        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION
+        state.setWim(state.wim.solution)
         let solution = new Solution()
         matrix.addSolution(solution)
         state.workspaceSelectedSolution = solution.id
@@ -305,7 +305,7 @@ module.exports = {
 
         document.getElementById('solutions-edit-form').classList.add('open')
         
-        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_SOLUTION
+        state.setWim(state.wim.solution)
         // Render relevant objects in matrix
         matrix.renderSolution(solutionID)
         for (let incompDsID of  solution.getIncompatibleDsIds()) {
@@ -340,7 +340,7 @@ module.exports = {
         }
 
         // Reset relevant state variables
-        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+        state.setWim(state.wim.default)
         state.workspaceSelectedSolution = null
 
         button.innerHTML = 'New solution'

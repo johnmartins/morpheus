@@ -17,28 +17,28 @@ module.exports = {
         let newIncompatibilityBtn = document.getElementById('btn-add-incompatibility')
 
         toggleDsBtn.onclick = () => {
-            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DISABLE) {
+            if (state.equalsWim(state.wim.disable)) {
                 toggleDsBtn.classList.remove('selected')
-                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+                state.setWim(state.wim.default)
             } else {
                 module.exports.resetUI()
 
                 toggleDsBtn.classList.add('selected')
-                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DISABLE
+                state.setWim(state.wim.disable)
             } 
         }
 
         newIncompatibilityBtn.onclick = () => {
-            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
+            if (state.equalsWim(state.wim.incompatibility)) {
                 newIncompatibilityBtn.classList.remove('selected')
-                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+                state.setWim(state.wim.default)
                 unfinishedIncompatibility = false
             } else {
                 module.exports.resetUI()
 
                 unfinishedIncompatibility = true
                 newIncompatibilityBtn.classList.add('selected')
-                state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY
+                state.setWim(state.wim.incompatibility)
             }
         }
 
@@ -207,7 +207,7 @@ module.exports = {
         state.workspaceSelectedIncompatibleOrigin = null
 
         workspace.getMatrix().clearAllIncompatibleOverlays()
-        state.workspaceInteractionMode = state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT
+        state.setWim(state.wim.default)
     }
 }
 

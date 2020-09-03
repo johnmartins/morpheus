@@ -241,11 +241,20 @@ class MorphMatrix {
         frCell.onmouseover = (evt) => {
             if (overlay) return
             overlay = document.createElement('div')
-            overlay = this._getFRCellDefaultOverlay(overlay, fr)
+            
+            if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_DEFAULT) {
+                overlay = this._getFRCellDefaultOverlay(overlay, fr)
+            } else {
+                overlay = null
+            }
+
+            if (!overlay) return // Skip of no relevant overlay
+
             frCell.appendChild(overlay)
         }
 
         frCell.onmouseleave = (evt) => {
+            if (!overlay) return
             frCell.removeChild(overlay)
             overlay = null
         }
@@ -371,6 +380,8 @@ class MorphMatrix {
                 overlay = this._getDSCellDisableOverlay(overlay, dsID, ds)
             } else if (state.workspaceInteractionMode === state.constants.WORKSPACE_INTERACTION_MODE_INCOMPATIBILITY) {
                 overlay = this._getDSCellIncompatibleOverlay(overlay, dsID, ds)
+            } else {
+                overlay = null
             }
 
             if (!overlay) return        // No overlay? Screw it.

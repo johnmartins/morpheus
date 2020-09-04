@@ -34,7 +34,7 @@
     menuResizeBorder.onmousedown = () => {
         resizing = true
         document.body.onmousemove = (evt) => {
-            minWidth = 170 //px
+            let minWidth = 170 //px
             if (!resizing) return
             let mouseX = evt.clientX
             if (mouseX < minWidth) mouseX = minWidth

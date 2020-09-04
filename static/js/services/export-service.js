@@ -43,8 +43,7 @@ module.exports = {
             }
 
             // Write to file (should be done using a stream in the final version)
-            console.log(csv)
-            fs.writeFileSync(res.filePath, csv)
+            fs.writeFileSync(res.filePath, "\ufeff"+csv, {encoding: 'utf8'})
 
             popup.notify(`Export to CSV successful. <br>${res.filePath}`, {
                 titleTxt: 'Export done'
@@ -154,7 +153,7 @@ module.exports = {
                     csv += '\n'
                 }
 
-                fs.writeFileSync(res.filePath, csv)
+                fs.writeFileSync(res.filePath, "\ufeff"+csv, {encoding: 'utf8'})
                 popup.notify(`Export to CSV successful. <br>${res.filePath}`, {
                     titleTxt: 'Export done'
                 })
@@ -207,7 +206,7 @@ module.exports = {
                     
                     // If this solution has mapped this FR to a DS
                     if (mappedDsID) {
-                        let ds = matrix.cellToDesignSolutionMap[mappedDsID]
+                        let ds = matrix.dsMap[mappedDsID]
                         csv += ds.description + ';\t'
                     } else {
                         csv += ';\t'
@@ -217,13 +216,14 @@ module.exports = {
 
                 csv += '\n'
             }
-            fs.writeFileSync(res.filePath, csv)
+            fs.writeFileSync(res.filePath, "\ufeff"+csv, {encoding: 'utf8'})
 
             popup.notify(`Export to CSV successful. <br>${res.filePath}`, {
                 titleTxt: 'Export done'
             })
         }).catch((err) => {
             popup.error('Failed to export solutions to CSV. Reason: ' + err.message)
+            console.error(err.stack)
         })
     },
 

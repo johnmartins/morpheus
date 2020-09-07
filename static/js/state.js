@@ -6,25 +6,45 @@ module.exports = {
             // Default mode. Nothing special
             code: 'wsim-def',
             name: 'Default',
-            desc: 'Default tool. Enables manipulating the morphological matrix structure. You can add and remove both SS and SF. Hover over a matrix cell to see the different options.'
+            desc: 'Default tool. \
+            Enables manipulating the morphological matrix structure. <br><br> \
+            You can add and remove both sub-solutions (SS) and sub-functions (SF). \
+            You can also move SF up and down and also add pictures to any SS. \
+            Hover over a matrix cell to see the different options.'
         },         
         solution: {
             // Used when setting solutions
             code: 'wsim-sol',
             name: 'Solution Edit',
-            desc: 'Solution edit mode. Enables editing a solution structure by selecting sub-solutions in the matrix. Each sub-function should have exactly one sub-solution selected.'
+            desc: 'Solution edit mode. \
+            Enables editing a solution structure by selecting sub-solutions in the matrix.<br><br> \
+            Each sub-function should have exactly one sub-solution selected.'
         } ,        
         disable: {
             // Used when disabling certain design solutions
             code: 'wsim-dis',
             name: 'Toggle SS',
-            desc: 'Toggle sub-solution mode. Click on sub solutions to toggle their availability. Disabled SS can not be used in solutions.'
+            desc: 'Toggle sub-solution mode. \
+            Enables you to enable or disable sub-solutions (SS). <br><br>\
+            Click on a SS to toggle its availability. \
+            Disabled SS can not be used in solutions, and will not be automatically picked \
+            when generating all possible solutions.'
         } ,         
         incompatibility: {
             // Used when defining incompatible DSs 
             code: 'wsim-inc',
             name: 'Incompatibility selection',
-            desc: 'Mark two sub-solutions as incompatible by clicking them. A pair of incompatible SS can not be used in the same solution.'
+            desc: 'Incompatibility selection mode. \
+            Renders two sub-solutions as incompatible, meaning they can not \
+            be part of the same solution. <br><br>\
+            Mark two sub-solutions as incompatible by clicking them. \
+            A pair of incompatible SS can not be used in the same solution. \
+            The sub-solutions can not be on the same row. \
+            Clicking on a selected sub-solution again will deselect it, \
+            allowing you to select another one. <br><br>\
+            Once you have selected two sub-solutions on different rows the \
+            incompatibility will be added to the list of incompatibilities, \
+            which can be seen under the "delimitations"-tab.'
         },
     },
 

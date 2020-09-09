@@ -10,7 +10,7 @@
     "watch": "sass --watch static/scss:static/css",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=build-resources/icons/app-icon.icns --prune=true --out=out",
+    "package-mac": "electron-packager . --overwrite --asar --platform=darwin --arch=x64 --icon=build-resources/icons/app-icon.icns --prune=true --out=out",
     "package-win": "electron-packager . Morpheus --overwrite --asar --platform=win32 --arch=ia32 --icon=build-resources/icons/app-icon.ico --prune=true --out=out --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Morpheus\"",
     "package-linux": "electron-packager . Morpheus --overwrite --asar --platform=linux --arch=x64 --icon=build-resources/icons/app-icon.png --prune=true --out=out"
   },

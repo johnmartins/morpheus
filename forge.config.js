@@ -36,7 +36,14 @@ module.exports = {
                 certificateFile: skipCertificate ? "" : certFilePath,
                 certificatePassword: skipCertificate ? "" : getPassword()
             }
-        }
+        },
+        {
+            name: '@electron-forge/maker-dmg',
+            config: {
+              background: './assets/dmg-background.png',
+              format: 'ULFO'
+            }
+          }
     ]
 }
 

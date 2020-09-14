@@ -1,7 +1,7 @@
 {
   "name": "morpheus",
   "productName": "Morpheus",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "Morphological Matrix Generation Interface",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "sass": "^1.26.8"
   },
   "dependencies": {
+    "@electron-forge/maker-dmg": "^6.0.0-beta.53",
     "archiver": "^4.0.1",
     "electron-squirrel-startup": "^1.0.0",
     "html2canvas": "^1.0.0-rc.5",

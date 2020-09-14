@@ -41,4 +41,8 @@
             layoutContainer.style.gridTemplateColumns = `${mouseX}px 4px auto`
         }
     }
+
+    // Should be the last thing that runs in the layout builder.
+    // Broadcast to nodejs back-end that the client side has finished loading. 
+    ipcRenderer.send('client-side-loaded')
 }())

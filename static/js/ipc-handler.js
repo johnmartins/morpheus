@@ -17,6 +17,10 @@ ipcRenderer.on('return-version', (evt, version) => {
 
 ipcRenderer.on('menu-event', (evt, menuEvent) => {handleMenuEvent(menuEvent)})
 
+ipcRenderer.on('force-load-file', (evt, file) => {
+    osService.open(file)
+})
+
 function handleMenuEvent(menuEvent) {
     let type = menuEvent.type
 

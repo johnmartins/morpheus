@@ -41,4 +41,11 @@ module.exports = (win) => {
         console.log('Graceful shutdown confirmed')
         app.exit(0)
     })
+
+    ipcMain.on('client-side-loaded', () => {
+        console.log('The client side had loaded')
+
+        // Parse application arguments
+        require('./argument-parser').parseArguments(win)
+    })
 }

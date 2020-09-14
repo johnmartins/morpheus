@@ -10,7 +10,17 @@ module.exports = {
         storageService.resetTmpStorageDirectory()
         workspace.createEmptyMatrix()
     },
-    open: () => {
+    /**
+     * Method for opening a file, or the "open file dialog".
+     * @param path if null, then a dialog window will be opened. If set, then that file will be opened.
+     */
+    open: (path) => {
+
+        if (path) {
+            loadFile(path)
+            return
+        }
+
         fileDiagService.newOpenFileDialog({
             filters: [
                 { name: 'Morph-matrix', extensions: ['morph'] }            ]
@@ -21,14 +31,9 @@ module.exports = {
                 return
             }
 
-            workspace.setWorkingFileLocation(res.path)
-            storageService.resetTmpStorageDirectory()
-            storageService.unzipInTmpStorage(res.path, () => {
-                let content = fs.readFileSync(storageService.getTmpStorageDirectory() + 'matrix.json', {encoding: 'utf8'})
-                let json = JSON.parse(content)
-                workspace.createMatrixFromObject(json)
-            })
+            loadFile(res.path)
         })
+
     },
     save: () => {
         // File has not previously been saved
@@ -100,5 +105,19 @@ function writeContentToFile (filePath, content, callback) {
         }
         console.log("Saved!")
         callback()
+    })
+}
+
+function loadFile(path) {
+    if (!fs.existsSync(path)) {
+        throw new Error('File does not exist: '+path)
+    }
+
+    workspace.setWorkingFileLocation(path)
+    storageService.resetTmpStorageDirectory()
+    storageService.unzipInTmpStorage(path, () => {
+        let content = fs.readFileSync(storageService.getTmpStorageDirectory() + 'matrix.json', {encoding: 'utf8'})
+        let json = JSON.parse(content)
+        workspace.createMatrixFromObject(json)
     })
 }

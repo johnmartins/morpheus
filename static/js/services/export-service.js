@@ -334,10 +334,12 @@ module.exports = {
 
 
 function prepareMatrixForCapture (container) {
-    console.log('This is where the magic happens')
-
     const colorCellText = 'black'
     const colorCellBackground = 'white'
+
+    // Increase title size
+    let titleElement = container.querySelector('.matrix-title')
+    titleElement.style.fontSize = '1.5rem'
 
     // Replace all text areas with divs containing the same content
     let textareas = container.querySelectorAll('textarea')
@@ -349,8 +351,9 @@ function prepareMatrixForCapture (container) {
 
         let replacement = document.createElement('div')
         replacement.innerHTML = textarea.value
-        replacement.style.height = '2rem'
-        replacement.style.fontSize = '0.8rem'
+        replacement.style.minHeight = '3.3rem'  // Why "3.3 rem", you might ask? 3 is my favorite number. Also, it happens to look pretty good.
+        replacement.style.fontSize = '1rem'
+        replacement.style.marginBottom = '2px'
         replacement.classList.add('houdini')
 
         // The good ol' switcharoo
@@ -374,6 +377,8 @@ function prepareMatrixForCapture (container) {
 function resetMatrixLayout (container) {
     let replacements = container.querySelectorAll('.houdini')
     let textareas = container.querySelectorAll('textarea')
+    let titleElement = container.querySelector('.matrix-title')
+    
 
     for (let i = 0; i < replacements.length; i++) {
         let replacement = replacements[i]
@@ -384,6 +389,7 @@ function resetMatrixLayout (container) {
     }
 
     // Change the font family back
+    titleElement.style.fontSize = null
     container.style.fontFamily = 'inherit'
     container.style.color = null
     container.style.backgroundColor = null

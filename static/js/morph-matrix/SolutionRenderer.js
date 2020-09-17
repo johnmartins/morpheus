@@ -7,6 +7,8 @@ const colorHeaderText = 'black'
 const colorCellBackground = 'white'
 const colorCellText = 'black'
 
+const cellFontSize = '1rem'
+
 class SolutionRenderer {
     constructor (container, solutionArray, frArray, dsMap) {
         this.container = container
@@ -32,7 +34,7 @@ class SolutionRenderer {
     _createTable () {
         let table = document.createElement('table')
         table.style.fontFamily = 'monospace'
-        table.style.fontSize = '0.9rem'
+        table.style.fontSize = cellFontSize
 
         // Main colors
         table.style.color = colorCellText
@@ -49,6 +51,7 @@ class SolutionRenderer {
         // Header colors
         frHeaderCell.style.backgroundColor = colorHeaderBackground
         frHeaderCell.style.color = colorHeaderText
+        frHeaderCell.style.fontSize = cellFontSize
 
         // Loop through FRs
         for (let i = 0; i < this.frArray.length; i++) {
@@ -56,6 +59,7 @@ class SolutionRenderer {
             let row = tbody.insertRow()
             let frCell = row.insertCell()
             frCell.innerHTML = fr.description
+            frCell.style.fontSize = cellFontSize
         }
 
         // Loop through solutions. Remember to create empty cells for non-mapped DSs
@@ -69,6 +73,7 @@ class SolutionRenderer {
             // Header colors
             solutionHeader.style.color = colorHeaderText
             solutionHeader.style.backgroundColor = colorHeaderBackground
+            solutionHeader.style.fontSize = cellFontSize
 
             // Loop through FRs again
             for (let j = 0; j < this.frArray.length; j++) {
@@ -80,7 +85,8 @@ class SolutionRenderer {
 
                 let dsCell = table.rows[j+1].insertCell()
                 let descContainer = document.createElement('div')
-                descContainer.style.height = '2rem'
+                descContainer.style.height = '3.3rem'
+                descContainer.style.fontSize = cellFontSize
                 dsCell.appendChild(descContainer)
 
                 if (!ds) {

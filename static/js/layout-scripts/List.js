@@ -14,6 +14,8 @@ class List {
 
         this.listRoot.onkeydown = (evt) => {
 
+            evt.preventDefault()
+
             let nextSelection = null
 
             if (evt.code === 'ArrowUp') {
@@ -23,6 +25,10 @@ class List {
             }
 
             if (!nextSelection) return
+            
+            nextSelection.scrollIntoView({
+                block: 'nearest'
+            })
 
             let targetID = nextSelection.id.substring(this.elementNameSpace.length)
             this.select(targetID)
@@ -77,18 +83,23 @@ class List {
         }
     }
 
+    /**
+     * Programmatically select an element
+     * @param {String} id 
+     */
     select (id) {
         if (!id) return
 
         let clickEvent = new MouseEvent("click", {
             view: window,
             bubbles: true,
-            cancelable: true
+            cancelable: true,
         })
 
         // Click on element programmatically
         const el = document.getElementById(this.elementNameSpace+id)
         if (!el) return
+
         el.dispatchEvent(clickEvent)
     }
 

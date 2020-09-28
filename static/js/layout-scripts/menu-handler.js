@@ -9,7 +9,7 @@ const path = require('path')
 // Setup side menus
 require(path.join(__dirname, './side-menu/solutions')).init()
 require(path.join(__dirname, './side-menu/export')).setupListeners()
-require(path.join(__dirname, './side-menu/delimitations')).setupListeners()
+require(path.join(__dirname, './side-menu/delimitations')).init()
 
 const state = require('./../state')
 const workspace = require('./../workspace')

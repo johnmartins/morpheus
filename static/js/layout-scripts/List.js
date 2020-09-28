@@ -2,8 +2,16 @@
 
 const random = require('./../utils/random')
 
+/**
+ * GUI List component. Can be used to list things (duh).
+ */
 class List {
 
+    /**
+     * 
+     * @param {String} containerID ID of container in which this component should be placed
+     * @param {Object} options elementNameSpace => all element IDs within this component will be prefixed with this.
+     */
     constructor (containerID, {elementNameSpace = random.randomString(5)} = {}) {
         this.elementNameSpace = elementNameSpace
         this.container = document.getElementById(containerID)
@@ -35,6 +43,11 @@ class List {
         }
     }
 
+    /**
+     * Add entry to list. You need to define id, onclick and createOverlay.
+     * @param {String} entryText 
+     * @param {Object} options {id, onClick, createOverlay} 
+     */
     add (entryText, {id, onClick, createOverlay} = {}) {
         let listEntry = document.createElement('li')
         listEntry.id = this.elementNameSpace + id
@@ -43,7 +56,7 @@ class List {
 
         // Setup listeners
         listEntry.onclick = (evt) => {
-            if (evt.target.classList.contains('overlay')) return
+            if (evt.target.classList.contains('overlay') || evt.target.classList.contains('icon')) return
 
             if (!onClick) {
                 console.error('List Entry does not have a registered click handler')
@@ -142,16 +155,27 @@ class List {
         return null
     }
 
+    /**
+     * Returns the DOM element that is currently selected
+     */
     getSelectedElement () {
         return this.listRoot.querySelector('.solution-list-entry.selected')
     }
 
+    /**
+     * Clears the styling that displays any selected elements
+     */
     clearHighlight () {
         let selected = this.getSelectedElement()
         if (!selected) return
         selected.classList.remove('selected')
     }
 
+    /**
+     * Returns the icon field of any given list element. 
+     * The icon field is placed in front of the entry text.
+     * @param {String} id ID of list element
+     */
     getIconField (id) {
         let listElement = document.getElementById(this.elementNameSpace+id)
         return listElement.querySelector('.solution-list-icon-span')

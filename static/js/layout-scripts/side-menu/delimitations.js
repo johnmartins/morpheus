@@ -2,12 +2,10 @@
 
 const state = require('./../../state')
 const workspace = require('./../../workspace')
-const random = require('../../utils/random')
 const List = require('../List')
 
 let unfinishedIncompatibility = false
 let incompatibilityDsSelection = null
-let incompatibilityListIdSelection = null
 
 let incompList = null
 
@@ -171,7 +169,6 @@ module.exports = {
                 module.exports.resetUI()
                 
                 matrix.renderIncompatibility(incompatibility.id)
-                incompatibilityListIdSelection = incompatibility.id
 
             },
             createOverlay: (overlay) => {
@@ -202,7 +199,6 @@ module.exports = {
         newIncompatibilityBtn.classList.remove('selected')
         toggleDsBtn.classList.remove('selected')
 
-        incompatibilityListIdSelection = null
         unfinishedIncompatibility = false
         incompatibilityDsSelection = null
         state.workspaceSelectedIncompatibleOrigin = null

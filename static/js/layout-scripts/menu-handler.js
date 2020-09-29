@@ -21,7 +21,7 @@ let currentTabID = null
 
 module.exports = () => {
     // Setup default tab
-    setTab('tab-solutions')
+    setTab('tab-delimitations')
 
     sideMenu.onclick = (evt) => {
         let target = evt.target

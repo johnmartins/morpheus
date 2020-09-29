@@ -7,13 +7,20 @@ const popup = require('./../popup')
 const SolutionGenerator = require('./../../morph-matrix/SolutionGenerator')
 const { randomInt } = require('../../utils/random')
 
+const List = require('./../List')
+
+let solutionList = null
+
 let unfinishedSolution = false      // The user has started a new solution that is unsaved
 let editingSolution = false         // The user is editing a solution
 
 const ID_PREFIX_SOLUTION_ENTRY = 'sol-li-'
 
 module.exports = {
-    setupListeners: () => {
+    init: () => {
+
+        setupSolutionList()
+
         let btnSolutions = document.getElementById('btn-new-solution')
         btnSolutions.onclick = module.exports.startNewSolution
 
@@ -179,77 +186,56 @@ module.exports = {
 
     saveEditedSolution: () => {
         let solutionID = state.workspaceSelectedSolution
-        let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
-        listEntry.parentElement.removeChild(listEntry)
+        solutionList.remove(solutionID)
         editingSolution = false
 
         module.exports.completeSolution()
     },
 
-    /**
-     * Wipes the list of solutions. But it does not actually delete the solutions.
-     */
-    clearSolutionList: () => {
-        let solList = document.getElementById('menu-solution-list')
-        solList.innerHTML = ''
-    },
+
+
 
     addToSolutionList: (solutionID) => {
-        let solList = document.getElementById('menu-solution-list')
         let matrix = workspace.getMatrix()
         let solution = matrix.getSolution(solutionID)
 
-        let solListEntry = document.createElement('li')
-        solListEntry.id = ID_PREFIX_SOLUTION_ENTRY+solutionID
-        solListEntry.innerHTML = '<span class="solution-list-icon-span"></span><span class="solution-list-name">'+solution.name+'</span>'
-        solListEntry.classList.add('solution-list-entry')
+        solutionList.add(solution.name, {
+            id: solutionID,
+            onClick: (alreadySelected) => {
+                if (editingSolution) return
 
-        // Setup listeners
-        solListEntry.onclick = (evt) => {
-            if (evt.target.classList.contains('overlay')) return
-            if (editingSolution) return
-
-            if (solListEntry.classList.contains('selected')) { 
+                if (alreadySelected) { 
+                    module.exports.resetUI()
+                    return;
+                }
+    
                 module.exports.resetUI()
-                return;
-            }
 
-            module.exports.resetUI()
+                state.workspaceSelectedSolution = solutionID
+                matrix.renderSolution(solutionID)
+            },
+            createOverlay: (overlay) => {
+                if (editingSolution) return
+                if (!overlay) return
 
-            state.workspaceSelectedSolution = solutionID
-
-            // Clear previous menu selection
-            let previousSelection = document.querySelector('.solution-list-entry.selected')
-            if (previousSelection) previousSelection.classList.remove('selected')
+                let deleteIcon = document.createElement('i')
+                deleteIcon.classList.add('fas', 'fa-trash-alt', 'icon')
+                deleteIcon.onclick = () => {
+                    module.exports.removeFromSolutionList(solution.id)
+                }
             
-            solListEntry.classList.add('selected')
-            matrix.renderSolution(solutionID)
-        }
-
-        let overlay = null
-
-        solListEntry.onmouseover = () => {
-            if (overlay) return
-            if (editingSolution) return
-
-            overlay = document.createElement('div')
-            createSolutionEntryOverlay(overlay, solution)
-            solListEntry.appendChild(overlay)
-        }
-
-        solListEntry.onmouseleave = () => {
-            if (!overlay) return
-            solListEntry.removeChild(overlay)
-            overlay = null
-        }
-
-        // Place the entry in the correct place alphabetically
-        let previousEntry = findListPosition(solution.name, solutionID)
-        if (previousEntry) {
-            solList.insertBefore(solListEntry, previousEntry)
-        } else {
-            solList.appendChild(solListEntry) 
-        }
+                let editIcon = document.createElement('i')
+                editIcon.classList.add('far', 'fa-edit', 'icon')
+                editIcon.onclick = () => {
+                    module.exports.editSolution(solution.id)
+                }
+            
+                overlay.appendChild(editIcon)
+                overlay.appendChild(deleteIcon)
+            
+                return overlay
+            }
+        })
 
         // Check if the solution contains conflicts.
         if (solution.hasConflicts()) {
@@ -316,12 +302,11 @@ module.exports = {
         
     },
 
+    /**
+     * Wipes the list of solutions. But it does not actually delete the solutions.
+    */
     clearSolutionList: () => {
-        let solutionEls = document.querySelectorAll('#menu-solution-list .solution-list-entry')
-        for (let i = 0; i < solutionEls.length; i++) {
-            let solutionElement = solutionEls[i]
-            solutionElement.parentElement.removeChild(solutionElement)
-        }
+        solutionList.clear()
     },
 
     resetUI: () => {
@@ -350,10 +335,7 @@ module.exports = {
         document.getElementById('solutions-edit-form').classList.remove('open')
 
         // Clear solution menu selection
-        let previousSelection = document.querySelector('.solution-list-entry.selected')
-        if (previousSelection) {
-            previousSelection.classList.remove('selected')
-        }
+        solutionList.clearHighlight()
     },
 
     createRandomSolution: () => {
@@ -391,8 +373,7 @@ module.exports = {
         const matrix = workspace.getMatrix()
         GlobalObserver.emit('solution-removed', solutionID)
         matrix.removeSolution(solutionID)
-        let listEntry = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
-        listEntry.parentElement.removeChild(listEntry)
+        solutionList.remove(solutionID)
         matrix.clearSolutionRender()
     },
 
@@ -454,44 +435,22 @@ module.exports = {
 }
 
 function addConflictIcon (solutionID) {
-    let listElement = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
-    let listElementIcons = listElement.querySelector('.solution-list-icon-span')
+    let iconField = solutionList.getIconField(solutionID)
 
     // Check if it already has such an icon
-    if (listElementIcons.querySelector('.conflict-warning')) return
+    if (iconField.querySelector('.conflict-warning')) return
 
     let conflictIcon = document.createElement('i')
     conflictIcon.classList.add('fas', 'fa-exclamation-triangle', 'warning-icon', 'conflict-warning')
     conflictIcon.title = 'Solution contains disabled or incompatible sub-solutions'
-    listElementIcons.appendChild(conflictIcon)
+    iconField.appendChild(conflictIcon)
 }
 
 function removeConflictIcon (solutionID) {
-    let listElement = document.getElementById(ID_PREFIX_SOLUTION_ENTRY+solutionID)
-    let listElementIcons = listElement.querySelector('.solution-list-icon-span')
-    let conflictWarning = listElementIcons.querySelector('.conflict-warning')
+    let iconField = solutionList.getIconField(solutionID)
+    let conflictWarning = iconField.querySelector('.conflict-warning')
     if (!conflictWarning) return
     conflictWarning.parentElement.removeChild(conflictWarning)
-
-}
-
-function createSolutionEntryOverlay (overlay, solution) {
-    overlay.classList.add('overlay')
-
-    let deleteIcon = document.createElement('i')
-    deleteIcon.classList.add('fas', 'fa-trash-alt', 'icon')
-    deleteIcon.onclick = () => {
-        module.exports.removeFromSolutionList(solution.id)
-    }
-
-    let editIcon = document.createElement('i')
-    editIcon.classList.add('far', 'fa-edit', 'icon')
-    editIcon.onclick = () => {
-        module.exports.editSolution(solution.id)
-    }
-
-    overlay.appendChild(editIcon)
-    overlay.appendChild(deleteIcon)
 }
 
 function getSolutionNameFormCallback (solution, enterCallback) {
@@ -504,31 +463,6 @@ function getSolutionNameFormCallback (solution, enterCallback) {
         let val = evt.target.value
         solution.name = val
     }
-}
-
-/**
- * Lazy O(n) search method for finding the appropriate place alphabetically in the solution list to insert a solution.
- * Returns the "next element", allowing the use of "insert before" to correctly place the solution. 
- * If this function returns null, then the correct placement is last.
- */
-function findListPosition (solutionName, solutionID) {
-    const entriesArray = document.getElementById('menu-solution-list').querySelectorAll('.solution-list-entry')
-
-    if (entriesArray.length === 0) return null
-
-    for (let i = 0; i < entriesArray.length; i++) {
-        const entry = entriesArray[i]
-
-        if (entry.id === ID_PREFIX_SOLUTION_ENTRY+solutionID) continue
-
-        const compRes = entry.querySelector('.solution-list-name').innerHTML.localeCompare(solutionName)
-
-        if (compRes === -1) continue
-
-        return entry
-    }
-
-    return null
 }
 
 function refreshConflictIcons () {
@@ -569,4 +503,10 @@ function checkIfWorkInProgress () {
         popup.error('A solution is currently being created. Save it first.')
         return true
     }
+}
+
+function setupSolutionList () {
+    solutionList = new List('menu-sol-list-container', {
+        elementNameSpace: ID_PREFIX_SOLUTION_ENTRY
+    })
 }

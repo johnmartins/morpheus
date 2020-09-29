@@ -222,8 +222,6 @@ class Solution {
         if (0 <= index) {
             this.conflicts.splice(index, 1)
         }
-
-        console.log('REMOVED CONFLICT - Conflict array: '+this.conflicts)
     }
 
     hasConflicts () {

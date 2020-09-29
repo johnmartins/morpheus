@@ -2,16 +2,22 @@
 
 const state = require('./../../state')
 const workspace = require('./../../workspace')
-const random = require('../../utils/random')
+const List = require('../List')
 
 let unfinishedIncompatibility = false
 let incompatibilityDsSelection = null
-let incompatibilityListIdSelection = null
+
+let incompList = null
 
 const ID_PREFIX_INCOMP_ENTRY = 'incomp-li-'
 
 module.exports = {
-    setupListeners: () => {
+    init: () => {
+
+        // Create list of incompatibilities
+        incompList = new List('menu-incomp-list-container', {
+            elementNameSpace: ID_PREFIX_INCOMP_ENTRY
+        })
 
         let toggleDsBtn = document.getElementById('btn-toggle-ds')
         let newIncompatibilityBtn = document.getElementById('btn-add-incompatibility')
@@ -107,6 +113,9 @@ module.exports = {
         })
     },
 
+    /**
+     * Count possible solutions again. Refreshes the counter visually
+     */
     refreshSolutionCounter: () => {
         let maxWidth = document.getElementById('gen-max-field').value
         let solutionCounter = document.getElementById('delim-solutions-counter')
@@ -126,82 +135,70 @@ module.exports = {
         }
     },
 
+    /**
+     * Completely wipes the list of incompatibilities. <br>
+     * <strong>Warning:</strong> does not ACTUALLY delete the incompatibilities from the data stucture.
+     */
     clearIncompatibilityList() {
-        const incompList = document.getElementById('menu-incompatibilities-list')
-        let incompElements = incompList.querySelectorAll('.solution-list-entry')
-
-        for (let element of incompElements) {
-            element.parentElement.removeChild(element)
-        }
+        incompList.clear()
     },
 
+    /**
+     * Remove a specific incompatibility from the list
+     * @param {String} incompatibilityID incompatibility ID
+     */
     removeFromList: (incompatibilityID) => {
-        let incompList = document.getElementById('menu-incompatibilities-list')
-        let targetID = ID_PREFIX_INCOMP_ENTRY + '-' + incompatibilityID
-        let targetElement = incompList.querySelector(`#${targetID}`)
-        incompList.removeChild(targetElement)
+        incompList.remove(incompatibilityID)
     },
 
+    /**
+     * Add incompatibility to the list of icompatibilities
+     * @param {Incompatibility} incompatibility
+     */
     addIncompatibilityToList: (incompatibility) => {
-        console.log('Adding incomp to list: '+incompatibility.name)
         const matrix = workspace.getMatrix()
 
-        let incompList = document.getElementById('menu-incompatibilities-list')
-        let listEntry = document.createElement('li')
-        listEntry.classList.add('solution-list-entry')
-        listEntry.id = ID_PREFIX_INCOMP_ENTRY + '-' + incompatibility.id
-
-        let titleElement = document.createElement('span')
-        titleElement.classList.add('solution-list-name')
-        titleElement.innerHTML = incompatibility.name
-
-        listEntry.appendChild(titleElement)
-        incompList.appendChild(listEntry)
-
-        listEntry.onclick = (evt) => {
-            if (evt.target.classList.contains('icon')) return
-            if (listEntry.id === incompatibilityListIdSelection) {
+        incompList.add(incompatibility.name, {
+            id: incompatibility.id,
+            onClick: (alreadySelected) => {
+                if (alreadySelected) {
+                    module.exports.resetUI()
+                    return
+                }
+    
                 module.exports.resetUI()
-                return
-            }
+                
+                matrix.renderIncompatibility(incompatibility.id)
 
-            module.exports.resetUI()
+            },
+            createOverlay: (overlay) => {
+                if (unfinishedIncompatibility) return
+
+                let deleteIcon = document.createElement('i')
+                deleteIcon.classList.add('fas', 'fa-trash-alt', 'icon')
+                deleteIcon.onclick = () => {
+                    console.log('Clicked delete icon')
+                    workspace.getMatrix().removeIncompatibility(incompatibility.id)
+                }
             
-            matrix.renderIncompatibility(incompatibility.id)
-            listEntry.classList.add('selected')
-            incompatibilityListIdSelection = listEntry.id
-        }
-
-        let overlay = null
-
-        listEntry.onmouseover = () => {
-            if (overlay) return
-            if (unfinishedIncompatibility) return
-
-            overlay = document.createElement('div')
-            createListEntryOverlay(overlay, incompatibility)
-            listEntry.appendChild(overlay)
-        }
-
-        listEntry.onmouseleave = () => {
-            if (!overlay) return
-            listEntry.removeChild(overlay)
-            overlay = null
-        }
+                overlay.appendChild(deleteIcon)
+                return overlay
+            }
+        })
     },
 
+    /**
+     * Reset interface to default condition
+     */
     resetUI: () => {
         let toggleDsBtn = document.getElementById('btn-toggle-ds')
         let newIncompatibilityBtn = document.getElementById('btn-add-incompatibility')
-        let incompList = document.getElementById('menu-incompatibilities-list')
 
         // Clear selections
-        let selectedIncompElement = incompList.querySelector('.selected')
-        if (selectedIncompElement) selectedIncompElement.classList.remove('selected')
+        incompList.clearHighlight()
         newIncompatibilityBtn.classList.remove('selected')
         toggleDsBtn.classList.remove('selected')
 
-        incompatibilityListIdSelection = null
         unfinishedIncompatibility = false
         incompatibilityDsSelection = null
         state.workspaceSelectedIncompatibleOrigin = null
@@ -209,18 +206,4 @@ module.exports = {
         workspace.getMatrix().clearAllIncompatibleOverlays()
         state.setWim(state.wim.default)
     }
-}
-
-
-function createListEntryOverlay (overlay, incompatibility) {
-    overlay.classList.add('overlay')
-
-    let deleteIcon = document.createElement('i')
-    deleteIcon.classList.add('fas', 'fa-trash-alt', 'icon')
-    deleteIcon.onclick = () => {
-        console.log('Clicked delete icon')
-        workspace.getMatrix().removeIncompatibility(incompatibility.id)
-    }
-
-    overlay.appendChild(deleteIcon)
 }

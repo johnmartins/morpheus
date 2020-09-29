@@ -20,16 +20,38 @@ class List {
         this.listRoot.tabIndex = 0
         this.container.appendChild(this.listRoot)
 
+        this.isScrolling = false
+
+        this.listRoot.onkeyup = (evt) => {
+            if (evt.code !== 'ArrowUp' && evt.code !== 'ArrowDown') return
+            this.isScrolling = false
+        }
+
         this.listRoot.onkeydown = (evt) => {
 
+            // Ignore keydown if unhandled key
+            if (evt.code !== 'ArrowUp' && evt.code !== 'ArrowDown') return
+
+            // Prevent the list from scrolling automatically
             evt.preventDefault()
 
-            let nextSelection = null
+            // Regulate switch speed.
+            if (this.isScrolling) { 
+                return
+            }
+            this.isScrolling = true
+            setTimeout( () => {
+                this.isScrolling = false
+            }, 200)
 
+            // Find which element the next one is based on which key pas pressed
+            let nextSelection = null
             if (evt.code === 'ArrowUp') {
                 nextSelection = this.getSelectedElement().previousSibling
             } else if (evt.code === 'ArrowDown') {
                 nextSelection = this.getSelectedElement().nextSibling
+            } else {
+                return
             }
 
             if (!nextSelection) return

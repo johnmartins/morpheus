@@ -179,6 +179,14 @@ class MorphMatrix {
 
         cellForm.style.marginBottom = '4px'
 
+        // Method for automatically adjusting the height of the form
+        const adjustRows = function (startRows) {
+            cellForm.rows = startRows
+            if (cellForm.scrollHeight > cellForm.clientHeight) {
+                adjustRows(startRows + 1)
+            }
+        }
+
         cellForm.onkeypress = (evt) => {
             if (evt.code === 'Enter') {
                 // If user presses enter
@@ -195,16 +203,15 @@ class MorphMatrix {
         cellForm.onchange = (evt) => {
             if (onChangeCallback) onChangeCallback(evt.target.value)
             // When the user is done editing, set appropriate row height
-            const adjustRows = function (startRows) {
-                cellForm.rows = startRows
-                if (cellForm.scrollHeight > cellForm.clientHeight) {
-                    adjustRows(startRows + 1)
-                }
-            }
             adjustRows(2)   // Start adjusting rows. 2 rows minimum.
         }
 
         cellElement.appendChild(cellForm)
+
+        if (defaultValue) {
+            adjustRows(2)
+        }
+
         cellForm.focus()
     }
 

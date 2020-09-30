@@ -174,8 +174,19 @@ class MorphMatrix {
         cellForm.classList.add('cell-form')
         if (styleClass) cellForm.classList.add(styleClass)
         cellForm.rows = 2
-        cellForm.maxLength = 40
+        cellForm.maxLength = 80
         cellForm.wrap = "soft"
+
+        cellForm.style.marginBottom = '4px'
+
+        // Method for automatically adjusting the height of the form
+        const adjustRows = function (startRows) {
+            cellForm.rows = startRows
+            if (cellForm.scrollHeight > cellForm.clientHeight) {
+                adjustRows(startRows + 1)
+            }
+        }
+
         cellForm.onkeypress = (evt) => {
             if (evt.code === 'Enter') {
                 // If user presses enter
@@ -183,11 +194,26 @@ class MorphMatrix {
                 return false
             } 
         }
+        cellForm.onkeyup = (evt) => {
+            // Adjust rows temporarily
+            if (cellForm.scrollHeight > cellForm.clientHeight) {
+                cellForm.rows += 1
+            }
+        }
         cellForm.onchange = (evt) => {
             if (onChangeCallback) onChangeCallback(evt.target.value)
+            // When the user is done editing, set appropriate row height
+            adjustRows(2)   // Start adjusting rows. 2 rows minimum.
         }
 
         cellElement.appendChild(cellForm)
+
+        // If the textarea already has a default value then the text area needs
+        // to be adjusted to fit that default value.
+        if (defaultValue) {
+            adjustRows(2)
+        }
+
         cellForm.focus()
     }
 
@@ -441,7 +467,6 @@ class MorphMatrix {
     }
 
     drawLineBetweenDs (dsID1, dsID2) {
-        console.log(`drawing line from ${dsID1} to ${dsID2}`)
         let ds1 = this.dsMap[dsID1]
         let ds2 = this.dsMap[dsID2]
         let dsCell1 = document.getElementById(ds1.id)
@@ -468,8 +493,6 @@ class MorphMatrix {
         let y1 = d1RelativePos.left + dsCell1.offsetWidth/2
         let x2 = d2RelativePos.top + dsCell2.offsetHeight/2
         let y2 = d2RelativePos.left + dsCell2.offsetWidth/2
-
-        console.log(`From (${x1},${y1}) to (${x2},${y2})`)
 
         ctx.moveTo(y1, x1)
         ctx.lineTo(y2, x2)
@@ -851,7 +874,14 @@ class MorphMatrix {
         let newCell = row.insertCell(cellPosition)
         newCell.id = ds.id
         newCell.verticalAlign = "top"
-
+        
+        let containerDiv = document.createElement('div')
+        containerDiv.style.display = 'flex'
+        containerDiv.style.flexDirection = 'column'
+        containerDiv.style.justifyContent = 'space-between'
+        containerDiv.style.height = '100%'
+        newCell.appendChild(containerDiv)
+        
         // Map ID for easy object lookup
         this.dsMap[ds.id] = ds
 
@@ -861,7 +891,7 @@ class MorphMatrix {
         }
 
         // Create form in which a description can be written
-        this._createCellForm(newCell, `Sub-Solution ${cellPosition}`, {
+        this._createCellForm(containerDiv, `Sub-Solution ${cellPosition}`, {
             onChangeCallback: (value) => ds.description = value,
             defaultValue: ds.description,
         })
@@ -875,7 +905,7 @@ class MorphMatrix {
         // Create initially empty image field
         let imgElement = document.createElement('img')
         imgElement.id = 'img-'+ds.id
-        newCell.appendChild(imgElement)
+        containerDiv.appendChild(imgElement)
         
         if (this.dsLabelCell.colSpan < row.cells.length - 2) {
             this.dsLabelCell.colSpan = row.cells.length - 2
@@ -890,8 +920,6 @@ class MorphMatrix {
         let val = workspaceElement.offsetWidth + workspaceElement.scrollLeft
         if (this.tableElement.offsetLeft + newCell.offsetLeft > val) {  // add offsetLeft of table because table has position set to relative.
             workspaceElement.scrollLeft += newCell.offsetWidth
-        } else {
-            console.log('Not gonna scroll. Nope.')
         }
 
         GlobalObserver.emit('ds-added')

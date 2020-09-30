@@ -174,17 +174,37 @@ class MorphMatrix {
         cellForm.classList.add('cell-form')
         if (styleClass) cellForm.classList.add(styleClass)
         cellForm.rows = 2
-        cellForm.maxLength = 40
+        cellForm.maxLength = 80
         cellForm.wrap = "soft"
+
+        cellForm.style.resize = 'none'
+        cellForm.style.overflow = 'hidden'
+
         cellForm.onkeypress = (evt) => {
             if (evt.code === 'Enter') {
                 // If user presses enter
                 cellForm.blur()
                 return false
             } 
+
+            // Adjust rows temporarily
+            if (cellForm.scrollHeight > cellForm.clientHeight) {
+                cellForm.rows += 1
+            }
         }
         cellForm.onchange = (evt) => {
             if (onChangeCallback) onChangeCallback(evt.target.value)
+
+            // When the user is done editing, set appropriate row height
+            const adjustRows = function (startRows) {
+                console.log('Adjusting, start = '+startRows)
+                cellForm.rows = startRows
+                if (cellForm.scrollHeight > cellForm.clientHeight) {
+                    adjustRows(startRows + 1)
+                }
+            }
+
+            adjustRows(2)   // Start adjusting rows. 2 rows minimum.
         }
 
         cellElement.appendChild(cellForm)

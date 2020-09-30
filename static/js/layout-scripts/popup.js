@@ -23,7 +23,7 @@ module.exports = {
         }
 
         document.onkeypress = (evt) => {
-            if (evt.keyCode !== 13) return      // If NOT enter
+            if (evt.code !== 'Enter') return      // If NOT enter
             if (callbackContinue) callbackContinue()
             removePopup(id)
         }   
@@ -57,7 +57,7 @@ module.exports = {
         } 
 
         document.onkeypress = (evt) => {
-            if (evt.keyCode !== 13) return      // If NOT enter
+            if (evt.code !== 'Enter') return      // If NOT enter
             if (callbackContinue) callbackContinue()
             removePopup(id)
         }   
@@ -81,7 +81,7 @@ module.exports = {
         } 
 
         document.onkeypress = (evt) => {
-            if (evt.keyCode !== 13) return      // If NOT enter
+            if (evt.code !== 'Enter') return      // If NOT enter
             if (callbackContinue) callbackContinue()
             removePopup(id)
         }        

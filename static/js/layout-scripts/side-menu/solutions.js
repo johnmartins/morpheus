@@ -455,7 +455,7 @@ function removeConflictIcon (solutionID) {
 
 function getSolutionNameFormCallback (solution, enterCallback) {
     return function (evt) {
-        if (evt.keyCode === 13) {
+        if (evt.code === 'Enter') {
             // user pressed enter
             enterCallback()
             return

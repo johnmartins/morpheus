@@ -185,7 +185,8 @@ class MorphMatrix {
                 cellForm.blur()
                 return false
             } 
-
+        }
+        cellForm.onkeyup = (evt) => {
             // Adjust rows temporarily
             if (cellForm.scrollHeight > cellForm.clientHeight) {
                 cellForm.rows += 1
@@ -193,7 +194,6 @@ class MorphMatrix {
         }
         cellForm.onchange = (evt) => {
             if (onChangeCallback) onChangeCallback(evt.target.value)
-
             // When the user is done editing, set appropriate row height
             const adjustRows = function (startRows) {
                 cellForm.rows = startRows
@@ -201,7 +201,6 @@ class MorphMatrix {
                     adjustRows(startRows + 1)
                 }
             }
-
             adjustRows(2)   // Start adjusting rows. 2 rows minimum.
         }
 

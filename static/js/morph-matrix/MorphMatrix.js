@@ -136,7 +136,7 @@ class MorphMatrix {
             titleInput.onblur = saveTitleChange
             titleInput.onkeypress = (evt) => {
                 // User pressed enter
-                if (evt.keyCode === 13) {
+                if (evt.code === 'Enter') {
                     saveTitleChange(evt)
                 }
             }
@@ -177,7 +177,7 @@ class MorphMatrix {
         cellForm.maxLength = 40
         cellForm.wrap = "soft"
         cellForm.onkeypress = (evt) => {
-            if (evt.keyCode === 13) {
+            if (evt.code === 'Enter') {
                 // If user presses enter
                 cellForm.blur()
                 return false

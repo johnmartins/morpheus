@@ -208,6 +208,8 @@ class MorphMatrix {
 
         cellElement.appendChild(cellForm)
 
+        // If the textarea already has a default value then the text area needs
+        // to be adjusted to fit that default value.
         if (defaultValue) {
             adjustRows(2)
         }

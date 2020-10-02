@@ -109,12 +109,18 @@ module.exports = {
 
     setShowConstraints: (show) => {
         if (show == showConstraints) return
+        const matrix = workspace.getMatrix()
         showConstraints = show
+
+        if (unfinishedSolution || editingSolution) return
 
         if (show) {
             // TODO: show constraints
+            const selectedSolutionID = solutionList.getSelectedID()
+            if (!selectedSolutionID) return
+            matrix.renderAllSolutionIncompatibilities(selectedSolutionID)
         } else {
-            // TODO: hide constraints
+            matrix.clearAllIncompatibleOverlays()
         }
     },
 

@@ -1055,16 +1055,18 @@ class MorphMatrix {
         }
         overlay.title = 'Incompatible'
         overlay.onclick = () => {
-            if (!state.equalsWim(state.wim.incompatibility)) {
-                // Wrong workspace mode
-                return
-            }
-            if (state.workspaceSelectedIncompatibleOrigin !== dsID) {
-                // This is not the origin of an incompability
-                return
-            }
-            GlobalObserver.emit('incompatibility-selection', this.dsMap[dsID])
+            if (state.equalsWim(state.wim.default)) {
+                console.log('Show incomps')
 
+            } else if (state.equalsWim(state.wim.incompatibility)) {
+
+                if (state.workspaceSelectedIncompatibleOrigin !== dsID) {
+                    // This is not the origin of an incompability
+                    return
+                }
+                GlobalObserver.emit('incompatibility-selection', this.dsMap[dsID])
+
+            } 
         }
         dsCell.appendChild(overlay)
     }

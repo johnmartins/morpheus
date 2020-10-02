@@ -18,7 +18,7 @@
             <button id="btn-new-solution" class="btn btn-max-width">New solution</button>
             <button id="btn-clear-solutions" class="btn btn-max-width btn-red">Delete all solutions</button>
 
-            <!-- Generate -->
+            <!-- [SOLUTIONS] Generate -->
             <span style="margin: 4px 0;" class="menu-title">Generate</span>
             <div class="tab-subsection">
                 <button id="btn-generate-all" class="btn btn-max-width">Generate all solutions</button>
@@ -30,6 +30,16 @@
                 </div>
                 <span id="gen-max-warning-text" class="text-yellow">Warning: setting maximum generations too high may cause significant performance issues.</span>
             </div>
+
+            <!-- [SOLUTIONS] Options -->
+            <span style="margin: 4px 0;" class="menu-title">Options</span>
+            <div class="checkbox-array">
+                <label for="solutions-cbox-show-contraints">
+                    <input type="checkbox" name="solutions-cbox-show-constraints" id="solutions-cbox-show-constraints-id">
+                    <span>Show constraints</span>
+                </label>
+            </div>
+
         </div>
 
         <!-- Export tab -->

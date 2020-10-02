@@ -1015,6 +1015,23 @@ class MorphMatrix {
         })
     }
 
+    /**
+     * Render all incompatible DSs for a specific solution
+     * @param {String} solutionID 
+     */
+    renderAllSolutionIncompatibilities(solutionID) {
+        const solution = this.solutions[solutionID]
+        const dsIdArray = solution.getIncompatibleDsIds()
+
+        for (let dsID of dsIdArray) {
+            this.renderIncompatibleOverlay(dsID)
+        }
+    }
+
+    /**
+     * Renders one compatibility (two SS-cells)
+     * @param {String} incompID 
+     */
     renderIncompatibility (incompID) {
         let incomp = this.incompatibilityMap[incompID]
 
@@ -1022,6 +1039,10 @@ class MorphMatrix {
         this.renderIncompatibleOverlay(incomp.ds2.id)
     }
 
+    /**
+     * Renders the incompatibility overlay over one SS-cell
+     * @param {String} dsID 
+     */
     renderIncompatibleOverlay (dsID) {
         const ds = this.dsMap[dsID]
 

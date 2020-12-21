@@ -433,9 +433,7 @@ class MorphMatrix {
     }
 
     renderSolution(solutionID) {
-        if (!this.canvasOverlay.isCreated('solution')) {
-            this.canvasOverlay.create(this.tableElement, 'solution')
-        }
+        this.canvasOverlay.rebuildCanvas('solution')
 
         let solution = this.solutions[solutionID]
         console.log(solution)
@@ -610,7 +608,7 @@ class MorphMatrix {
         delete this.frMap[frRowID]
 
         // The matrix changes in size. Thus, a new canvas is required.
-        this.canvasOverlay.rebuildCanvas('solution')
+        // TODO: Rebuild canvas unless rebuild every render
 
         // IF a solution is selected, rerender it after manipulating DOM
         if (state.workspaceSelectedSolution) {
@@ -665,7 +663,7 @@ class MorphMatrix {
         }
 
         // The matrix changes in size. Thus, a new canvas is required.
-        this.canvasOverlay.rebuildCanvas('solution')
+        // TODO: Rebuild canvas unless rebuild every render
 
         // IF a solution is selected, rerender it after manipulating DOM
         if (state.workspaceSelectedSolution) {
@@ -809,7 +807,7 @@ class MorphMatrix {
         workspaceElement.scrollTo(0, workspaceElement.scrollHeight)
 
         // The matrix changes in size. Thus, a new canvas is required.
-        this.canvasOverlay.rebuildCanvas('solution')
+        // TODO: Rebuild canvas unless rebuild every render
 
         // IF a solution is selected, rerender it after manipulating DOM
         if (state.workspaceSelectedSolution) {
@@ -889,7 +887,7 @@ class MorphMatrix {
         }
 
         // The matrix changes in size. Thus, a new canvas is required.
-        this.canvasOverlay.rebuildCanvas('solution')
+        // TODO: Rebuild canvas unless rebuild every render
 
         // IF a solution is selected, rerender it after manipulating DOM
         if (state.workspaceSelectedSolution) {
@@ -1014,21 +1012,14 @@ class MorphMatrix {
     }
 
     renderIncompatibilitiesForSS (ss) {
-        // TODO: Draw lines to all incompatible sub solutions
-        // maybe also write the name of the incompatibilities
+        // TODO: Write a list of the incompatibilities active for this SS
         // The incompatibilitiy names can be extracted like this:
         // ss.incompatibleWith[dsID].name (it maps from dsID to incomp)
-        if (!this.canvasOverlay.isCreated('incomp')) {
-            this.canvasOverlay.create('incomp', {
-                defaultColor: 'yellow'
-            })
-        } else {
-            this.canvasOverlay.clear('incomp')
-        }
+        this.canvasOverlay.rebuildCanvas('incomp')
 
         for (let incompSSID in ss.incompatibleWith) {
             const incompSS = this.dsMap[incompSSID]
-            this.canvasOverlay.createLine('incomp', ss, incompSS)
+            this.canvasOverlay.createLine('incomp', ss, incompSS, {color: 'yellow'})
         }
     }
 
@@ -1047,13 +1038,20 @@ class MorphMatrix {
             overlay.innerHTML = '<i class="fas fa-times"></i>'
         }
         overlay.title = 'Incompatible'
-        overlay.onclick = (evt) => {
-            if (state.equalsWim(state.wim.default)) {
-                console.log('Show incomps')
-                this.renderIncompatibilitiesForSS(ds)
-                evt.preventDefault()
-            } else if (state.equalsWim(state.wim.incompatibility)) {
 
+        overlay.onmouseenter = (evt) => {
+            console.log('show incomps')
+            this.renderIncompatibilitiesForSS(ds)
+        }
+
+        overlay.onmouseleave = (evt) => {
+            this.canvasOverlay.clear('incomp')
+        }
+
+        overlay.onclick = (evt) => {
+            if (state.equalsWim(state.wim.incompatibility)) {
+                // If the user is using the incompatibility tool
+                console.log(state.workspaceSelectedIncompatibleOrigin)
                 if (state.workspaceSelectedIncompatibleOrigin !== dsID) {
                     // This is not the origin of an incompability
                     return

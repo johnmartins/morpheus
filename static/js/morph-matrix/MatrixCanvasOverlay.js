@@ -121,6 +121,13 @@ class MatrixCanvasOverlay {
         this.create(layer)
     }
 
+    rebuildAllCanvas () {
+        const layers = Object.keys(this.layers)
+        layers.forEach((layer) => {
+            this.rebuildCanvas(layer)
+        })
+    }
+
     /**
      * Draw a line from one SS to another SS in the matrix
      * @param {String} layer 

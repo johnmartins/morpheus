@@ -12,6 +12,7 @@ const random = require('../utils/random')
 const {SolutionExistsError} = require('./../errors')
 const storageService = require('../services/storage-service')
 const fileDiagService = require('../services/file-dialog-service')
+const popup = require('./../layout-scripts/popup')
 
 // Morph Matrix classes
 const FunctionalRequirement = require('./FunctionalRequirement')
@@ -1025,23 +1026,23 @@ class MorphMatrix {
 
     /**
      * Renders the incompatibility overlay over one SS-cell
-     * @param {String} dsID 
+     * @param {String} ssID 
      */
-    renderIncompatibleOverlay (dsID) {
-        const ds = this.dsMap[dsID]
+    renderIncompatibleOverlay (ssID) {
+        const ss = this.dsMap[ssID]
 
-        let dsCell = document.getElementById(dsID)
+        let ssCell = document.getElementById(ssID)
         let overlay = document.createElement('div')
 
         overlay.classList.add('overlay-incompatible')
-        if (!ds.isDisabled()) {
+        if (!ss.isDisabled()) {
             overlay.innerHTML = '<i class="fas fa-times"></i>'
         }
-        overlay.title = 'Incompatible'
+        overlay.title = 'Incompatible. Click to list incompatibilities.'
 
         overlay.onmouseenter = (evt) => {
             console.log('show incomps')
-            this.renderIncompatibilitiesForSS(ds)
+            this.renderIncompatibilitiesForSS(ss)
         }
 
         overlay.onmouseleave = (evt) => {
@@ -1052,14 +1053,21 @@ class MorphMatrix {
             if (state.equalsWim(state.wim.incompatibility)) {
                 // If the user is using the incompatibility tool
                 console.log(state.workspaceSelectedIncompatibleOrigin)
-                if (state.workspaceSelectedIncompatibleOrigin !== dsID) {
+                if (state.workspaceSelectedIncompatibleOrigin !== ssID) {
                     // This is not the origin of an incompability
                     return
                 }
-                GlobalObserver.emit('incompatibility-selection', this.dsMap[dsID])
-            } 
+                GlobalObserver.emit('incompatibility-selection', this.dsMap[ssID])
+            } else if (state.equalsWim(state.wim.default)) {
+                evt.preventDefault()
+                const incompNames = Object.keys(ss.incompatibleWith).map((ssID) => {
+                    return this.getIncompatibility(ss.incompatibleWith[ssID]).name
+                })
+                const incompsString = incompNames.join('<br>')
+                popup.notify(incompsString, {titleTxt: 'Related incompatibilities'})
+            }
         }
-        dsCell.appendChild(overlay)
+        ssCell.appendChild(overlay)
     }
 
     clearIncompatibleOverlay (dsID) {

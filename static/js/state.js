@@ -54,6 +54,8 @@ module.exports = {
     workspaceSelectedSolution: null,
     workspaceSelectedIncompatibleOrigin: null,
 
+    tabCurrent: null,
+
     /**
      * Resets all state parameters that depends on user interaction
      */
@@ -79,6 +81,9 @@ module.exports = {
 
         module.exports.workspaceInteractionMode = mode
         GlobalObserver.emit('wim-change', mode)
-    }
+    },
 
+    setCurrentTab: (tabID) => {
+        module.exports.tabCurrent = tabID
+    }
 }

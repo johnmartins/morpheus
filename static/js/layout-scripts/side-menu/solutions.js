@@ -94,7 +94,7 @@ module.exports = {
             refreshConflictIcons()
         })
 
-        GlobalObserver.on('tab-change', (tabID) => {
+        GlobalObserver.on('tab-change', (tabData) => {
             module.exports.resetUI()
         })
 

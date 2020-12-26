@@ -185,6 +185,14 @@ class List {
     }
 
     /**
+     * Returns the attributed ID of the selected object (NOT the element ID)
+     */
+    getSelectedID () {
+        const selection = this.getSelectedElement()
+        return selection ? selection.id.substring(this.elementNameSpace.length) : null
+    }
+
+    /**
      * Clears the styling that displays any selected elements
      */
     clearHighlight () {

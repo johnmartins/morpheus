@@ -12,12 +12,10 @@ require(path.join(__dirname, './side-menu/export')).setupListeners()
 require(path.join(__dirname, './side-menu/delimitations')).init()
 
 const state = require('./../state')
-const workspace = require('./../workspace')
 
 let sideMenu = document.getElementById('side-menu-tabs')
 
 let currentTabContent = null
-let currentTabID = null
 
 module.exports = () => {
     // Setup default tab
@@ -48,10 +46,11 @@ module.exports = () => {
         currentTabContent = targetTabContent
 
         GlobalObserver.emit('tab-change', {
-            currentTab: currentTabID,
+            currentTab: state.tabCurrent,
             nextTab: tabID
         })
-        currentTabID = tabID
+
+        state.setCurrentTab(tabID)
     }
 }
 

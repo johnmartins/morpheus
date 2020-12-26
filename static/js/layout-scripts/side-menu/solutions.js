@@ -11,8 +11,10 @@ const List = require('./../List')
 
 let solutionList = null
 
+// Parameters
 let unfinishedSolution = false      // The user has started a new solution that is unsaved
 let editingSolution = false         // The user is editing a solution
+let showConstraints = false
 
 const ID_PREFIX_SOLUTION_ENTRY = 'sol-li-'
 
@@ -32,6 +34,9 @@ module.exports = {
 
         let btnGenerate = document.getElementById('btn-generate-all')
         btnGenerate.onclick = module.exports.generateAllSolutions
+
+        let cboxShowConstraints = document.getElementById('solutions-cbox-show-constraints-id')
+        cboxShowConstraints.onchange = () => module.exports.setShowConstraints(cboxShowConstraints.checked)
 
         // Solution generation controls
         let genWarningText = document.getElementById('gen-max-warning-text')
@@ -89,7 +94,7 @@ module.exports = {
             refreshConflictIcons()
         })
 
-        GlobalObserver.on('tab-change', (tabID) => {
+        GlobalObserver.on('tab-change', (tabData) => {
             module.exports.resetUI()
         })
 
@@ -100,6 +105,23 @@ module.exports = {
                 matrix.renderIncompatibleOverlay(incompDsID)
             }
         })
+    },
+
+    setShowConstraints: (show) => {
+        if (show == showConstraints) return
+        const matrix = workspace.getMatrix()
+        showConstraints = show
+
+        if (unfinishedSolution || editingSolution) return
+
+        if (show) {
+            // TODO: show constraints
+            const selectedSolutionID = solutionList.getSelectedID()
+            if (!selectedSolutionID) return
+            matrix.renderAllSolutionIncompatibilities(selectedSolutionID)
+        } else {
+            matrix.clearAllIncompatibleOverlays()
+        }
     },
 
     startNewSolution: () => {
@@ -192,9 +214,6 @@ module.exports = {
         module.exports.completeSolution()
     },
 
-
-
-
     addToSolutionList: (solutionID) => {
         let matrix = workspace.getMatrix()
         let solution = matrix.getSolution(solutionID)
@@ -213,6 +232,10 @@ module.exports = {
 
                 state.workspaceSelectedSolution = solutionID
                 matrix.renderSolution(solutionID)
+
+                if (showConstraints) {
+                    matrix.renderAllSolutionIncompatibilities(solutionID)
+                }
             },
             createOverlay: (overlay) => {
                 if (editingSolution) return

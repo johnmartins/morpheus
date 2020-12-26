@@ -12,15 +12,17 @@ const random = require('../utils/random')
 const {SolutionExistsError} = require('./../errors')
 const storageService = require('../services/storage-service')
 const fileDiagService = require('../services/file-dialog-service')
+const popup = require('./../layout-scripts/popup')
 
 // Morph Matrix classes
 const FunctionalRequirement = require('./FunctionalRequirement')
 const DesignSolution = require('./DesignSolution')
 const Solution = require('./Solution')
 const Incompatibility = require('./Incompatibility')
-const SolutionGenerator = require('./SolutionGenerator')
 
-const solutionCanvasID = 'solution-canvas-id'
+// Supporting classes
+const MatrixCanvasOverlay = require('./MatrixCanvasOverlay')
+const SolutionGenerator = require('./SolutionGenerator')
 
 /**
  * A morphological matrix structure. Contains Functional Requirements, 
@@ -48,6 +50,7 @@ class MorphMatrix {
     tableElement = null
     tbodyElement = null
     dsLabelCell = null
+    canvasOverlay = null
 
     constructor(containerID) {
         this.containerElement = document.getElementById(containerID)
@@ -64,6 +67,7 @@ class MorphMatrix {
         this.tbodyElement = document.createElement('tbody')
         this.tableElement.appendChild(this.tbodyElement)
         this.containerElement.appendChild(this.tableElement)
+        this.canvasOverlay = new MatrixCanvasOverlay(this.tableElement)
 
         this._setupTableControls()
 
@@ -426,11 +430,12 @@ class MorphMatrix {
             let overlay = solutionRenderOverlays[i]
             overlay.parentElement.removeChild(overlay)
         }
-        this.destroySolutionCanvas()
+        this.canvasOverlay.clear('solution')
     }
 
     renderSolution(solutionID) {
-        this.createSolutionCanvas()
+        this.canvasOverlay.rebuildCanvas('solution')
+
         let solution = this.solutions[solutionID]
         console.log(solution)
         let frIDs = solution.getMappedFunctionsArray()
@@ -461,66 +466,11 @@ class MorphMatrix {
             dsCell.appendChild(overlay)
 
             if (i+1 < frArray.length) {
-                this.drawLineBetweenDs(solution.getDsForFr(frArray[i].id), solution.getDsForFr(frArray[i+1].id))
+                const ss1 = this.dsMap[solution.getDsForFr(frArray[i].id)]
+                const ss2 = this.dsMap[solution.getDsForFr(frArray[i+1].id)]
+                this.canvasOverlay.createLine('solution', ss1, ss2)
             }
         }
-    }
-
-    drawLineBetweenDs (dsID1, dsID2) {
-        let ds1 = this.dsMap[dsID1]
-        let ds2 = this.dsMap[dsID2]
-        let dsCell1 = document.getElementById(ds1.id)
-        let dsCell2 = document.getElementById(ds2.id)
-
-        let canvas = document.getElementById(solutionCanvasID)
-        if (!canvas) throw new Error('Canvas not yet created.')
-        let ctx = canvas.getContext("2d")
-        ctx.beginPath()
-
-        let parentPos = canvas.getBoundingClientRect()
-        let d1Pos = dsCell1.getBoundingClientRect()
-        let d2Pos = dsCell2.getBoundingClientRect()
-        let d1RelativePos = {
-            top: d1Pos.top - parentPos.top,
-            left: d1Pos.left - parentPos.left
-        }
-        let d2RelativePos = {
-            top: d2Pos.top - parentPos.top,
-            left: d2Pos.left - parentPos.left
-        }
-
-        let x1 = d1RelativePos.top + dsCell1.offsetHeight/2
-        let y1 = d1RelativePos.left + dsCell1.offsetWidth/2
-        let x2 = d2RelativePos.top + dsCell2.offsetHeight/2
-        let y2 = d2RelativePos.left + dsCell2.offsetWidth/2
-
-        ctx.moveTo(y1, x1)
-        ctx.lineTo(y2, x2)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = 'rgba(94,211,237,0.5)'
-        ctx.stroke()
-    }
-
-    createSolutionCanvas() {
-        this.destroySolutionCanvas()
-
-        let canvas = document.createElement('canvas')
-        canvas.id = solutionCanvasID
-        canvas.style.position = 'absolute'
-        canvas.style.top = '0'
-        canvas.style.left = '0'
-        canvas.style.width = this.tableElement.offsetWidth + 'px'
-        canvas.style.height = this.tableElement.offsetHeight + 'px'
-        canvas.style.pointerEvents = 'none'
-        canvas.width = this.tableElement.offsetWidth
-        canvas.height = this.tableElement.offsetHeight
-        this.canvasOverlayElement = canvas
-        this.tableElement.appendChild(canvas)
-    }
-
-    destroySolutionCanvas() {
-        let canvas = document.getElementById(solutionCanvasID)
-        if (canvas) canvas.parentElement.removeChild(canvas)
     }
 
     toggleSolutionDS(ds) {
@@ -658,6 +608,9 @@ class MorphMatrix {
         // Delete map reference
         delete this.frMap[frRowID]
 
+        // The matrix changes in size. Thus, a new canvas is required.
+        // TODO: Rebuild canvas unless rebuild every render
+
         // IF a solution is selected, rerender it after manipulating DOM
         if (state.workspaceSelectedSolution) {
             this.clearSolutionRender()
@@ -709,6 +662,9 @@ class MorphMatrix {
                 this.removeIncompatibility(incompatibility.id)
             }
         }
+
+        // The matrix changes in size. Thus, a new canvas is required.
+        // TODO: Rebuild canvas unless rebuild every render
 
         // IF a solution is selected, rerender it after manipulating DOM
         if (state.workspaceSelectedSolution) {
@@ -850,6 +806,15 @@ class MorphMatrix {
         // Automatically scroll to the bottom of the page
         let workspaceElement = document.querySelector("#layout-workspace")
         workspaceElement.scrollTo(0, workspaceElement.scrollHeight)
+
+        // The matrix changes in size. Thus, a new canvas is required.
+        // TODO: Rebuild canvas unless rebuild every render
+
+        // IF a solution is selected, rerender it after manipulating DOM
+        if (state.workspaceSelectedSolution) {
+            this.clearSolutionRender()
+            this.renderSolution(state.workspaceSelectedSolution)
+        }
     }
 
     /**
@@ -920,6 +885,15 @@ class MorphMatrix {
         let val = workspaceElement.offsetWidth + workspaceElement.scrollLeft
         if (this.tableElement.offsetLeft + newCell.offsetLeft > val) {  // add offsetLeft of table because table has position set to relative.
             workspaceElement.scrollLeft += newCell.offsetWidth
+        }
+
+        // The matrix changes in size. Thus, a new canvas is required.
+        // TODO: Rebuild canvas unless rebuild every render
+
+        // IF a solution is selected, rerender it after manipulating DOM
+        if (state.workspaceSelectedSolution) {
+            this.clearSolutionRender()
+            this.renderSolution(state.workspaceSelectedSolution)
         }
 
         GlobalObserver.emit('ds-added')
@@ -1015,37 +989,86 @@ class MorphMatrix {
         })
     }
 
+    /**
+     * Render all incompatible DSs for a specific solution
+     * @param {String} solutionID 
+     */
+    renderAllSolutionIncompatibilities(solutionID) {
+        const solution = this.solutions[solutionID]
+        const dsIdArray = solution.getIncompatibleDsIds()
+
+        for (let dsID of dsIdArray) {
+            this.renderIncompatibleOverlay(dsID)
+        }
+    }
+
+    /**
+     * Renders one compatibility (two SS-cells)
+     * @param {String} incompID 
+     */
     renderIncompatibility (incompID) {
         let incomp = this.incompatibilityMap[incompID]
-
         this.renderIncompatibleOverlay(incomp.ds1.id)
         this.renderIncompatibleOverlay(incomp.ds2.id)
     }
 
-    renderIncompatibleOverlay (dsID) {
-        const ds = this.dsMap[dsID]
+    renderIncompatibilitiesForSS (ss) {
+        // TODO: Write a list of the incompatibilities active for this SS
+        // The incompatibilitiy names can be extracted like this:
+        // ss.incompatibleWith[dsID].name (it maps from dsID to incomp)
+        this.canvasOverlay.rebuildCanvas('incomp')
 
-        let dsCell = document.getElementById(dsID)
+        for (let incompSSID in ss.incompatibleWith) {
+            const incompSS = this.dsMap[incompSSID]
+            this.canvasOverlay.createLine('incomp', ss, incompSS, {color: 'yellow'})
+        }
+    }
+
+    /**
+     * Renders the incompatibility overlay over one SS-cell
+     * @param {String} ssID 
+     */
+    renderIncompatibleOverlay (ssID) {
+        const ss = this.dsMap[ssID]
+
+        let ssCell = document.getElementById(ssID)
         let overlay = document.createElement('div')
 
         overlay.classList.add('overlay-incompatible')
-        if (!ds.isDisabled()) {
+        if (!ss.isDisabled()) {
             overlay.innerHTML = '<i class="fas fa-times"></i>'
         }
-        overlay.title = 'Incompatible'
-        overlay.onclick = () => {
-            if (!state.equalsWim(state.wim.incompatibility)) {
-                // Wrong workspace mode
-                return
-            }
-            if (state.workspaceSelectedIncompatibleOrigin !== dsID) {
-                // This is not the origin of an incompability
-                return
-            }
-            GlobalObserver.emit('incompatibility-selection', this.dsMap[dsID])
+        overlay.title = 'Incompatible. Click to list incompatibilities.'
 
+        overlay.onmouseenter = (evt) => {
+            if (state.tabCurrent === 'tab-solutions') {
+                this.renderIncompatibilitiesForSS(ss)
+            }   
         }
-        dsCell.appendChild(overlay)
+
+        overlay.onmouseleave = (evt) => {
+            this.canvasOverlay.clear('incomp')
+        }
+
+        overlay.onclick = (evt) => {
+            if (state.equalsWim(state.wim.incompatibility)) {
+                // If the user is using the incompatibility tool
+                console.log(state.workspaceSelectedIncompatibleOrigin)
+                if (state.workspaceSelectedIncompatibleOrigin !== ssID) {
+                    // This is not the origin of an incompability
+                    return
+                }
+                GlobalObserver.emit('incompatibility-selection', this.dsMap[ssID])
+            } else if (state.equalsWim(state.wim.default)) {
+                evt.preventDefault()
+                const incompNames = Object.keys(ss.incompatibleWith).map((ssID) => {
+                    return this.getIncompatibility(ss.incompatibleWith[ssID]).name
+                })
+                const incompsString = incompNames.join('<br>')
+                popup.notify(incompsString, {titleTxt: 'Related incompatibilities'})
+            }
+        }
+        ssCell.appendChild(overlay)
     }
 
     clearIncompatibleOverlay (dsID) {
@@ -1061,6 +1084,9 @@ class MorphMatrix {
             let overlay = overlays[i]
             overlay.parentElement.removeChild(overlay)
         }
+
+        // Also clear the incompatibility canvas
+        this.canvasOverlay.clear('incomp')
     }
 
     renderDisabledDsOverlay(dsCell) {

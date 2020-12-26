@@ -38,3 +38,15 @@
     font-family: monospace;
     font-weight: bold;
 }
+
+.checkbox-array label {
+    display: inline-block;
+    padding-right: 10px;
+    white-space: nowrap;
+}
+.checkbox-array input {
+    vertical-align: middle;
+}
+.checkbox-array label span {
+    vertical-align: middle;
+}

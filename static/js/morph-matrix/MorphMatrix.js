@@ -1041,8 +1041,9 @@ class MorphMatrix {
         overlay.title = 'Incompatible. Click to list incompatibilities.'
 
         overlay.onmouseenter = (evt) => {
-            console.log('show incomps')
-            this.renderIncompatibilitiesForSS(ss)
+            if (state.tabCurrent === 'tab-solutions') {
+                this.renderIncompatibilitiesForSS(ss)
+            }   
         }
 
         overlay.onmouseleave = (evt) => {

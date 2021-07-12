@@ -104,13 +104,9 @@ module.exports = {
                 throw new ('Error! Failed to save workspace PNG')
             })
 
-
-
         } catch (err) {
             popup.error('Failed to export matrix to PNG. Reason: ' + err.message)
         }
-        
-
     },
 
     exportSolutionToCSV: (solutionID) => {
@@ -341,6 +337,12 @@ function prepareMatrixForCapture (container) {
     let titleElement = container.querySelector('.matrix-title')
     titleElement.style.fontSize = '1.5rem'
 
+    // Remove header background
+    let headerElements = container.querySelectorAll('.mm-label-cell')
+    for (const headerElement of headerElements) {
+        headerElement.classList.add('screendump-prep')
+    }
+
     // Replace all text areas with divs containing the same content
     let textareas = container.querySelectorAll('textarea')
 
@@ -378,7 +380,12 @@ function resetMatrixLayout (container) {
     let replacements = container.querySelectorAll('.houdini')
     let textareas = container.querySelectorAll('textarea')
     let titleElement = container.querySelector('.matrix-title')
-    
+
+    // Clear screendump-prep class
+    let screendumpPreppedElements = container.querySelectorAll('.screendump-prep')
+    for (const element of screendumpPreppedElements) {
+        element.classList.remove('screendump-prep')
+    }
 
     for (let i = 0; i < replacements.length; i++) {
         let replacement = replacements[i]

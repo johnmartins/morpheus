@@ -15,6 +15,15 @@
     color: $white-medium;
     height: 15px;
     min-height: 15px;
+    font-size: 1rem;
+    vertical-align: middle;
+    text-align: center;
+    font-weight: bold;
+
+    &.screendump-prep {
+        background-color: transparent;
+        color: $grey-lowest;
+    }
 }
 
 .matrix .mm-add-cell {

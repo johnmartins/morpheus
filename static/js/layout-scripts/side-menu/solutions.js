@@ -423,7 +423,19 @@ module.exports = {
             if (err.code === 'NO_DS_IN_MATRIX') {
                 popup.error(`No sub-solutions in Matrix.<br><br>Error message: ${err.message}`)
             } else if (err.code === 'GEN_CAP') {
-                popup.error(`Generation capacity reached!<br><br>Error message: ${err.message}`)
+                const maxGenFieldValue = document.getElementById('gen-max-field').value
+                popup.notify(`Generation capacity reached!
+                <br>
+                <br>
+                The current value for <em>"maximum generations"</em> is set to <strong>${maxGenFieldValue}</strong>.
+                Consider reducing the amount of possible solutions by introducing <strong>delimitations</strong> 
+                using the tools available under the delimitations tab. If necessary, the number of maximum generations 
+                may be increased by navigating to the solutions tab, though this is not recommended.
+                <br>
+                <br>
+                <em>Raised exception message: ${err.message}</em>`, {
+                    titleTxt: 'Too many solutions'
+                })
             } else {
                 popup.error('An unidentified error occured when attempting to generate all solutions.')
                 console.error(err.message)

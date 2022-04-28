@@ -1,6 +1,8 @@
 # About
 This is a graphical tool for creating morphological matrices. It can be used to quickly create a matrix with "sub-functions" (SF) and "sub-solutions" (SS). Once all SFs and SSs have been fed into the matrix the tool can be used to generate all possible solutions.
 
+[![DOI](https://zenodo.org/badge/267880956.svg)](https://zenodo.org/badge/latestdoi/267880956)
+
 ## Features
 - Add, remove and edit Sub-Functions and Sub-Solutions easily
 - Import images to your sub-solutions for improved clarity

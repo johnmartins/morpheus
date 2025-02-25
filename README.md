@@ -1,3 +1,6 @@
+# DEPRECATION WARNING
+This tool has been replaced by a web-based alternative (https://morpheus.martinsson-bonde.com/) and is no longer being updated. If you are a student, it is strongly recommended that you instead use the web-based version. This repository will be kept online for research and documentation purposes.
+
 # About
 This is a graphical tool for creating morphological matrices. It can be used to quickly create a matrix with "sub-functions" (SF) and "sub-solutions" (SS). Once all SFs and SSs have been fed into the matrix the tool can be used to generate all possible solutions.
 
